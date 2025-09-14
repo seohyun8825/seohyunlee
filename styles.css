@@ -121,6 +121,9 @@ main { position: relative; z-index: 1; }
 /* Experience logos */
 .timeline-item h3 { display: flex; align-items: center; gap: 12px; }
 .timeline-item h3 .logo { width: 36px; height: 36px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border); }
+.timeline-item h3 { flex-wrap: wrap; }
+.timeline-item .content h3,
+.timeline-item .content p { overflow-wrap: anywhere; word-break: break-word; }
 
 .cards { list-style: none; padding: 0; margin: 0; max-width: 980px; width: 100%; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
 .card { position: relative; background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; min-height: 120px; transition: background 0.2s ease, transform 0.06s ease; }
@@ -157,6 +160,18 @@ main { position: relative; z-index: 1; }
 @media (max-width: 720px) {
   .hero-card { grid-template-columns: 1fr; text-align: center; }
   .avatar { margin: 0 auto; }
+}
+
+/* Tighten layout for small screens */
+@media (max-width: 560px) {
+  .hero-text h1 { font-size: 28px; }
+  .subtitle { font-size: 14px; }
+  .section { padding: 28px 16px; }
+  .timeline:before { left: 8px; }
+  .timeline-item { padding-left: 34px; }
+  .timeline-item .dot { left: 2px; }
+  .timeline-item h3 .logo { width: 28px; height: 28px; }
+  .cards, .project-cards, .pub-list { grid-template-columns: 1fr; }
 }
 
 /* Nice smooth scrolling */
