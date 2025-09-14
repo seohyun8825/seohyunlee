@@ -1,0 +1,16 @@
+{
+  "name": "seohyun-portfolio",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Seohyun Lee – static portfolio site for GitHub Pages (project site).",
+  "scripts": {
+    "deploy": "gh-pages -d ."
+  },
+  "main": "script.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "gh-pages": "^6.3.0"
+  }
+}
