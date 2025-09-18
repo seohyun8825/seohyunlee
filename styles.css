@@ -121,7 +121,7 @@ main { position: relative; z-index: 1; min-height: 100vh; }
 }
 
 .hero {
-  height: calc(100vh - 80px);
+  height: calc(100vh - 120px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -392,7 +392,7 @@ main { position: relative; z-index: 1; min-height: 100vh; }
   opacity: 1;
 }
 
-.footer { padding: 40px 20px 80px; text-align: center; color: var(--muted); }
+.footer { padding: 20px 20px 40px; text-align: center; color: var(--muted); }
 .footer .contact { display: flex; gap: 14px; align-items: center; justify-content: center; margin-bottom: 8px; flex-wrap: wrap; }
 .footer .email { color: var(--text); text-decoration: none; font-weight: 600; }
 .footer .email:hover { text-decoration: underline; }
