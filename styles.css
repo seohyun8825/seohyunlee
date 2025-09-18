@@ -200,6 +200,33 @@ main { position: relative; z-index: 1; min-height: 100vh; }
   gap: 12px; 
   flex-wrap: wrap; 
 }
+.hero-text .socials {
+  margin-top: 20px;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-start;
+}
+.hero-text .icon-btn {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.06);
+  color: var(--text);
+  transition: all 0.2s ease;
+}
+.hero-text .icon-btn:hover {
+  background: rgba(255,255,255,0.1);
+  transform: translateY(-2px);
+}
+.hero-text .icon-btn svg,
+.hero-text .icon-btn img {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
 .button {
   display: inline-flex;
   align-items: center;
@@ -392,8 +419,8 @@ main { position: relative; z-index: 1; min-height: 100vh; }
   opacity: 1;
 }
 
-.footer { padding: 20px 20px 40px; text-align: center; color: var(--muted); }
-.footer .contact { display: flex; gap: 14px; align-items: center; justify-content: center; margin-bottom: 8px; flex-wrap: wrap; }
+.footer { padding: 16px 20px 24px; text-align: center; color: var(--muted); }
+.footer .contact { display: flex; gap: 14px; align-items: center; justify-content: center; margin-bottom: 4px; flex-wrap: wrap; }
 .footer .email { color: var(--text); text-decoration: none; font-weight: 600; }
 .footer .email:hover { text-decoration: underline; }
 .footer .socials { display: inline-flex; gap: 8px; }
