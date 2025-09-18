@@ -58,6 +58,7 @@
 
 // Page Navigation System
 (function() {
+  console.log('Page Navigation System loaded');
   let currentPage = 'home';
   
   function showPage(pageId) {
@@ -95,11 +96,15 @@
   
   // Navigation event listeners
   document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM Content Loaded');
     const navLinks = document.querySelectorAll('[data-page]');
+    console.log('Found nav links:', navLinks.length);
+    
     navLinks.forEach(link => {
       link.addEventListener('click', (e) => {
         e.preventDefault();
         const pageId = link.getAttribute('data-page');
+        console.log('Clicked page:', pageId);
         if (pageId && pageId !== currentPage) {
           showPage(pageId);
         }
@@ -107,6 +112,7 @@
     });
     
     // Initialize with home page
+    console.log('Initializing with home page');
     showPage('home');
   });
   
