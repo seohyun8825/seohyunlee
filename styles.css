@@ -149,6 +149,15 @@ main { position: relative; z-index: 1; min-height: 100vh; }
   flex: 0.8;
 }
 
+/* Mobile and Desktop specific image placement */
+.mobile-only {
+  display: none;
+}
+
+.desktop-only {
+  display: flex;
+}
+
 
 .avatar {
   width: 260px;
@@ -498,6 +507,16 @@ main { position: relative; z-index: 1; min-height: 100vh; }
   .hero-text {
     margin-bottom: 40px;
     padding-right: 0;
+  }
+  
+  /* Mobile: Show image after title, hide desktop image */
+  .mobile-only {
+    display: flex;
+    margin: 20px 0;
+  }
+  
+  .desktop-only {
+    display: none;
   }
   .avatar {
     width: 240px;
