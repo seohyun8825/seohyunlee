@@ -121,29 +121,29 @@ main { position: relative; z-index: 1; min-height: 100vh; }
 }
 
 .hero {
-  height: calc(100vh - 120px);
+  min-height: calc(100vh - 80px);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 20px;
-  overflow: hidden;
 }
 .hero-content {
   max-width: 1200px;
   width: 100%;
-  display: grid;
-  grid-template-columns: 1fr auto;
+  display: flex;
   gap: 40px;
   align-items: center;
 }
 .hero-text {
   max-width: 600px;
+  flex: 1;
 }
 .hero-image {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 
@@ -201,17 +201,17 @@ main { position: relative; z-index: 1; min-height: 100vh; }
   flex-wrap: wrap; 
 }
 .hero-text .socials {
-  margin-top: 20px;
+  margin-top: 16px;
   display: flex;
-  gap: 12px;
+  gap: 10px;
   justify-content: flex-start;
 }
 .hero-text .icon-btn {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   display: grid;
   place-items: center;
-  border-radius: 8px;
+  border-radius: 6px;
   border: 1px solid var(--border);
   background: rgba(255,255,255,0.06);
   color: var(--text);
@@ -223,8 +223,8 @@ main { position: relative; z-index: 1; min-height: 100vh; }
 }
 .hero-text .icon-btn svg,
 .hero-text .icon-btn img {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   display: block;
 }
 .button {
@@ -421,8 +421,26 @@ main { position: relative; z-index: 1; min-height: 100vh; }
 
 .footer { padding: 16px 20px 24px; text-align: center; color: var(--muted); }
 .footer .contact { display: flex; gap: 14px; align-items: center; justify-content: center; margin-bottom: 4px; flex-wrap: wrap; }
-.footer .email { color: var(--text); text-decoration: none; font-weight: 600; }
-.footer .email:hover { text-decoration: underline; }
+.footer .email-btn {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.06);
+  color: var(--text);
+  transition: all 0.2s ease;
+}
+.footer .email-btn:hover {
+  background: rgba(255,255,255,0.1);
+  transform: translateY(-2px);
+}
+.footer .email-btn svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
 .footer .socials { display: inline-flex; gap: 8px; }
 .footer .icon-btn { width: 28px; height: 28px; display: grid; place-items: center; border-radius: 8px; border: 1px solid var(--border); background: rgba(255,255,255,0.06); color: var(--text); }
 .footer .icon-btn svg { width: 16px; height: 16px; display: block; }
@@ -468,7 +486,7 @@ main { position: relative; z-index: 1; min-height: 100vh; }
     height: 250px;
   }
   .hero-content {
-    grid-template-columns: 1fr;
+    flex-direction: column;
     gap: 40px;
     text-align: center;
   }
