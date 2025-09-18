@@ -19,118 +19,178 @@
   <body>
     <canvas id="bg"></canvas>
 
-    <!-- <header class="site-header">
-      <a class="brand" href="#top">SL</a>
+    <header class="site-header">
       <nav>
-        <a href="#about">About</a>
-        <a href="#experience">Experience</a>
-        <a href="#awards">Awards</a>
-        <a href="#publications">Publications</a>
+        <a href="#" data-page="home" class="nav-link active">About</a>
+        <a href="#" data-page="experience" class="nav-link">Experience</a>
+        <a href="#" data-page="awards" class="nav-link">Awards</a>
+        <a href="#" data-page="publications" class="nav-link">Publications</a>
       </nav>
-    </header> -->
+    </header>
 
-    <main id="top">
-      <section class="hero" id="about">
-        <div class="hero-card glass">
-          <img class="avatar" src="src/images/a.jpg" alt="Portrait of Seohyun Lee" />
-          <div class="hero-text">
-            <h1>👋 Hello, I'm <span class="accent">Seohyun Lee</span>!</h1>
-            <p class="subtitle">Undergraduate student at Korea University</p>
-            <p>My primary focus is on <strong>Computer Vision</strong>, with a particular interest in <strong>Vision-Language Models (VLM)</strong> and <strong>Generative Models</strong>.</p>
-            <div class="cta-row">
-              <a class="button primary" href="#publications">View Publications</a>
-              <a class="button" href="#experience">Experience</a>
+    <main id="app">
+      <!-- Home Page -->
+      <div class="page active" id="home-page">
+        <section class="hero">
+          <div class="hero-content">
+            <div class="hero-text">
+              <h1>👋 Hello, I'm <span class="accent">Seohyun Lee</span>!</h1>
+              <p class="subtitle">Undergraduate student at Korea University</p>
+              <p>My primary focus is on <strong>Computer Vision</strong>, with a particular interest in <strong>Vision-Language Models (VLM)</strong> and <strong>Generative Models</strong>.</p>
+              <div class="cta-row">
+                <a class="button primary" href="#" data-page="publications">View Publications</a>
+                <a class="button secondary" href="#" data-page="experience">Experience</a>
+              </div>
+            </div>
+            <div class="hero-image">
+              <img class="avatar" src="src/images/a.jpg" alt="Portrait of Seohyun Lee" />
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </div>
 
-      <section class="section" id="experience">
-        <h2>📚 Experience</h2>
-        <div class="timeline">
-          <article class="timeline-item">
-            <div class="dot"></div>
-            <div class="content">
-              <h3>
-                <img class="logo" src="src/images/lg.jpeg" alt="LG AI Research logo" />
-                LG AI Research — Vision Lab (Intern)
-              </h3>
-              <p class="meta">Developed OCR model for ChatEXAONE, worked on EXAONE‑VL • 2025.01 – 2025.08</p>
-            </div>
-          </article>
-          <article class="timeline-item">
-            <div class="dot"></div>
-            <div class="content">
-              <h3>
-                <img class="logo" src="src/images/mlv.png" alt="MLVLAB logo" />
-                Undergraduate Intern of MLVLAB
-              </h3>
-              <p class="meta">Under the supervision of Professor Hyunwoo J. Kim • 2024.07 – 2024.12</p>
-            </div>
-          </article>
-          <article class="timeline-item">
-            <div class="dot"></div>
-            <div class="content">
-              <h3>
-                <img class="logo" src="src/images/kubig.jpeg" alt="KUBIG logo" />
-                Member of KUBIG (AI & Data Science Club)
-              </h3>
-              <p class="meta">2023.12 – 2024.12</p>
-            </div>
-          </article>
-          <article class="timeline-item">
-            <div class="dot"></div>
-            <div class="content">
-              <h3>
-                <img class="logo" src="src/images/hanawayoung.jpg" alt="하나와영 club logo" />
-                Member of 하나와영, Software Club
-              </h3>
-              <p class="meta">2020.06 – 2021.06</p>
-            </div>
-          </article>
-        </div>
-      </section>
+      <!-- Experience Page -->
+      <div class="page" id="experience-page">
+        <section class="page-content">
+          <h1>Experience</h1>
+          <div class="timeline">
+            <article class="timeline-item">
+              <div class="content">
+                <h3>
+                  <img class="logo" src="src/images/lg.jpeg" alt="LG AI Research logo" />
+                  LG AI Research — Vision Lab (Intern)
+                </h3>
+                <p class="meta">Developed OCR model for ChatEXAONE, worked on EXAONE‑VL • 2025.01 – 2025.08</p>
+              </div>
+            </article>
+            <article class="timeline-item">
+              <div class="content">
+                <h3>
+                  <img class="logo" src="src/images/mlv.png" alt="MLVLAB logo" />
+                  Undergraduate Intern of MLVLAB
+                </h3>
+                <p class="meta">Under the supervision of Professor Hyunwoo J. Kim • 2024.07 – 2024.12</p>
+              </div>
+            </article>
+            <article class="timeline-item">
+              <div class="content">
+                <h3>
+                  <img class="logo" src="src/images/kubig.jpeg" alt="KUBIG logo" />
+                  Member of KUBIG (AI & Data Science Club)
+                </h3>
+                <p class="meta">2023.12 – 2024.12</p>
+              </div>
+            </article>
+            <article class="timeline-item">
+              <div class="content">
+                <h3>
+                  <img class="logo" src="src/images/hanawayoung.jpg" alt="하나와영 club logo" />
+                  Member of 하나와영, Software Club
+                </h3>
+                <p class="meta">2020.06 – 2021.06</p>
+              </div>
+            </article>
+          </div>
+        </section>
+      </div>
 
-      <section class="section" id="awards">
-        <h2>🏆 Awards</h2>
-        <ul class="cards">
-          <li class="card">
-            <h3>[First Place Winner]</h3>
-            <p>LLM Innovators Challenge 2024 (KU × Upstage) — 1st (KRW 10M Prize), out of 56 teams</p>
-            <a class="stretched-link" href="https://github.com/llm-Innovation-Challenge/ChnoAI-api" target="_blank" rel="noopener" aria-label="Open GitHub repo: LLM Innovators Challenge — ChnoAI API"></a>
-          </li>
-          <li class="card">
-            <h3>[First Place Winner]</h3>
-            <p>Ambient AI Competition 2024, Seoul National University</p>
-            <a class="stretched-link" href="https://github.com/seohyun8825/NIKESolo-Ambient-AI-" target="_blank" rel="noopener" aria-label="Open GitHub repo: Ambient AI — NIKESolo"></a>
-          </li>
-          <li class="card">
-            <h3>[First Place Winner]</h3>
-            <p>KU AI Forum Poster Presentation 2024</p>
-          </li>
-        </ul>
-      </section>
+      <!-- Awards Page -->
+      <div class="page" id="awards-page">
+        <section class="page-content">
+          <h1>Awards</h1>
+          <ul class="awards-list">
+            <li class="award">
+              <div class="award-image">
+                <img src="src/images/awards/innovators.jpg" alt="LLM Innovators Challenge" />
+              </div>
+              <div class="award-content">
+                <h3>First Place Winner</h3>
+                <p class="meta">LLM Innovators Challenge 2024 (KU × Upstage) — 1st (KRW 10M Prize), out of 56 teams</p>
+                <p><a href="https://github.com/llm-Innovation-Challenge/ChnoAI-api" target="_blank" rel="noopener">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                  </svg>
+                  GitHub
+                </a></p>
+              </div>
+            </li>
+            <li class="award">
+              <div class="award-image">
+                <img src="src/images/awards/ambientai.png" alt="Ambient AI Competition" />
+              </div>
+              <div class="award-content">
+                <h3>First Place Winner</h3>
+                <p class="meta">Ambient AI Competition 2024, Seoul National University</p>
+                <p><a href="https://github.com/seohyun8825/NIKESolo-Ambient-AI-" target="_blank" rel="noopener">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                  </svg>
+                  GitHub
+                </a></p>
+              </div>
+            </li>
+            <li class="award">
+              <div class="award-image">
+                <img src="src/images/awards/kuaiposter.jpg" alt="KU AI Forum Poster" />
+              </div>
+              <div class="award-content">
+                <h3>First Place Winner</h3>
+                <p class="meta">KU AI Forum Poster Presentation 2024</p>
+              </div>
+            </li>
+          </ul>
+        </section>
+      </div>
 
-      <section class="section" id="publications">
-        <h2>📄 Publications</h2>
-        <ul class="pub-list">
-          <li class="pub">
-            <h3>DR.SIMON: Domain-wise Rewrite for Segment-Informed Medical Oversight Network</h3>
-            <p class="meta">Seohyun Lee, Suhyun Choe, Jaeha Choi, Jin Won Lee (2025). <em>MedAGI Workshop @ MICCAI 2025</em> — <strong>Oral Presentation</strong></p>
-            <p><a href="https://drsimon-rewrite.github.io/" target="_blank" rel="noopener">Project Page</a></p>
-          </li>
-          <li class="pub">
-            <h3>Exaone 4.0 VL: Vision-Language Foundation Model for Enterprise AI Agent</h3>
-            <p class="meta">LG AI Talk Concert 2025</p>
-            <p><a href="https://www.youtube.com/watch?v=EGzIMo4AizA&t=1323s" target="_blank" rel="noopener">Video</a></p>
-          </li>
-          <li class="pub">
-            <h3>ODPG: Outfitting Diffusion with Pose-Guided Conditions</h3>
-            <p class="meta">Seohyun Lee*, Jintae Park*, Sanghyeok Park* (2025). <em>VISAPP 2025</em> — <strong>Oral Presentation</strong></p>
-            <p><a href="https://www.scitepress.org/publishedPapers/2025/131506/pdf/index.html" target="_blank" rel="noopener">Paper</a></p>
-          </li>
-        </ul>
-      </section>
+      <!-- Publications Page -->
+      <div class="page" id="publications-page">
+        <section class="page-content">
+          <div class="page-header">
+            <h1>Publications</h1>
+            <div class="pipeline-image">
+              <img src="src/images/pipeline.png" alt="" />
+            </div>
+          </div>
+          <ul class="pub-list">
+            <li class="pub">
+              <div class="pub-image">
+                <img src="src/images/publications/drsimon.png" alt="DR.SIMON" />
+              </div>
+              <div class="pub-content">
+                <h3>DR.SIMON: Domain-wise Rewrite for Segment-Informed Medical Oversight Network</h3>
+                <p class="meta">Seohyun Lee, Suhyun Choe, Jaeha Choi, Jin Won Lee (2025). <em>MedAGI Workshop @ MICCAI 2025</em> — <strong>Oral Presentation</strong></p>
+                <p><a href="https://drsimon-rewrite.github.io/" target="_blank" rel="noopener">Project Page</a></p>
+              </div>
+            </li>
+            <li class="pub">
+              <div class="pub-image">
+                <img src="src/images/publications/exaone.png" alt="Exaone 4.0 VL" />
+              </div>
+              <div class="pub-content">
+                <h3>Exaone 4.0 VL: Vision-Language Foundation Model for Enterprise AI Agent</h3>
+                <p class="meta">LG AI Talk Concert 2025</p>
+                <p><a href="https://www.youtube.com/watch?v=EGzIMo4AizA&t=1323s" target="_blank" rel="noopener">Video</a></p>
+              </div>
+            </li>
+            <li class="pub">
+              <div class="pub-image">
+                <div class="slideshow-container">
+                  <div class="slideshow">
+                    <img src="src/images/publications/odpg1.png" alt="ODPG 1" class="slide active" />
+                    <img src="src/images/publications/odpg2.png" alt="ODPG 2" class="slide" />
+                    <img src="src/images/publications/odpg3.png" alt="ODPG 3" class="slide" />
+                  </div>
+                </div>
+              </div>
+              <div class="pub-content">
+                <h3>ODPG: Outfitting Diffusion with Pose-Guided Conditions</h3>
+                <p class="meta">Seohyun Lee*, Jintae Park*, Sanghyeok Park* (2025). <em>VISAPP 2025</em> — <strong>Oral Presentation</strong></p>
+                <p><a href="https://www.scitepress.org/publishedPapers/2025/131506/pdf/index.html" target="_blank" rel="noopener">Paper</a></p>
+              </div>
+            </li>
+          </ul>
+        </section>
+      </div>
 
       <footer class="footer">
         <div class="contact">

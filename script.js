@@ -56,6 +56,101 @@
   step();
 })();
 
+// Page Navigation System
+(function() {
+  let currentPage = 'home';
+  
+  function showPage(pageId) {
+    // Hide all pages
+    document.querySelectorAll('.page').forEach(page => {
+      page.classList.remove('active');
+    });
+    
+    // Show target page
+    const targetPage = document.getElementById(pageId + '-page');
+    if (targetPage) {
+      targetPage.classList.add('active');
+    }
+    
+    // Update navigation
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.classList.remove('active');
+    });
+    
+    const activeLink = document.querySelector(`[data-page="${pageId}"]`);
+    if (activeLink) {
+      activeLink.classList.add('active');
+    }
+    
+    currentPage = pageId;
+    
+    // Trigger animations for new page content
+    setTimeout(() => {
+      const elementsToAnimate = targetPage.querySelectorAll('.timeline-item, .card, .pub');
+      elementsToAnimate.forEach(el => {
+        el.classList.add('visible');
+      });
+    }, 100);
+  }
+  
+  // Navigation event listeners
+  document.addEventListener('DOMContentLoaded', () => {
+    const navLinks = document.querySelectorAll('[data-page]');
+    navLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const pageId = link.getAttribute('data-page');
+        if (pageId && pageId !== currentPage) {
+          showPage(pageId);
+        }
+      });
+    });
+    
+    // Initialize with home page
+    showPage('home');
+  });
+  
+  // Handle browser back/forward buttons
+  window.addEventListener('popstate', (e) => {
+    const pageId = e.state?.page || 'home';
+    showPage(pageId);
+  });
+})();
+
+// Slideshow functionality
+let currentSlide = 0;
+const slides = document.querySelectorAll('.slide');
+
+function showSlide(index) {
+  slides.forEach((slide, i) => {
+    slide.classList.toggle('active', i === index);
+  });
+}
+
+function changeSlide(direction) {
+  currentSlide += direction;
+  if (currentSlide >= slides.length) {
+    currentSlide = 0;
+  } else if (currentSlide < 0) {
+    currentSlide = slides.length - 1;
+  }
+  showSlide(currentSlide);
+}
+
+// Auto-advance slideshow
+function autoAdvance() {
+  changeSlide(1);
+}
+
+// Initialize slideshow
+document.addEventListener('DOMContentLoaded', () => {
+  if (slides.length > 0) {
+    showSlide(0);
+    // Auto-advance every 3 seconds
+    setInterval(autoAdvance, 3000);
+  }
+});
+
 // Footer year
 document.getElementById('year').textContent = new Date().getFullYear();
 
