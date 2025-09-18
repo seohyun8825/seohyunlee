@@ -56,6 +56,101 @@
   step();
 })();
 
+// Page Navigation System
+(function() {
+  let currentPage = 'home';
+  
+  function showPage(pageId) {
+    // Hide all pages
+    document.querySelectorAll('.page').forEach(page => {
+      page.classList.remove('active');
+    });
+    
+    // Show target page
+    const targetPage = document.getElementById(pageId + '-page');
+    if (targetPage) {
+      targetPage.classList.add('active');
+    }
+    
+    // Update navigation
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.classList.remove('active');
+    });
+    
+    const activeLink = document.querySelector(`[data-page="${pageId}"]`);
+    if (activeLink) {
+      activeLink.classList.add('active');
+    }
+    
+    currentPage = pageId;
+    
+    // Trigger animations for new page content
+    setTimeout(() => {
+      const elementsToAnimate = targetPage.querySelectorAll('.timeline-item, .card, .pub');
+      elementsToAnimate.forEach(el => {
+        el.classList.add('visible');
+      });
+    }, 100);
+  }
+  
+  // Navigation event listeners
+  document.addEventListener('DOMContentLoaded', () => {
+    const navLinks = document.querySelectorAll('[data-page]');
+    navLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const pageId = link.getAttribute('data-page');
+        if (pageId && pageId !== currentPage) {
+          showPage(pageId);
+        }
+      });
+    });
+    
+    // Initialize with home page
+    showPage('home');
+  });
+  
+  // Handle browser back/forward buttons
+  window.addEventListener('popstate', (e) => {
+    const pageId = e.state?.page || 'home';
+    showPage(pageId);
+  });
+})();
+
+// Slideshow functionality
+let currentSlide = 0;
+const slides = document.querySelectorAll('.slide');
+
+function showSlide(index) {
+  slides.forEach((slide, i) => {
+    slide.classList.toggle('active', i === index);
+  });
+}
+
+function changeSlide(direction) {
+  currentSlide += direction;
+  if (currentSlide >= slides.length) {
+    currentSlide = 0;
+  } else if (currentSlide < 0) {
+    currentSlide = slides.length - 1;
+  }
+  showSlide(currentSlide);
+}
+
+// Auto-advance slideshow
+function autoAdvance() {
+  changeSlide(1);
+}
+
+// Initialize slideshow
+document.addEventListener('DOMContentLoaded', () => {
+  if (slides.length > 0) {
+    showSlide(0);
+    // Auto-advance every 3 seconds
+    setInterval(autoAdvance, 3000);
+  }
+});
+
 // Footer year
 document.getElementById('year').textContent = new Date().getFullYear();
 
@@ -65,13 +160,13 @@ document.getElementById('year').textContent = new Date().getFullYear();
   const toggle = document.getElementById('audio-toggle');
   if (!audio || !toggle) return;
 
-  const START_AT = 70; // seconds (1:10)
+  const START_AT = 0; // start from the beginning
   const FADE_MS = 1200; // fade-in duration
   const DEFAULT_VOLUME = 0.5;
 
   // UI state
-  const savedState = localStorage.getItem('bg-audio');
-  let enabled = savedState ? savedState === 'on' : true; // first visit: try enabled
+  // Start disabled by default; require an explicit click to play
+  let enabled = false;
   function updateUI() {
     toggle.classList.toggle('on', enabled);
     toggle.classList.toggle('off', !enabled);
@@ -96,23 +191,13 @@ document.getElementById('year').textContent = new Date().getFullYear();
   }
   function ensureStartOffset() {
     const seek = () => {
-      if (!isNaN(audio.duration) && audio.duration > START_AT && audio.currentTime < START_AT - 0.5) {
-        try { audio.currentTime = START_AT; } catch (_) {}
-      }
+      try { audio.currentTime = START_AT; } catch (_) {}
     };
     if (audio.readyState >= 1) seek(); else audio.addEventListener('loadedmetadata', seek, { once: true });
   }
 
-  async function applyState() {
-    if (enabled) {
-      ensureStartOffset();
-      try {
-        audio.muted = false;
-        audio.volume = 0;
-        await audio.play();
-        fadeTo(DEFAULT_VOLUME, FADE_MS);
-      } catch (_) { /* autoplay may need a gesture */ }
-    } else {
+  function applyState() {
+    if (!enabled) {
       cancelFade();
       audio.pause();
       audio.muted = true;
@@ -121,24 +206,29 @@ document.getElementById('year').textContent = new Date().getFullYear();
   }
 
   // Initialize
-  audio.muted = true; // keep muted until play
-  updateUI();
-  // Warm up decoder silently
-  audio.play().then(() => audio.pause()).catch(() => {});
+  audio.muted = true; // keep muted until user clicks
   applyState();
 
   toggle.addEventListener('click', async () => {
     enabled = !enabled;
-    localStorage.setItem('bg-audio', enabled ? 'on' : 'off');
-    applyState();
+    if (enabled) {
+      ensureStartOffset(); // will set to 0
+      audio.muted = false;
+      audio.volume = 0;
+      try {
+        await audio.play();
+        fadeTo(DEFAULT_VOLUME, FADE_MS);
+      } catch (_) {
+        // If playback fails, revert UI state
+        enabled = false;
+      }
+    } else {
+      cancelFade();
+      audio.pause();
+      audio.muted = true;
+    }
+    updateUI();
   });
 
-  // On user gesture, retry play if needed
-  window.addEventListener('pointerdown', () => {
-    if (enabled && audio.paused) {
-      ensureStartOffset();
-      audio.muted = false;
-      audio.play().then(() => fadeTo(DEFAULT_VOLUME, FADE_MS)).catch(() => {});
-    }
-  }, { once: false, passive: true });
+  // Remove global gesture-based auto-start; playback only starts via the toggle click
 })();
