@@ -132,10 +132,11 @@ main { position: relative; z-index: 1; min-height: 100vh; }
   width: 100%;
   display: flex;
   align-items: center;
+  justify-content: center;
 }
 .hero-text {
   max-width: 600px;
-  flex: 1;
+  flex: 0 1 auto;
   margin-right: 40px;
 }
 .hero-image {
