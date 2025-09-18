@@ -131,12 +131,12 @@ main { position: relative; z-index: 1; min-height: 100vh; }
   max-width: 1200px;
   width: 100%;
   display: flex;
-  gap: 40px;
   align-items: center;
 }
 .hero-text {
   max-width: 600px;
   flex: 1;
+  margin-right: 40px;
 }
 .hero-image {
   position: relative;
@@ -197,14 +197,25 @@ main { position: relative; z-index: 1; min-height: 100vh; }
 .cta-row { 
   margin-top: 16px; 
   display: flex; 
-  gap: 12px; 
   flex-wrap: wrap; 
+}
+.cta-row .button {
+  margin-right: 12px;
+  margin-bottom: 8px;
+}
+.cta-row .button:last-child {
+  margin-right: 0;
 }
 .hero-text .socials {
   margin-top: 16px;
   display: flex;
-  gap: 10px;
   justify-content: flex-start;
+}
+.hero-text .socials .icon-btn {
+  margin-right: 10px;
+}
+.hero-text .socials .icon-btn:last-child {
+  margin-right: 0;
 }
 .hero-text .icon-btn {
   width: 28px;
@@ -420,26 +431,17 @@ main { position: relative; z-index: 1; min-height: 100vh; }
 }
 
 .footer { padding: 16px 20px 24px; text-align: center; color: var(--muted); }
-.footer .contact { display: flex; gap: 14px; align-items: center; justify-content: center; margin-bottom: 4px; flex-wrap: wrap; }
-.footer .email-btn {
-  width: 28px;
-  height: 28px;
-  display: grid;
-  place-items: center;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: rgba(255,255,255,0.06);
+.footer .contact { 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  margin-bottom: 4px; 
+  flex-wrap: wrap; 
+}
+.footer .contact p {
+  margin: 0;
   color: var(--text);
-  transition: all 0.2s ease;
-}
-.footer .email-btn:hover {
-  background: rgba(255,255,255,0.1);
-  transform: translateY(-2px);
-}
-.footer .email-btn svg {
-  width: 16px;
-  height: 16px;
-  display: block;
+  font-size: 14px;
 }
 .footer .socials { display: inline-flex; gap: 8px; }
 .footer .icon-btn { width: 28px; height: 28px; display: grid; place-items: center; border-radius: 8px; border: 1px solid var(--border); background: rgba(255,255,255,0.06); color: var(--text); }
@@ -487,8 +489,11 @@ main { position: relative; z-index: 1; min-height: 100vh; }
   }
   .hero-content {
     flex-direction: column;
-    gap: 40px;
     text-align: center;
+  }
+  .hero-text {
+    margin-right: 0;
+    margin-bottom: 40px;
   }
   .avatar {
     width: 240px;
