@@ -134,17 +134,19 @@ main { position: relative; z-index: 1; min-height: 100vh; }
   align-items: center;
   justify-content: space-between;
   margin: 0 auto;
+  padding: 0 40px;
 }
 .hero-text {
   max-width: 600px;
-  flex: 1;
+  flex: 1.2;
+  padding-right: 40px;
 }
 .hero-image {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex: 1;
+  flex: 0.8;
 }
 
 
@@ -491,9 +493,11 @@ main { position: relative; z-index: 1; min-height: 100vh; }
   .hero-content {
     flex-direction: column;
     text-align: center;
+    padding: 0 20px;
   }
   .hero-text {
     margin-bottom: 40px;
+    padding-right: 0;
   }
   .avatar {
     width: 240px;
