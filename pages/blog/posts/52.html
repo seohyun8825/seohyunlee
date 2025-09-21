@@ -1,0 +1,143 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>An Image is Worth 32 Tokens for Reconstruction and Generation — happy8825 - Seohyun Lee Blog</title>
+    <meta name="description" content="이미지 생성을 효율적으로 하기위해 이미지를 토큰화시키는 방법이 연구되고 있음
+&nbsp;
+예를들어 VQGAN과 같은 방법들은, 이미지를 2차원의 고정된 크기를 가지는 격자로 변환해서 토큰화하는 방법인데, 이미지의 여러 부분이 서로 비슷한 경우 이런 중복성을 처리하는데 한계가 있었다.
+&">
+    <link rel="stylesheet" href="../../styles.css">
+    <style>
+        body { 
+            background: #0d0f17; 
+            color: #fff; 
+            font-family: 'Inter', sans-serif; 
+            line-height: 1.6; 
+            margin: 0; 
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .post-header {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 2rem;
+            margin-bottom: 2rem;
+        }
+        .post-meta {
+            color: #888;
+            margin-bottom: 1rem;
+        }
+        .post-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .post-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        .post-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 1rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .post-content p {
+            margin-bottom: 1rem;
+        }
+        .post-content h1, .post-content h2, .post-content h3 {
+            color: #667eea;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .post-content blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 1rem;
+            margin: 1.5rem 0;
+            color: #ccc;
+            font-style: italic;
+        }
+        .post-content code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .post-content pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            color: #667eea;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            background: rgba(102, 126, 234, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    
+    <div class="post-header">
+        <div class="post-meta">
+            <span>📅 2024-09-03</span>
+            <span> | 🏷️ Computer Vision Paper Review</span>
+            <span> | 🔗 <a href="https://happy8825.tistory.com/50" target="_blank">Original Post</a></span>
+            <span> | 📊 2 images</span>
+        </div>
+        <h1 class="post-title">An Image is Worth 32 Tokens for Reconstruction and Generation — happy8825</h1>
+        
+    </div>
+    
+    <div class="post-content">
+        <p data-ke-size="size18">이미지 생성을 효율적으로 하기위해 이미지를 토큰화시키는 방법이 연구되고 있음</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">예를들어 VQGAN과 같은 방법들은, 이미지를 2차원의 고정된 크기를 가지는 격자로 변환해서 토큰화하는 방법인데, 이미지의 여러 부분이 서로 비슷한 경우 이런 중복성을 처리하는데 한계가 있었다.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">그래서 이 논문에서 제안한 TiTok 접근법은, 새로운 방식인&nbsp; transformer 기반의 1차원 token을 제안한다. TiTok은 이미지를 1차원의 연속된 데이터 시퀀스로 변환해서 토큰화하고, 이 방식이 기존의 2차원 방식보다 더 효율적이고 효과적인 표현을 가능하게 한다고 한다.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">모델파잎라인</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1136" data-origin-height="560" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/k0V5o/btsJorUsHqH/AAAAAAAAAAAAAAAAAAAAALDaVjc4_uG_ZhzZGAIoatw3ysjY4L5yrMZha2B0sFzE/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=gmIpNQrY8%2F1dkZLIiO%2Fgs8Xu9vo%3D" data-phocus="https://blog.kakaocdn.net/dna/k0V5o/btsJorUsHqH/AAAAAAAAAAAAAAAAAAAAALDaVjc4_uG_ZhzZGAIoatw3ysjY4L5yrMZha2B0sFzE/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=gmIpNQrY8%2F1dkZLIiO%2Fgs8Xu9vo%3D"><img src="https://blog.kakaocdn.net/dna/k0V5o/btsJorUsHqH/AAAAAAAAAAAAAAAAAAAAALDaVjc4_uG_ZhzZGAIoatw3ysjY4L5yrMZha2B0sFzE/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=gmIpNQrY8%2F1dkZLIiO%2Fgs8Xu9vo%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2Fk0V5o%2FbtsJorUsHqH%2FAAAAAAAAAAAAAAAAAAAAALDaVjc4_uG_ZhzZGAIoatw3ysjY4L5yrMZha2B0sFzE%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DgmIpNQrY8%252F1dkZLIiO%252Fgs8Xu9vo%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1136" height="560" data-origin-width="1136" data-origin-height="560" data-phocus-index="0"></span></figure>
+<p></p>
+<p data-ke-size="size18">토큰화 과정은</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">먼저 전체 이미지를 작은 패치로 나눈다.&nbsp; 이 패치에 patch embedding layer를 붙인거랑 latetn token을&nbsp; 함께 vit 인코더에 넣어서 vit 인코더는 1차원의 latent vector 를 아웃풋한다</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">인코더에서 output된 이 1D 벡터는 vector quantization 과정을 거쳐, 코드북에서 가장 가까운 vector 로 대체된다.&nbsp;</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">여기 패치 개수만큼 마스크 토큰을 생성하고, 이거를 discrete된 latent 토큰이랑 concat을 시켜 디코더에 넘겨준다. 넘겨준 디코더는 이미지 generation을 수행하게 된다</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">많은 토큰의 수는 지역적 정보가 많아져 분류 accuracy는 낮아질 수 있으나 , reconstruction 성능은 향상될거고</p>
+<p data-ke-size="size18">reconstruction 말고 이미지 생성에 있어서는&nbsp; 적은 토큰의 수가 오히려 넓고 추상적인 특징을 포착하는데 유리하고, 다양한 이미지 생성하는데 도움이 된다.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">그리고</p>
+<p data-ke-size="size18">코드북의 크기가 중요!</p>
+<p data-ke-size="size18">.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">결과~</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1134" data-origin-height="550" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/MCN6s/btsJo0oz2dy/AAAAAAAAAAAAAAAAAAAAADrk3wQ_Va0V4vW9h6CbYC1Xn99B-Ruw55uGP5WDpgRA/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=%2FFJHJ%2BfnFBlFos%2F9Qy4J3NfYROY%3D" data-phocus="https://blog.kakaocdn.net/dna/MCN6s/btsJo0oz2dy/AAAAAAAAAAAAAAAAAAAAADrk3wQ_Va0V4vW9h6CbYC1Xn99B-Ruw55uGP5WDpgRA/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=%2FFJHJ%2BfnFBlFos%2F9Qy4J3NfYROY%3D"><img src="https://blog.kakaocdn.net/dna/MCN6s/btsJo0oz2dy/AAAAAAAAAAAAAAAAAAAAADrk3wQ_Va0V4vW9h6CbYC1Xn99B-Ruw55uGP5WDpgRA/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=%2FFJHJ%2BfnFBlFos%2F9Qy4J3NfYROY%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FMCN6s%2FbtsJo0oz2dy%2FAAAAAAAAAAAAAAAAAAAAADrk3wQ_Va0V4vW9h6CbYC1Xn99B-Ruw55uGP5WDpgRA%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3D%252FFJHJ%252BfnFBlFos%252F9Qy4J3NfYROY%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1134" height="550" data-origin-width="1134" data-origin-height="550" data-phocus-index="1"></span></figure>
+<p></p>
+    </div>
+    
+    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+        <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,102 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Seohyun Lee</title>
+    <meta name="description" content="Seohyun Lee" />
+    <meta property="og:title" content="Seohyun Lee" />
+    <meta property="og:description" content="Computer Vision, Vision-Language Models, Generative Models" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="a.jpg" />
+    <meta name="theme-color" content="#0d0f17" />
+    <link rel="icon" href="./src/images/a.jpg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./styles.css?v=2" />
+  </head>
+  <body>
+    <canvas id="bg"></canvas>
+
+    <header class="site-header">
+      <nav>
+        <a href="/" class="nav-link active">About</a>
+        <a href="/pages/experience" class="nav-link">Experience</a>
+        <a href="/pages/awards" class="nav-link">Awards</a>
+        <a href="/pages/publications" class="nav-link">Publications</a>
+        <a href="/pages/blog" class="nav-link">Blog</a>
+      </nav>
+    </header>
+
+    <main id="app">
+      <!-- Home Page -->
+      <div class="page active" id="home-page">
+        <section class="hero">
+          <div class="hero-content">
+            <div class="hero-text">
+              <h1>Hello, I'm <span class="accent">Seohyun Lee</span>!</h1>
+              <!-- Mobile-only image placement -->
+              <div class="hero-image mobile-only">
+                <img class="avatar" src="./src/images/a.jpg" alt="Portrait of Seohyun Lee" />
+              </div>
+              <p class="subtitle">Undergraduate student at Korea University</p>
+              <p>My primary focus is on <strong>Computer Vision</strong>, with a particular interest in <strong>Vision-Language Models (VLM)</strong> and <strong>Generative Models</strong>.</p>
+              <div class="cta-row">
+                <a class="button primary" href="/pages/publications">View Publications</a>
+                <a class="button secondary" href="/pages/experience">Experience</a>
+              </div>
+              <div class="socials">
+                <a class="icon-btn" href="https://www.linkedin.com/in/seohyun-lee-783606327" target="_blank" rel="noopener" aria-label="LinkedIn">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4.98 3.5C4.98 4.88 3.86 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.5 8h4V23h-4V8zM8 8h3.8v2.05h.05c.53-1 1.82-2.05 3.75-2.05 4.01 0 4.75 2.64 4.75 6.06V23h-4v-6.64c0-1.58-.03-3.62-2.21-3.62-2.21 0-2.55 1.73-2.55 3.51V23H8V8z"/></svg>
+                </a>
+                <a class="icon-btn" href="mailto:happy8825@korea.ac.kr" aria-label="Email">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                </a>
+                <a class="icon-btn" href="https://github.com/seohyun8825" target="_blank" rel="noopener" aria-label="GitHub">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2C6.48 2 2 6.58 2 12.26c0 4.52 2.87 8.35 6.84 9.7.5.1.68-.22.68-.49 0-.24-.01-.87-.01-1.71-2.78.62-3.36-1.2-3.36-1.2-.46-1.2-1.13-1.52-1.13-1.52-.92-.65.07-.64.07-.64 1.02.07 1.56 1.06 1.56 1.06.9 1.58 2.36 1.12 2.94.86.09-.67.35-1.12.63-1.37-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.04 1.03-2.76-.1-.26-.45-1.33.1-2.76 0 0 .84-.28 2.75 1.05A9.2 9.2 0 0 1 12 7.07c.85 0 1.7.12 2.5.34 1.9-1.33 2.74-1.05 2.74-1.05.56 1.43.21 2.51.11 2.76.64.72 1.02 1.64 1.02 2.76 0 3.93-2.34 4.8-4.57 5.05.36.32.68.95.68 1.92 0 1.38-.01 2.49-.01 2.83 0 .27.18.6.69.49A10.04 10.04 0 0 0 22 12.26C22 6.58 17.52 2 12 2Z"/></svg>
+                </a>
+                <a class="icon-btn" href="https://huggingface.co/happy8825" target="_blank" rel="noopener" aria-label="Hugging Face">
+                  <img src="./src/images/hf-logo.png" alt="Hugging Face" width="24" height="24" />
+                </a>
+                <a class="icon-btn" href="https://scholar.google.com/citations?hl=ko&user=WXTvNO8AAAAJ" target="_blank" rel="noopener" aria-label="Google Scholar">
+                  <img src="./src/images/Google_Scholar_logo.svg.png" alt="Google Scholar" width="24" height="24" />
+                </a>
+              </div>
+            </div>
+            <!-- Desktop-only image placement -->
+            <div class="hero-image desktop-only">
+              <img class="avatar" src="./src/images/a.jpg" alt="Portrait of Seohyun Lee" />
+            </div>
+          </div>
+        </section>
+      </div>
+
+
+      <footer class="footer">
+        <div class="contact">
+          <p> happy8825@korea.ac.kr</p>
+        </div>
+        <p>© <span id="year"></span> Seohyun Lee • All rights reserved.</p>
+      </footer>
+    </main>
+
+    <!-- Background music (default muted; enable via the toggle) -->
+    <audio id="bg-audio" src="src/media/luxury.mp3" preload="auto" loop></audio>
+    <div class="audio-controls" role="group" aria-label="Background audio controls">
+      <button id="audio-toggle" class="audio-toggle" aria-pressed="false" aria-label="Toggle background music" title="Toggle background music">
+        <!-- Speaker ON icon -->
+        <svg class="icon icon-on" viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="currentColor" d="M3 9v6h4l5 4V5L7 9H3zm12.5 3c0-1.77-1.02-3.29-2.5-4.03v8.06c1.48-.74 2.5-2.26 2.5-4.03zm2.5 0c0 3.04-1.7 5.64-4.2 6.92l-.8-1.46C15.58 16.8 17 14.61 17 12s-1.42-4.8-3.99-5.46l.79-1.46C18.29 6.36 20 8.96 20 12z"/>
+        </svg>
+        <!-- Speaker OFF icon -->
+        <svg class="icon icon-off" viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="currentColor" d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.48 2.48c.01-.22.02-.44.02-.66zm-2.5 4.03c1.48-.74 2.5-2.26 2.5-4.03 0-.22-.01-.44-.04-.65L14 13.31v2.72zM3.41 1.86L2 3.27 7.73 9H3v6h4l5 4v-6.73l4.25 4.25c-.9.86-1.97 1.53-3.2 1.9l-.8-1.46c.89-.44 1.64-1.08 2.2-1.86L3.41 1.86zM14 5l-2-.01v4.28L14 11V5zM19 3l-3.19 3.19 1.41 1.41L20.41 4.4 19 3zM20.41 19.59 18.99 21l-3.2-3.2 1.42-1.41 3.2 3.2z"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Cache-bust to ensure latest JS loads -->
+    <script src="./scripts/script-home.js?v=2"></script>
+  </body>
+  </html>

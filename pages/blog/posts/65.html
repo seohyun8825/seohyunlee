@@ -1,0 +1,148 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Non-Invertible Matrix — happy8825 - Seohyun Lee Blog</title>
+    <meta name="description" content="
+
+
+Non-Invertible Matrix&nbsp;
+행렬 A이 즉 역행렬이 존재하지 않을 경우, det(A)=0 이다.. 예를 들어, 행렬 A=[1224]는 각 행이 선형 종속적이므로 det(A)=0이 된다
+&nbsp;
+이런 non invertible 행렬 A을 사용하는 linear">
+    <link rel="stylesheet" href="../../styles.css">
+    <style>
+        body { 
+            background: #0d0f17; 
+            color: #fff; 
+            font-family: 'Inter', sans-serif; 
+            line-height: 1.6; 
+            margin: 0; 
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .post-header {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 2rem;
+            margin-bottom: 2rem;
+        }
+        .post-meta {
+            color: #888;
+            margin-bottom: 1rem;
+        }
+        .post-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .post-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        .post-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 1rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .post-content p {
+            margin-bottom: 1rem;
+        }
+        .post-content h1, .post-content h2, .post-content h3 {
+            color: #667eea;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .post-content blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 1rem;
+            margin: 1.5rem 0;
+            color: #ccc;
+            font-style: italic;
+        }
+        .post-content code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .post-content pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            color: #667eea;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            background: rgba(102, 126, 234, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    
+    <div class="post-header">
+        <div class="post-meta">
+            <span>📅 2024-08-07</span>
+            <span> | 🏷️ Linear Algebra</span>
+            <span> | 🔗 <a href="https://happy8825.tistory.com/39" target="_blank">Original Post</a></span>
+            <span> | 📊 4 images</span>
+        </div>
+        <h1 class="post-title">Non-Invertible Matrix — happy8825</h1>
+        
+    </div>
+    
+    <div class="post-content">
+        <!-- MathJax 로드 -->
+
+
+<h2 data-ke-size="size26" id="Non-Invertible%20Matrix%C2%A0-1"><a href="#Non-Invertible%20Matrix%C2%A0-1">Non-Invertible Matrix&nbsp;</a></h2>
+<p data-ke-size="size16">행렬 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="0" style="font-size: 116%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D434 TEX-I"></mjx-c></mjx-mi></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>A</mi></math></mjx-assistive-mml></mjx-container>이 즉 역행렬이 존재하지 않을 경우, <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="1" style="font-size: 116%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mtext class="mjx-n"><mjx-c class="mjx-c64"></mjx-c><mjx-c class="mjx-c65"></mjx-c><mjx-c class="mjx-c74"></mjx-c></mjx-mtext><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D434 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mn class="mjx-n" space="4"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mtext>det</mtext><mo stretchy="false">(</mo><mi>A</mi><mo stretchy="false">)</mo><mo>=</mo><mn>0</mn></math></mjx-assistive-mml></mjx-container> 이다.. 예를 들어, 행렬 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="2" style="font-size: 116%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D434 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mrow space="4"><mjx-mo class="mjx-s3"><mjx-c class="mjx-c5B TEX-S3"></mjx-c></mjx-mo><mjx-mtable style="min-width: 2em;"><mjx-table><mjx-itable><mjx-mtr><mjx-mtd style="padding-right: 0.5em; padding-bottom: 0.2em;"><mjx-mn class="mjx-n"><mjx-c class="mjx-c31"></mjx-c></mjx-mn><mjx-tstrut></mjx-tstrut></mjx-mtd><mjx-mtd style="padding-left: 0.5em; padding-bottom: 0.2em;"><mjx-mn class="mjx-n"><mjx-c class="mjx-c32"></mjx-c></mjx-mn><mjx-tstrut></mjx-tstrut></mjx-mtd></mjx-mtr><mjx-mtr><mjx-mtd style="padding-right: 0.5em; padding-top: 0.2em;"><mjx-mn class="mjx-n"><mjx-c class="mjx-c32"></mjx-c></mjx-mn><mjx-tstrut></mjx-tstrut></mjx-mtd><mjx-mtd style="padding-left: 0.5em; padding-top: 0.2em;"><mjx-mn class="mjx-n"><mjx-c class="mjx-c34"></mjx-c></mjx-mn><mjx-tstrut></mjx-tstrut></mjx-mtd></mjx-mtr></mjx-itable></mjx-table></mjx-mtable><mjx-mo class="mjx-s3"><mjx-c class="mjx-c5D TEX-S3"></mjx-c></mjx-mo></mjx-mrow></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>A</mi><mo>=</mo><mrow data-mjx-texclass="INNER"><mo data-mjx-texclass="OPEN">[</mo><mtable columnspacing="1em" rowspacing="4pt"><mtr><mtd><mn>1</mn></mtd><mtd><mn>2</mn></mtd></mtr><mtr><mtd><mn>2</mn></mtd><mtd><mn>4</mn></mtd></mtr></mtable><mo data-mjx-texclass="CLOSE">]</mo></mrow></math></mjx-assistive-mml></mjx-container>는 각 행이 선형 종속적이므로 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="3" style="font-size: 116%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mtext class="mjx-n"><mjx-c class="mjx-c64"></mjx-c><mjx-c class="mjx-c65"></mjx-c><mjx-c class="mjx-c74"></mjx-c></mjx-mtext><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D434 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mn class="mjx-n" space="4"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mtext>det</mtext><mo stretchy="false">(</mo><mi>A</mi><mo stretchy="false">)</mo><mo>=</mo><mn>0</mn></math></mjx-assistive-mml></mjx-container>이 된다</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">이런 non invertible 행렬 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="4" style="font-size: 116%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D434 TEX-I"></mjx-c></mjx-mi></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>A</mi></math></mjx-assistive-mml></mjx-container>을 사용하는 linear system에는 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="5" style="font-size: 116%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D434 TEX-I"></mjx-c></mjx-mi><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="4"><mjx-c class="mjx-c1D44F TEX-I"></mjx-c></mjx-mi></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>A</mi><mi>x</mi><mo>=</mo><mi>b</mi></math></mjx-assistive-mml></mjx-container>는 유일한 해가 없을 수 있다. 해가 아예 없거나, 무수히 많거나.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">이건 해가 무수히 많을 경우.&nbsp;</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1440" data-origin-height="601" style="margin-left: 50%; transform: translateX(-50%); width: 520px; max-width: 520px;"><span data-url="https://blog.kakaocdn.net/dna/k44vO/btsIXlTQpl6/AAAAAAAAAAAAAAAAAAAAAM00tU7nIBfZq25gBt-hFL2_SdlW83YSbo5qzvQC3g9u/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=yFP8qtbEHZZFiFIN22BE0moP0IE%3D" data-phocus="https://blog.kakaocdn.net/dna/k44vO/btsIXlTQpl6/AAAAAAAAAAAAAAAAAAAAAM00tU7nIBfZq25gBt-hFL2_SdlW83YSbo5qzvQC3g9u/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=yFP8qtbEHZZFiFIN22BE0moP0IE%3D"><img src="https://blog.kakaocdn.net/dna/k44vO/btsIXlTQpl6/AAAAAAAAAAAAAAAAAAAAAM00tU7nIBfZq25gBt-hFL2_SdlW83YSbo5qzvQC3g9u/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=yFP8qtbEHZZFiFIN22BE0moP0IE%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2Fk44vO%2FbtsIXlTQpl6%2FAAAAAAAAAAAAAAAAAAAAAM00tU7nIBfZq25gBt-hFL2_SdlW83YSbo5qzvQC3g9u%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DyFP8qtbEHZZFiFIN22BE0moP0IE%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="520" height="217" data-origin-width="1440" data-origin-height="601" data-phocus-index="0"></span></figure>
+<p></p>
+<p data-ke-size="size16">해가 아예 없을 경우</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1440" data-origin-height="588" style="margin-left: 50%; transform: translateX(-50%); width: 603px; max-width: 603px;"><span data-url="https://blog.kakaocdn.net/dna/d9kt7I/btsIVGLSoXH/AAAAAAAAAAAAAAAAAAAAABOD7HT0jp-EMVPzDof2fVFcMQ_sYDRdj15O95Q1lOR9/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=%2BEjNDj%2F3E%2BiUZ0GF6EEYWdKqJak%3D" data-phocus="https://blog.kakaocdn.net/dna/d9kt7I/btsIVGLSoXH/AAAAAAAAAAAAAAAAAAAAABOD7HT0jp-EMVPzDof2fVFcMQ_sYDRdj15O95Q1lOR9/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=%2BEjNDj%2F3E%2BiUZ0GF6EEYWdKqJak%3D"><img src="https://blog.kakaocdn.net/dna/d9kt7I/btsIVGLSoXH/AAAAAAAAAAAAAAAAAAAAABOD7HT0jp-EMVPzDof2fVFcMQ_sYDRdj15O95Q1lOR9/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=%2BEjNDj%2F3E%2BiUZ0GF6EEYWdKqJak%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2Fd9kt7I%2FbtsIVGLSoXH%2FAAAAAAAAAAAAAAAAAAAAABOD7HT0jp-EMVPzDof2fVFcMQ_sYDRdj15O95Q1lOR9%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3D%252BEjNDj%252F3E%252BiUZ0GF6EEYWdKqJak%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="603" height="246" data-origin-width="1440" data-origin-height="588" data-phocus-index="1"></span></figure>
+<p></p>
+<h2 data-ke-size="size26" id="Does%20a%20Matrix%20Have%20an%20Inverse%20Matrix%3F%C2%A0-1"><a href="#Does%20a%20Matrix%20Have%20an%20Inverse%20Matrix%3F%C2%A0-1">Does a Matrix Have an Inverse Matrix?&nbsp;</a></h2>
+<p data-ke-size="size16">그래서 행렬기 역행렬을 가지는지 결정하는 애는, 이 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="6" style="font-size: 116%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mtext class="mjx-n"><mjx-c class="mjx-c64"></mjx-c><mjx-c class="mjx-c65"></mjx-c><mjx-c class="mjx-c74"></mjx-c></mjx-mtext><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D434 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mtext>det</mtext><mo stretchy="false">(</mo><mi>A</mi><mo stretchy="false">)</mo></math></mjx-assistive-mml></mjx-container>이다. <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="7" style="font-size: 116%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mtext class="mjx-n"><mjx-c class="mjx-c64"></mjx-c><mjx-c class="mjx-c65"></mjx-c><mjx-c class="mjx-c74"></mjx-c></mjx-mtext><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D434 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c2260"></mjx-c></mjx-mo><mjx-mn class="mjx-n" space="4"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mtext>det</mtext><mo stretchy="false">(</mo><mi>A</mi><mo stretchy="false">)</mo><mo>≠</mo><mn>0</mn></math></mjx-assistive-mml></mjx-container>이면 역행렬이 존재하고, <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="8" style="font-size: 116%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mtext class="mjx-n"><mjx-c class="mjx-c64"></mjx-c><mjx-c class="mjx-c65"></mjx-c><mjx-c class="mjx-c74"></mjx-c></mjx-mtext><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D434 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mn class="mjx-n" space="4"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mtext>det</mtext><mo stretchy="false">(</mo><mi>A</mi><mo stretchy="false">)</mo><mo>=</mo><mn>0</mn></math></mjx-assistive-mml></mjx-container>이면 역행렬이 존재하지 않는다</p>
+<h2 data-ke-size="size26" id="Example%C2%A0-1"><a href="#Example%C2%A0-1">Example&nbsp;</a></h2>
+<p data-ke-size="size16">다음 행렬 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="9" style="font-size: 116%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D434 TEX-I"></mjx-c></mjx-mi></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>A</mi></math></mjx-assistive-mml></mjx-container>을 보자</p>
+<div class="formula"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="10" style="font-size: 116%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D434 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mrow space="4"><mjx-mo class="mjx-s3"><mjx-c class="mjx-c5B TEX-S3"></mjx-c></mjx-mo><mjx-mtable style="min-width: 2em;"><mjx-table><mjx-itable><mjx-mtr><mjx-mtd style="padding-right: 0.5em; padding-bottom: 0.2em;"><mjx-mn class="mjx-n"><mjx-c class="mjx-c33"></mjx-c></mjx-mn><mjx-tstrut></mjx-tstrut></mjx-mtd><mjx-mtd style="padding-left: 0.5em; padding-bottom: 0.2em;"><mjx-mn class="mjx-n"><mjx-c class="mjx-c36"></mjx-c></mjx-mn><mjx-tstrut></mjx-tstrut></mjx-mtd></mjx-mtr><mjx-mtr><mjx-mtd style="padding-right: 0.5em; padding-top: 0.2em;"><mjx-mn class="mjx-n"><mjx-c class="mjx-c32"></mjx-c></mjx-mn><mjx-tstrut></mjx-tstrut></mjx-mtd><mjx-mtd style="padding-left: 0.5em; padding-top: 0.2em;"><mjx-mn class="mjx-n"><mjx-c class="mjx-c34"></mjx-c></mjx-mn><mjx-tstrut></mjx-tstrut></mjx-mtd></mjx-mtr></mjx-itable></mjx-table></mjx-mtable><mjx-mo class="mjx-s3"><mjx-c class="mjx-c5D TEX-S3"></mjx-c></mjx-mo></mjx-mrow></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>A</mi><mo>=</mo><mrow data-mjx-texclass="INNER"><mo data-mjx-texclass="OPEN">[</mo><mtable columnspacing="1em" rowspacing="4pt"><mtr><mtd><mn>3</mn></mtd><mtd><mn>6</mn></mtd></mtr><mtr><mtd><mn>2</mn></mtd><mtd><mn>4</mn></mtd></mtr></mtable><mo data-mjx-texclass="CLOSE">]</mo></mrow></math></mjx-assistive-mml></mjx-container></div>
+<p data-ke-size="size16"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="11" style="font-size: 116%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mtext class="mjx-n"><mjx-c class="mjx-c64"></mjx-c><mjx-c class="mjx-c65"></mjx-c><mjx-c class="mjx-c74"></mjx-c></mjx-mtext><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D434 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mn class="mjx-n" space="4"><mjx-c class="mjx-c33"></mjx-c></mjx-mn><mjx-mo class="mjx-n" space="3"><mjx-c class="mjx-cD7"></mjx-c></mjx-mo><mjx-mn class="mjx-n" space="3"><mjx-c class="mjx-c34"></mjx-c></mjx-mn><mjx-mo class="mjx-n" space="3"><mjx-c class="mjx-c2212"></mjx-c></mjx-mo><mjx-mn class="mjx-n" space="3"><mjx-c class="mjx-c36"></mjx-c></mjx-mn><mjx-mo class="mjx-n" space="3"><mjx-c class="mjx-cD7"></mjx-c></mjx-mo><mjx-mn class="mjx-n" space="3"><mjx-c class="mjx-c32"></mjx-c></mjx-mn><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mn class="mjx-n" space="4"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mtext>det</mtext><mo stretchy="false">(</mo><mi>A</mi><mo stretchy="false">)</mo><mo>=</mo><mn>3</mn><mo>×</mo><mn>4</mn><mo>−</mo><mn>6</mn><mo>×</mo><mn>2</mn><mo>=</mo><mn>0</mn></math></mjx-assistive-mml></mjx-container>이므로, <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="12" style="font-size: 116%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D434 TEX-I"></mjx-c></mjx-mi></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>A</mi></math></mjx-assistive-mml></mjx-container>는 invertible 하다</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">참고로 determinant 구하는거는</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1099" data-origin-height="571" style="margin-left: 50%; transform: translateX(-50%); width: 543px; max-width: 543px;"><span data-url="https://blog.kakaocdn.net/dna/cPI5BG/btsIWdbnmCp/AAAAAAAAAAAAAAAAAAAAAM_sfRxm0nph-4IsKOUZUYnwYgDKckJcBIsfMYNBStxq/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=MARZQVSMvtwc7c%2Fk58Jgdx4DfOs%3D" data-phocus="https://blog.kakaocdn.net/dna/cPI5BG/btsIWdbnmCp/AAAAAAAAAAAAAAAAAAAAAM_sfRxm0nph-4IsKOUZUYnwYgDKckJcBIsfMYNBStxq/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=MARZQVSMvtwc7c%2Fk58Jgdx4DfOs%3D"><img src="https://blog.kakaocdn.net/dna/cPI5BG/btsIWdbnmCp/AAAAAAAAAAAAAAAAAAAAAM_sfRxm0nph-4IsKOUZUYnwYgDKckJcBIsfMYNBStxq/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=MARZQVSMvtwc7c%2Fk58Jgdx4DfOs%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FcPI5BG%2FbtsIWdbnmCp%2FAAAAAAAAAAAAAAAAAAAAAM_sfRxm0nph-4IsKOUZUYnwYgDKckJcBIsfMYNBStxq%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DMARZQVSMvtwc7c%252Fk58Jgdx4DfOs%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="543" height="282" data-origin-width="1099" data-origin-height="571" data-phocus-index="2"></span></figure>
+<p></p>
+<p data-ke-size="size16">inverse 구할때 앞에 있는데 determinant이다</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">이건 3x3 matrix det 구하는거</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1440" data-origin-height="420" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/bjwkFe/btsIXuwkFMe/AAAAAAAAAAAAAAAAAAAAAB_7EAXzcX_S1fWjbW0PkvkClLPMHSUTbp_b_iyv8dwL/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=tz14g3z5QhHTrBILGsl6psxxr0w%3D" data-phocus="https://blog.kakaocdn.net/dna/bjwkFe/btsIXuwkFMe/AAAAAAAAAAAAAAAAAAAAAB_7EAXzcX_S1fWjbW0PkvkClLPMHSUTbp_b_iyv8dwL/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=tz14g3z5QhHTrBILGsl6psxxr0w%3D"><img src="https://blog.kakaocdn.net/dna/bjwkFe/btsIXuwkFMe/AAAAAAAAAAAAAAAAAAAAAB_7EAXzcX_S1fWjbW0PkvkClLPMHSUTbp_b_iyv8dwL/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=tz14g3z5QhHTrBILGsl6psxxr0w%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FbjwkFe%2FbtsIXuwkFMe%2FAAAAAAAAAAAAAAAAAAAAAB_7EAXzcX_S1fWjbW0PkvkClLPMHSUTbp_b_iyv8dwL%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3Dtz14g3z5QhHTrBILGsl6psxxr0w%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1440" height="420" data-origin-width="1440" data-origin-height="420" data-phocus-index="3"></span></figure>
+<p></p>
+<p data-ke-size="size16">&nbsp;</p>
+    </div>
+    
+    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+        <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    </div>
+</body>
+</html>

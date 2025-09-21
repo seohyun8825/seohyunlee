@@ -1,0 +1,197 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CTRL-Adapter: An Efficient and Versatile Frameworkfor Adapting Diverse Controls to Any Diffusion Model — happy8825 - Seohyun Lee Blog</title>
+    <meta name="description" content="
+
+Abstract + Intro
+ControlNet은 text to image 디퓨전 모델에서 특정 spaital control을 더해주는데 사용되었음. 근데 video generation에서 ControlNet은 Feature Space mismatch 문제 땜에 바로 모델과 통합하">
+    <link rel="stylesheet" href="../../styles.css">
+    <style>
+        body { 
+            background: #0d0f17; 
+            color: #fff; 
+            font-family: 'Inter', sans-serif; 
+            line-height: 1.6; 
+            margin: 0; 
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .post-header {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 2rem;
+            margin-bottom: 2rem;
+        }
+        .post-meta {
+            color: #888;
+            margin-bottom: 1rem;
+        }
+        .post-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .post-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        .post-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 1rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .post-content p {
+            margin-bottom: 1rem;
+        }
+        .post-content h1, .post-content h2, .post-content h3 {
+            color: #667eea;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .post-content blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 1rem;
+            margin: 1.5rem 0;
+            color: #ccc;
+            font-style: italic;
+        }
+        .post-content code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .post-content pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            color: #667eea;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            background: rgba(102, 126, 234, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    
+    <div class="post-header">
+        <div class="post-meta">
+            <span>📅 2024-07-09</span>
+            <span> | 🏷️ Computer Vision Paper Review</span>
+            <span> | 🔗 <a href="https://happy8825.tistory.com/15" target="_blank">Original Post</a></span>
+            <span> | 📊 12 images</span>
+        </div>
+        <h1 class="post-title">CTRL-Adapter: An Efficient and Versatile Frameworkfor Adapting Diverse Controls to Any Diffusion Model — happy8825</h1>
+        
+    </div>
+    
+    <div class="post-content">
+        
+
+<h3 data-ke-size="size23" id="Abstract%20%2B%20Intro-1"><a href="#Abstract%20%2B%20Intro-1">Abstract + Intro</a></h3>
+<p data-ke-size="size18">ControlNet은 text to image 디퓨전 모델에서 특정 spaital control을 더해주는데 사용되었음. 근데 video generation에서 ControlNet은<b> Feature Space mismatch 문제</b> 땜에 바로 모델과 통합하는게 불가능함. 그리고 video generation을 위해 controlNet을 새로 training 시키는것도 제약이 있고. 특히 video generation을 할때, ControlNet 이 독립적으로 쓰이기에는 <b>temporal consistency</b>가 안맞는다는 문제가 있음.</p>
+<p data-ke-size="size18">그래서 이 논문에서 CTRL_Adapter를 제안함. Pretrained ControlNet을 video generation에도 사용하기 위한 adapter임.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<h2 data-ke-size="size26" id="Method-1"><a href="#Method-1">Method</a></h2>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1232" data-origin-height="940" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/c8HzSj/btsIqPvI8Yt/AAAAAAAAAAAAAAAAAAAAAIU22HGX3YDHa8undHJsuuf23SIxROPRwxUVPxYi16oK/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=QQf5YxtAxbsZ0sINd%2B4Av%2B51DWc%3D" data-phocus="https://blog.kakaocdn.net/dna/c8HzSj/btsIqPvI8Yt/AAAAAAAAAAAAAAAAAAAAAIU22HGX3YDHa8undHJsuuf23SIxROPRwxUVPxYi16oK/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=QQf5YxtAxbsZ0sINd%2B4Av%2B51DWc%3D"><img src="https://blog.kakaocdn.net/dna/c8HzSj/btsIqPvI8Yt/AAAAAAAAAAAAAAAAAAAAAIU22HGX3YDHa8undHJsuuf23SIxROPRwxUVPxYi16oK/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=QQf5YxtAxbsZ0sINd%2B4Av%2B51DWc%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2Fc8HzSj%2FbtsIqPvI8Yt%2FAAAAAAAAAAAAAAAAAAAAAIU22HGX3YDHa8undHJsuuf23SIxROPRwxUVPxYi16oK%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DQQf5YxtAxbsZ0sINd%252B4Av%252B51DWc%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1232" height="940" data-origin-width="1232" data-origin-height="940" data-phocus-index="0"></span></figure>
+<p></p>
+<h4 data-ke-size="size20"><u>Preliminaries</u></h4>
+<p data-ke-size="size18"><u>Latent Diffusion Models</u></p>
+<p data-ke-size="size18">우선 F-frame의 RGB video(Fx3xHxW) 가 AE 를 통과해 (FxCxH'XW')의 latent representation을 가지게 되고, 이부분이 zt로 왼쪽 초록색 pretrained Image/Video Diffusion Model에 들어감. ( 높이와 너비는 공간적으로 다운샘플링됨(<i>H' &lt; H</i><span style="color: #333333; text-align: start;"><span>&nbsp;</span>및<span>&nbsp;</span></span><i>W' &lt; W</i>) )</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">그 다음&nbsp; latents <i>z</i>에 노이즈를 추가하고, reverse process에서는 모델 <i>ℱ<sub>θ</sub>(z<sub>t</sub>, t, c<sub>text/img</sub>)에 </i>&nbsp;타임스텝 <i>t</i>, 텍스트 프롬프트 <i>c<sub>text</sub></i> 아님 inital 프레임 <i>c<sub>img</sub></i> 가 주어졌을 때 latents를 점진적으로 denoise 하는법을 학습하는것.&nbsp;</p>
+<p style="text-align: center;" data-ke-size="size18"><i>ℒ<sub>LDM</sub> = 𝔼<sub>z, ε∼ℕ(0, I), t</sub> [ || ε − ε<sub>θ</sub>(z<sub>t</sub>, t, c<sub>text/img</sub>) ||<sub>2</sub><sup>2</sup> ]</i></p>
+<p data-ke-size="size18">여기서 <i>ε</i> 및 <i>ε<sub>θ</sub></i>는 각각 latents에 추가된 노이즈와 모델이 예측한 노이즈를 나타냄. (여기까지는 디퓨전 모델이랑 다 비슷한것 같음)</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18"><u>ControlNets</u></p>
+<p data-ke-size="size18">이전 포스트에서도 봤던 controlNet!</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="840" data-origin-height="500" style="margin-left: 50%; transform: translateX(-50%); width: 840px; max-width: 840px;"><span data-url="https://blog.kakaocdn.net/dna/czTqu4/btsItlTNLCK/AAAAAAAAAAAAAAAAAAAAADM6NwcHB0_4O5dkulzDmukwmW7zfUCi4ZNsYU79VYRb/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=gVIJsLeKVY%2BOlLcJRjZwxesKjwQ%3D" data-phocus="https://blog.kakaocdn.net/dna/czTqu4/btsItlTNLCK/AAAAAAAAAAAAAAAAAAAAADM6NwcHB0_4O5dkulzDmukwmW7zfUCi4ZNsYU79VYRb/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=gVIJsLeKVY%2BOlLcJRjZwxesKjwQ%3D"><img src="https://blog.kakaocdn.net/dna/czTqu4/btsItlTNLCK/AAAAAAAAAAAAAAAAAAAAADM6NwcHB0_4O5dkulzDmukwmW7zfUCi4ZNsYU79VYRb/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=gVIJsLeKVY%2BOlLcJRjZwxesKjwQ%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FczTqu4%2FbtsItlTNLCK%2FAAAAAAAAAAAAAAAAAAAAADM6NwcHB0_4O5dkulzDmukwmW7zfUCi4ZNsYU79VYRb%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DgVIJsLeKVY%252BOlLcJRjZwxesKjwQ%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="840" height="500" data-origin-width="840" data-origin-height="500" data-phocus-index="1"></span></figure>
+<p></p>
+<p data-ke-size="size18">CTRL 모델 구조중에 초록색 부분을 ControlNet의 왼쪽, 파란색부분을 controlNet의 오른쪽으로 보면 됨.</p>
+<p data-ke-size="size18">컨디션을 잘 넣어주기 위해 고안된 모델이라고 생각하면 됨.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">&nbsp;</p>
+<h4 data-ke-size="size20"><u> CTRL-Adapter</u></h4>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="890" data-origin-height="840" style="margin-left: 50%; transform: translateX(-50%); width: 890px; max-width: 890px;"><span data-url="https://blog.kakaocdn.net/dna/bd0p3z/btsIswIy7iJ/AAAAAAAAAAAAAAAAAAAAAF3A7KWlD9VLylTZhAWxhKHNBXUBXJk0nu89pBZDEI79/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=2ZY5C7w%2FmQS9ftXW8z6ehDrID8g%3D" data-phocus="https://blog.kakaocdn.net/dna/bd0p3z/btsIswIy7iJ/AAAAAAAAAAAAAAAAAAAAAF3A7KWlD9VLylTZhAWxhKHNBXUBXJk0nu89pBZDEI79/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=2ZY5C7w%2FmQS9ftXW8z6ehDrID8g%3D"><img src="https://blog.kakaocdn.net/dna/bd0p3z/btsIswIy7iJ/AAAAAAAAAAAAAAAAAAAAAF3A7KWlD9VLylTZhAWxhKHNBXUBXJk0nu89pBZDEI79/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=2ZY5C7w%2FmQS9ftXW8z6ehDrID8g%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2Fbd0p3z%2FbtsIswIy7iJ%2FAAAAAAAAAAAAAAAAAAAAAF3A7KWlD9VLylTZhAWxhKHNBXUBXJk0nu89pBZDEI79%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3D2ZY5C7w%252FmQS9ftXW8z6ehDrID8g%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="890" height="840" data-origin-width="890" data-origin-height="840" data-phocus-index="2"></span></figure>
+<p></p>
+<p data-ke-size="size18">여기 모델 구조를 한번 다시 봐보자. 우리가 학습시킬거는 adapter(주황색 부분)인데, 뭐를 학습시키는거냐면 파란색의 middle , output block이 초록색의 middle output block에 매핑되도록 학습시키는것.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">CTRL 구체적인 구조로는 총 4가지 module 을 가지고 있음 : spatial convolution, temporal convolution, spatial attention, temporal attention</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1182" data-origin-height="388" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/WYoWx/btsIrx2s9rp/AAAAAAAAAAAAAAAAAAAAAA1vdNnMgQsxRhuJvNBWcvWzzjEafXJwmU8GH5iBY28p/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=hlY0YjcAaT8JVzNYUFPgD8MON%2BE%3D" data-phocus="https://blog.kakaocdn.net/dna/WYoWx/btsIrx2s9rp/AAAAAAAAAAAAAAAAAAAAAA1vdNnMgQsxRhuJvNBWcvWzzjEafXJwmU8GH5iBY28p/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=hlY0YjcAaT8JVzNYUFPgD8MON%2BE%3D"><img src="https://blog.kakaocdn.net/dna/WYoWx/btsIrx2s9rp/AAAAAAAAAAAAAAAAAAAAAA1vdNnMgQsxRhuJvNBWcvWzzjEafXJwmU8GH5iBY28p/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=hlY0YjcAaT8JVzNYUFPgD8MON%2BE%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FWYoWx%2FbtsIrx2s9rp%2FAAAAAAAAAAAAAAAAAAAAAA1vdNnMgQsxRhuJvNBWcvWzzjEafXJwmU8GH5iBY28p%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DhlY0YjcAaT8JVzNYUFPgD8MON%252BE%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1182" height="388" data-origin-width="1182" data-origin-height="388" data-phocus-index="3"></span></figure>
+<p></p>
+<p data-ke-size="size16">이미지를 생성할때는 temporal conv 랑 temporal attn을 제외해주고, 비디오를 생성할떄는 4가지 모듈을 다 써주면 됨.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size18">논문에서는 이 모듈 디자인에 대해 다양한 ablation study를 했는데</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1226" data-origin-height="404" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/sMcCt/btsIrPIB7AY/AAAAAAAAAAAAAAAAAAAAALU9VxkOi98ALfl87pwMgj_c2n2gc0MBDd51YVNToqvY/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=g2hm0hHJ5QaDIyYbHZhTUCc3afc%3D" data-phocus="https://blog.kakaocdn.net/dna/sMcCt/btsIrPIB7AY/AAAAAAAAAAAAAAAAAAAAALU9VxkOi98ALfl87pwMgj_c2n2gc0MBDd51YVNToqvY/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=g2hm0hHJ5QaDIyYbHZhTUCc3afc%3D"><img src="https://blog.kakaocdn.net/dna/sMcCt/btsIrPIB7AY/AAAAAAAAAAAAAAAAAAAAALU9VxkOi98ALfl87pwMgj_c2n2gc0MBDd51YVNToqvY/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=g2hm0hHJ5QaDIyYbHZhTUCc3afc%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FsMcCt%2FbtsIrPIB7AY%2FAAAAAAAAAAAAAAAAAAAAALU9VxkOi98ALfl87pwMgj_c2n2gc0MBDd51YVNToqvY%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3Dg2hm0hHJ5QaDIyYbHZhTUCc3afc%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1226" height="404" data-origin-width="1226" data-origin-height="404" data-phocus-index="4"></span></figure>
+<p></p>
+<p data-ke-size="size18">이미지 control에서는 SC+SA 레이어를 stacking 하는게 SC만 stacking 하는거나 SA만 stacking하는거보다 효과적이었다고 함. SA+SC stack 2번하는게 FID는 좋아지지만 MSE면에서 trade off 가 있음. 그래서 SA+SC 한번 stack 하는걸로 실험 진행함.</p>
+<p data-ke-size="size18">현실적 정확도 vs 픽셀단위 정확도 사이를 잘 조율해야할듯?</p>
+<p data-ke-size="size18">video control 에서는 SC+TC+SA+TA 랑 (TC+TA)*2 이 두가지가 제일 효과적이었음.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">백본으로 DiT based Backobone 을 쓰는것도 가능!</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1124" data-origin-height="492" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/cGLGDe/btsIsMqPyLW/AAAAAAAAAAAAAAAAAAAAAJXc372Sr7msocQ-kEajD5qEO2QWLweRu6qdbtYFxsaK/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=N4L3Kgq2AXVGHuR4pBHhz%2BDfcIQ%3D" data-phocus="https://blog.kakaocdn.net/dna/cGLGDe/btsIsMqPyLW/AAAAAAAAAAAAAAAAAAAAAJXc372Sr7msocQ-kEajD5qEO2QWLweRu6qdbtYFxsaK/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=N4L3Kgq2AXVGHuR4pBHhz%2BDfcIQ%3D"><img src="https://blog.kakaocdn.net/dna/cGLGDe/btsIsMqPyLW/AAAAAAAAAAAAAAAAAAAAAJXc372Sr7msocQ-kEajD5qEO2QWLweRu6qdbtYFxsaK/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=N4L3Kgq2AXVGHuR4pBHhz%2BDfcIQ%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FcGLGDe%2FbtsIsMqPyLW%2FAAAAAAAAAAAAAAAAAAAAAJXc372Sr7msocQ-kEajD5qEO2QWLweRu6qdbtYFxsaK%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DN4L3Kgq2AXVGHuR4pBHhz%252BDfcIQ%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1124" height="492" data-origin-width="1124" data-origin-height="492" data-phocus-index="5"></span></figure>
+<p></p>
+<p data-ke-size="size18">U-Net 기반의 Controlnet을 DiT-based video Backbone에 adapt하는것도 가능하다고 함.</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1090" data-origin-height="1412" style="margin-left: 50%; transform: translateX(-50%); width: 231px; max-width: 231px;"><span data-url="https://blog.kakaocdn.net/dna/IYFxR/btsIsLen657/AAAAAAAAAAAAAAAAAAAAAPb62cpdkuEUMEaPTRipAB13371O0rlUKMIok89U0ZPa/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=lCHm0EGgnrWGbJTNzoRpKA853Y8%3D" data-phocus="https://blog.kakaocdn.net/dna/IYFxR/btsIsLen657/AAAAAAAAAAAAAAAAAAAAAPb62cpdkuEUMEaPTRipAB13371O0rlUKMIok89U0ZPa/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=lCHm0EGgnrWGbJTNzoRpKA853Y8%3D" data-alt="이건 기본 모델(unet based)"><img src="https://blog.kakaocdn.net/dna/IYFxR/btsIsLen657/AAAAAAAAAAAAAAAAAAAAAPb62cpdkuEUMEaPTRipAB13371O0rlUKMIok89U0ZPa/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=lCHm0EGgnrWGbJTNzoRpKA853Y8%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FIYFxR%2FbtsIsLen657%2FAAAAAAAAAAAAAAAAAAAAAPb62cpdkuEUMEaPTRipAB13371O0rlUKMIok89U0ZPa%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DlCHm0EGgnrWGbJTNzoRpKA853Y8%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="231" height="1412" data-origin-width="1090" data-origin-height="1412" data-phocus-index="6"></span><figcaption>이건 기본 모델(unet based)</figcaption>
+</figure>
+<p></p>
+<p data-ke-size="size18">원래는 unet 구조의 image controlnet을 unet 구조의 image/video diffusion model에 adapt 시키는거였음. 이때는 ControlNet의 output block을 image/video diffusion model의 output block 에 매칭 시켜주는거였는데</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">Unet 이랑 DiT의 특징을 생각해보면, DiT에서 마지막 블록만 adapt 시켜주는건 그렇게 효과적이지 않음을 알 수 있음.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">왜냐면 DiT는 밑에서 보이는 그림처럼,&nbsp; 모든 block이 global한 특징을 모두 잡는다면</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="738" data-origin-height="566" style="margin-left: 50%; transform: translateX(-50%); width: 738px; max-width: 738px;"><span data-url="https://blog.kakaocdn.net/dna/dnPuck/btsIs4Y4lBw/AAAAAAAAAAAAAAAAAAAAAB19W3UcJnnsy4t-P0X39uotV7oCOpfYR9EWrTn9C4QF/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=0Z156OKokC2JZKo%2FjTsseTxGKEg%3D" data-phocus="https://blog.kakaocdn.net/dna/dnPuck/btsIs4Y4lBw/AAAAAAAAAAAAAAAAAAAAAB19W3UcJnnsy4t-P0X39uotV7oCOpfYR9EWrTn9C4QF/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=0Z156OKokC2JZKo%2FjTsseTxGKEg%3D"><img src="https://blog.kakaocdn.net/dna/dnPuck/btsIs4Y4lBw/AAAAAAAAAAAAAAAAAAAAAB19W3UcJnnsy4t-P0X39uotV7oCOpfYR9EWrTn9C4QF/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=0Z156OKokC2JZKo%2FjTsseTxGKEg%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FdnPuck%2FbtsIs4Y4lBw%2FAAAAAAAAAAAAAAAAAAAAAB19W3UcJnnsy4t-P0X39uotV7oCOpfYR9EWrTn9C4QF%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3D0Z156OKokC2JZKo%252FjTsseTxGKEg%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="738" height="566" data-origin-width="738" data-origin-height="566" data-phocus-index="7"></span></figure>
+<p></p>
+<p data-ke-size="size18">Unet은 hierarchical하게 low level~ high level feature 를&nbsp; mapping함</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="742" data-origin-height="312" style="margin-left: 50%; transform: translateX(-50%); width: 742px; max-width: 742px;"><span data-url="https://blog.kakaocdn.net/dna/qGQYM/btsIrLGcOYH/AAAAAAAAAAAAAAAAAAAAAJNLqOcqHLanb429gjKQx4POTfnVgSIM315IuRX1Dxc8/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=Svcegch4%2FenxN4cM9LVl7vnEMvE%3D" data-phocus="https://blog.kakaocdn.net/dna/qGQYM/btsIrLGcOYH/AAAAAAAAAAAAAAAAAAAAAJNLqOcqHLanb429gjKQx4POTfnVgSIM315IuRX1Dxc8/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=Svcegch4%2FenxN4cM9LVl7vnEMvE%3D"><img src="https://blog.kakaocdn.net/dna/qGQYM/btsIrLGcOYH/AAAAAAAAAAAAAAAAAAAAAJNLqOcqHLanb429gjKQx4POTfnVgSIM315IuRX1Dxc8/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=Svcegch4%2FenxN4cM9LVl7vnEMvE%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FqGQYM%2FbtsIrLGcOYH%2FAAAAAAAAAAAAAAAAAAAAAJNLqOcqHLanb429gjKQx4POTfnVgSIM315IuRX1Dxc8%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DSvcegch4%252FenxN4cM9LVl7vnEMvE%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="742" height="312" data-origin-width="742" data-origin-height="312" data-phocus-index="8"></span></figure>
+<p></p>
+<p data-ke-size="size18">그래서 figure 17 가장 왼쪽그림처럼 block 2, 4, 6, 이렇게 교대로 하나씩 넣어주는게 더 효과적이라고 함. middle, output 에만 다 넣어주는것 보다는!</p>
+<h4 data-ke-size="size20"><u> Skipping the latent from ControlNet inputs: robust adaption to different noise scales &amp; sparse frame conditions. </u></h4>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="702" data-origin-height="362" style="margin-left: 50%; transform: translateX(-50%); width: 702px; max-width: 702px;"><span data-url="https://blog.kakaocdn.net/dna/buPRBS/btsIsLyJPBO/AAAAAAAAAAAAAAAAAAAAAAXeOwPorPzKLvmZOjVOTXx0umgqLhvfNdS1K5GX2cAQ/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=XHaONDlg9QeKzdo57n8YEV%2BR%2FgU%3D" data-phocus="https://blog.kakaocdn.net/dna/buPRBS/btsIsLyJPBO/AAAAAAAAAAAAAAAAAAAAAAXeOwPorPzKLvmZOjVOTXx0umgqLhvfNdS1K5GX2cAQ/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=XHaONDlg9QeKzdo57n8YEV%2BR%2FgU%3D"><img src="https://blog.kakaocdn.net/dna/buPRBS/btsIsLyJPBO/AAAAAAAAAAAAAAAAAAAAAAXeOwPorPzKLvmZOjVOTXx0umgqLhvfNdS1K5GX2cAQ/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=XHaONDlg9QeKzdo57n8YEV%2BR%2FgU%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FbuPRBS%2FbtsIsLyJPBO%2FAAAAAAAAAAAAAAAAAAAAAAXeOwPorPzKLvmZOjVOTXx0umgqLhvfNdS1K5GX2cAQ%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DXHaONDlg9QeKzdo57n8YEV%252BR%252FgU%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="702" height="362" data-origin-width="702" data-origin-height="362" data-phocus-index="9"></span></figure>
+<p></p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size18">ControlNet에 latent를&nbsp; 안주는게 더 효과적이었다고 함. Control + Zt(latent) 합쳐지면 control에 대한 information이 모호해져서 그런것 같음.</p>
+<p data-ke-size="size18">그리고 비디오 데이터이다 보니, frame 별로 condition이 없는것들이 많음.&nbsp; 그래서 controlnet이 너무 zt 에만 의존하는 경향이 있어서 Ct의 영향을 늘리려고 이렇게 설계한것 같음.</p>
+<h4 style="color: #000000; text-align: start;" data-ke-size="size20"><u>Inverse timestep sampling</u></h4>
+<p data-ke-size="size18">Discrete distribution이랑 continuous distribution에서 샘플링하는 모델들의 gap을 compensate 하기 위해 고안된 아이디어. 알고리즘을 보면 더&nbsp; 이해가 잘되는데, 간단하게 정리하자면&nbsp; timestep mapping을 해주는 알고리즘</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1150" data-origin-height="780" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/cCO9Vx/btsIsx1LAYT/AAAAAAAAAAAAAAAAAAAAABSVG_j5RuqDUQpjTFyeKF9U_xRNrkaDuJjiMPZ_RGpA/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=3xbc6I%2F37ZZb6PSBqz%2BExdfdyVs%3D" data-phocus="https://blog.kakaocdn.net/dna/cCO9Vx/btsIsx1LAYT/AAAAAAAAAAAAAAAAAAAAABSVG_j5RuqDUQpjTFyeKF9U_xRNrkaDuJjiMPZ_RGpA/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=3xbc6I%2F37ZZb6PSBqz%2BExdfdyVs%3D"><img src="https://blog.kakaocdn.net/dna/cCO9Vx/btsIsx1LAYT/AAAAAAAAAAAAAAAAAAAAABSVG_j5RuqDUQpjTFyeKF9U_xRNrkaDuJjiMPZ_RGpA/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=3xbc6I%2F37ZZb6PSBqz%2BExdfdyVs%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FcCO9Vx%2FbtsIsx1LAYT%2FAAAAAAAAAAAAAAAAAAAAABSVG_j5RuqDUQpjTFyeKF9U_xRNrkaDuJjiMPZ_RGpA%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3D3xbc6I%252F37ZZb6PSBqz%252BExdfdyVs%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1150" height="780" data-origin-width="1150" data-origin-height="780" data-phocus-index="10"></span></figure>
+<p></p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">&nbsp;</p>
+<h4 style="color: #000000; text-align: start;" data-ke-size="size20"><u>Multi-Condition Generation via CTRL-Adapter Composition</u></h4>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1268" data-origin-height="676" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/udIDy/btsIqRNT8UW/AAAAAAAAAAAAAAAAAAAAAB36fEldiSeFeV3YnWjZ_o3IXc9JZpR1_a29qYOO1NvC/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=zF7m7O%2B508rH79faUg2Yzc1hu4Q%3D" data-phocus="https://blog.kakaocdn.net/dna/udIDy/btsIqRNT8UW/AAAAAAAAAAAAAAAAAAAAAB36fEldiSeFeV3YnWjZ_o3IXc9JZpR1_a29qYOO1NvC/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=zF7m7O%2B508rH79faUg2Yzc1hu4Q%3D"><img src="https://blog.kakaocdn.net/dna/udIDy/btsIqRNT8UW/AAAAAAAAAAAAAAAAAAAAAB36fEldiSeFeV3YnWjZ_o3IXc9JZpR1_a29qYOO1NvC/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=zF7m7O%2B508rH79faUg2Yzc1hu4Q%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FudIDy%2FbtsIqRNT8UW%2FAAAAAAAAAAAAAAAAAAAAAB36fEldiSeFeV3YnWjZ_o3IXc9JZpR1_a29qYOO1NvC%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DzF7m7O%252B508rH79faUg2Yzc1hu4Q%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1268" height="676" data-origin-width="1268" data-origin-height="676" data-phocus-index="11"></span></figure>
+<p></p>
+<p data-ke-size="size18">컨디션별로 어떤거에 더 weight를 많이 줄지? 에 대해 model이 weight 까지 학습하게 하는거.&nbsp;</p>
+<p data-ke-size="size18">MOE랑 비슷한데, (a)는 단순한 MoE, (b)는 patch-level MOE, (c)는 condition patch 다 종합적으로 고려하는 Q-former</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">&nbsp;</p>
+    </div>
+    
+    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+        <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    </div>
+</body>
+</html>

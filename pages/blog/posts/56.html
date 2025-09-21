@@ -1,0 +1,145 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collaborative Video Diffusion: Consistent Multi-video Generation with Camera Control — happy8825 - Seohyun Lee Blog</title>
+    <meta name="description" content="여러 시점에서 일관된 비디오를 만들어 내기 위한 방법을 제안한 논문이다.
+최근 비디오 생성 기술을 보면, text 나 이미지를 바탕으로 영상을 만들어내지만, 정확하게 원하는대로 영상의 내용이나 움직임을 제어하는데는 한계가 있었다.
+특히 특정 장면을 여러 각도에서 찍은 비디오를 만들고 싶">
+    <link rel="stylesheet" href="../../styles.css">
+    <style>
+        body { 
+            background: #0d0f17; 
+            color: #fff; 
+            font-family: 'Inter', sans-serif; 
+            line-height: 1.6; 
+            margin: 0; 
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .post-header {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 2rem;
+            margin-bottom: 2rem;
+        }
+        .post-meta {
+            color: #888;
+            margin-bottom: 1rem;
+        }
+        .post-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .post-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        .post-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 1rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .post-content p {
+            margin-bottom: 1rem;
+        }
+        .post-content h1, .post-content h2, .post-content h3 {
+            color: #667eea;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .post-content blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 1rem;
+            margin: 1.5rem 0;
+            color: #ccc;
+            font-style: italic;
+        }
+        .post-content code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .post-content pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            color: #667eea;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            background: rgba(102, 126, 234, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    
+    <div class="post-header">
+        <div class="post-meta">
+            <span>📅 2024-09-02</span>
+            <span> | 🏷️ Computer Vision Paper Review</span>
+            <span> | 🔗 <a href="https://happy8825.tistory.com/46" target="_blank">Original Post</a></span>
+            <span> | 📊 1 images</span>
+        </div>
+        <h1 class="post-title">Collaborative Video Diffusion: Consistent Multi-video Generation with Camera Control — happy8825</h1>
+        
+    </div>
+    
+    <div class="post-content">
+        <p data-ke-size="size16">여러 시점에서 일관된 비디오를 만들어 내기 위한 방법을 제안한 논문이다.</p>
+<p data-ke-size="size16">최근 비디오 생성 기술을 보면, text 나 이미지를 바탕으로 영상을 만들어내지만, 정확하게 원하는대로 영상의 내용이나 움직임을 제어하는데는 한계가 있었다.</p>
+<p data-ke-size="size16">특히 특정 장면을 여러 각도에서 찍은 비디오를 만들고 싶을 때, 일관성 문제가 생긴다.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">그래서 이런 문제를 해결하기 위해 Cross-Video diffusion CVD라는 모듈을 제안해서, 한 장면을 다양한 각도에서 찍은 비디오를 만들 떄 내용이나 움직임이 자연스럽게 연결되도록 한다. CVD를 통해 여러 비디오가 연결되어 일관되게 만들어지도록 하고, 이를 위해 epipolar attention을 사용한다. 또한 새로운 기술을 학습시키기 위해 많은 데이터가 필요하기에, CVD는 고정된 장면 데이터랑 동적인 장면 데이터를 혼합해서 학습하는 방법을 사용한다.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">Pipeline</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1186" data-origin-height="506" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/bEVHdW/btsJoOBktsI/AAAAAAAAAAAAAAAAAAAAAJyYfoh4OMnik-3Kt4rsJLq9Mnk1_SSo7XPKw18Xu91C/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=y%2FtcTg4Xyuv%2BKPBt3tiRWh9Jx%2FM%3D" data-phocus="https://blog.kakaocdn.net/dna/bEVHdW/btsJoOBktsI/AAAAAAAAAAAAAAAAAAAAAJyYfoh4OMnik-3Kt4rsJLq9Mnk1_SSo7XPKw18Xu91C/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=y%2FtcTg4Xyuv%2BKPBt3tiRWh9Jx%2FM%3D"><img src="https://blog.kakaocdn.net/dna/bEVHdW/btsJoOBktsI/AAAAAAAAAAAAAAAAAAAAAJyYfoh4OMnik-3Kt4rsJLq9Mnk1_SSo7XPKw18Xu91C/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=y%2FtcTg4Xyuv%2BKPBt3tiRWh9Jx%2FM%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FbEVHdW%2FbtsJoOBktsI%2FAAAAAAAAAAAAAAAAAAAAAJyYfoh4OMnik-3Kt4rsJLq9Mnk1_SSo7XPKw18Xu91C%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3Dy%252FtcTg4Xyuv%252BKPBt3tiRWh9Jx%252FM%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1186" height="506" data-origin-width="1186" data-origin-height="506" data-phocus-index="0"></span></figure>
+<p></p>
+<p data-ke-size="size16">두개(혹은 그 이상)의 noisy한 video가 camera trajectory랑 같이 input으로 들어가서 함께 noise prediction이 된다.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">그냥 내가 이해한대로 정리해보자면</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">원래 비디오 디퓨전들 보면, frame 내에서 위치 간의 관계를 파악하려면 공간적 attention을 사용하고, frame 간의 관계를 파악하려면 시간적 attention을 쓴다.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">근데 우리가 지금 해야할거는, 여러 view에서 본 동일한 video 생성이니까, 서로 다른 video간을 비교하되, 비디오간의 context 파악을 해야함. 이렇게 하기 위해 cross video attention을 쓴다.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">이전 연구들에서는 비슷한 task를 하기 위해 extended attention technique이라고, 서로 다른 비디오의 key 랑 value를 연결하는 방법으로 semantic한 information을 보존하려고 했다. 이거의 의미를 생각해보면, 서로 다른 비디오의 key랑 value를 연결한다면, 두 비디오에서의 같은 객체는 같은 의미를 같는다.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">근데 이게 의미적으로는 유지될 수 있어도, 실제로 비디오간의 기하학적 구조상에서 일관성을 보장해주지는 않는다. 그래서 이 논문에서 새로 제안한게, Cross View Synchronoization Module이다.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">그럼 Cross View Synchronization Module은 어떻게 돌아갈까</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">일단 frame이 동기화되었으며, 첫 번째 frame에서 카메라 포즈가 동일함을 가정한다.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">M1-&gt;2가 뜻하는게 픽셀이 비디오 2에서 어디로 매핑되어야하는지를 결정하는 역할을 하는데,</p>
+<p data-ke-size="size16">즉, 1, 2 라는 비디오가 있으면 , 쿼리는 1에서 가져오고, 키랑 벨류는 2에서 가져오되, 비디오 1의 픽셀이 비디오 2에서 올바르게 대응되는 픽셀들과만 연산이 이루지도록 한다.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">즉, 비디오 1의 픽셀들이 비디오2에서 올바르게 대응되는 픽셀들과 비교되는것. 이렇게 consistency를 유지할 수 있다.</p>
+<p data-ke-size="size16">&nbsp;</p>
+    </div>
+    
+    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+        <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,193 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deepseek v3 해부식 — happy8825 - Seohyun Lee Blog</title>
+    <meta name="description" content="미루고 미뤄왔던 Deepseek tech report를 차근차근 읽어봤다. 정말 공부할게 많은 tech report 인것 같다.
+&nbsp;
+크게 봐야할 지점이, attention 안에 있는 KV 캐시를 어떻게 효율적으로 바꿨는지, Feed Forward 부분에서 MOE를 어떻게 사용했">
+    <link rel="stylesheet" href="../../styles.css">
+    <style>
+        body { 
+            background: #0d0f17; 
+            color: #fff; 
+            font-family: 'Inter', sans-serif; 
+            line-height: 1.6; 
+            margin: 0; 
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .post-header {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 2rem;
+            margin-bottom: 2rem;
+        }
+        .post-meta {
+            color: #888;
+            margin-bottom: 1rem;
+        }
+        .post-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .post-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        .post-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 1rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .post-content p {
+            margin-bottom: 1rem;
+        }
+        .post-content h1, .post-content h2, .post-content h3 {
+            color: #667eea;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .post-content blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 1rem;
+            margin: 1.5rem 0;
+            color: #ccc;
+            font-style: italic;
+        }
+        .post-content code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .post-content pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            color: #667eea;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            background: rgba(102, 126, 234, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    
+    <div class="post-header">
+        <div class="post-meta">
+            <span>📅 2025-03-29</span>
+            <span> | 🏷️ Computer Vision Paper Review</span>
+            <span> | 🔗 <a href="https://happy8825.tistory.com/104" target="_blank">Original Post</a></span>
+            <span> | 📊 9 images</span>
+        </div>
+        <h1 class="post-title">Deepseek v3 해부식 — happy8825</h1>
+        
+    </div>
+    
+    <div class="post-content">
+        <p data-ke-size="size18">미루고 미뤄왔던 Deepseek tech report를 차근차근 읽어봤다. 정말 공부할게 많은 tech report 인것 같다.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">크게 봐야할 지점이, attention 안에 있는 KV 캐시를 어떻게 효율적으로 바꿨는지, Feed Forward 부분에서 MOE를 어떻게 사용했는지(parameter를 조금만 쓰고 scaling 해서, 조금의 연산량으로 더 큰 모델을 만들수 있다). 그리고 Multi Token Prediction 이 세가지를 위주로 보면 될것 같다.&nbsp;&nbsp;</p>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style5">
+<h3 data-ke-size="size23" id="1)%20Multi%20Head%20Latent%20Attention-1"><a href="#1)%20Multi%20Head%20Latent%20Attention-1">1) Multi Head Latent Attention</a></h3>
+<p data-ke-size="size18">여기서는 Q,K,V&nbsp; projection을 변형해서, KV cache를 잘 compress 시킨다.</p>
+<p data-ke-size="size18">보통, token에서 q, k, v가 나오면 이걸로 attention을 하는데, (q,k,v 차원이 D라고 하자)</p>
+<p data-ke-size="size18">새로운 토큰이 들어오면, 매번 key 랑 value 를 저장시켜야한다. 그래서 새로운 token이 들어올때마다 memory가 2D만큼 계속 linear 하게 늘어난다.</p>
+<p data-ke-size="size18">Deepseek에서는 이 linear 하게 2D 증가하는 이 memory를 D만큼만 증가해도되게한다.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">이걸 어떻게 했는지 살펴보자</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1440" data-origin-height="1106" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/bM9Mg0/btsM0uNZfuJ/AAAAAAAAAAAAAAAAAAAAAAhvsOcJD7hUcQCr1JIdFIm4R5D9dS06L8Z4NDgnXMaa/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=%2Fbyct7zo6K5aRQ3M1ONGy6IZk2c%3D" data-phocus="https://blog.kakaocdn.net/dna/bM9Mg0/btsM0uNZfuJ/AAAAAAAAAAAAAAAAAAAAAAhvsOcJD7hUcQCr1JIdFIm4R5D9dS06L8Z4NDgnXMaa/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=%2Fbyct7zo6K5aRQ3M1ONGy6IZk2c%3D"><img src="https://blog.kakaocdn.net/dna/bM9Mg0/btsM0uNZfuJ/AAAAAAAAAAAAAAAAAAAAAAhvsOcJD7hUcQCr1JIdFIm4R5D9dS06L8Z4NDgnXMaa/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=%2Fbyct7zo6K5aRQ3M1ONGy6IZk2c%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FbM9Mg0%2FbtsM0uNZfuJ%2FAAAAAAAAAAAAAAAAAAAAAAhvsOcJD7hUcQCr1JIdFIm4R5D9dS06L8Z4NDgnXMaa%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3D%252Fbyct7zo6K5aRQ3M1ONGy6IZk2c%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1440" height="1106" data-origin-width="1440" data-origin-height="1106" data-phocus-index="0"></span></figure>
+<p></p>
+<p data-ke-size="size18">먼저&nbsp;</p>
+<p data-ke-size="size18">d dimension을 갖는 토큰에서 시작해서, 이 토큰은 쿼리(Latent Ctq), 그리고 Key, Value(latent Ctkv) 이렇게 projected 된다, (이렇게 하면 k, v를 다 caching 하는 기존의 방법 대신, 저기 빨간색으로 표시해놓은&nbsp; C tkv 부분만 캐싱해주면 된다.&nbsp; 기존에는 2D만큼 linear하게 증가했다면, 지금은 D만큼 증가하게 된다.)</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">그리고 이 Ctkv를 다시 Key, value로 upsampling해서 project 해준다. 즉 엄청 high dimension으로 upsample 해주고 number of head로 나눠준다.&nbsp; 그리 attention을 하기 전에 RoPE를 query, key 에 apply 하는데, 이 RoPE는 qk가 서로 자신의 relative position을 할수 있게해주는, positional encoding 같은거라고 생각해주면 된다.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">Key에 더해지는 RoPE는 original 한 hiddenstate에서 다시 projection 되어서, RoPE embedding 이 나오는데, 이게 각 key 의 head에 concat 되는거다.</p>
+<p data-ke-size="size18">그러니까 사실상, KV 캐시를 기존에는 다 저장해서 2D만큼이 계속 저장되었다면, 여기서는 RoPE 임베딩이랑 Latent Ctkv 이거만 저장시키면 되는거다.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">이제 쿼리쪽을 보자. 이부분은 캐시를 할 필요가 없으니까 사실 왜 한건지 잘 납득이 안간다. 왜 Q를 compress했을까. 이해할순 없지만 그냥 compress했다고 한다. 그리고 Key 랑 똑같은 방식으로 여기에도 RoPE가더해진다.&nbsp; 한가지 다른 점은 query 에서는 compress된 representation에서 RoPE 임베딩이 나왔는데, Key의 RoPE는 original hidden state에서 나온다.</p>
+<p data-ke-size="size18">Decoupled RoPE embedding을 가질 수 있어서, length extention이 더 쉬워져서 이렇게 했다고한다.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">파이프라인이랑 대조해서, 차원놀이를 한번 해보면 이해가 더 잘 가는것 같다.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1440" data-origin-height="682" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/7AABt/btsM1fpw7Vc/AAAAAAAAAAAAAAAAAAAAAPGAznN5lCdQjfTJofiiGoUz2NiCGBwgwHzZ3xjcFHl2/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=Do7koE%2BK%2BwTNanRC7OhiDbB4oME%3D" data-phocus="https://blog.kakaocdn.net/dna/7AABt/btsM1fpw7Vc/AAAAAAAAAAAAAAAAAAAAAPGAznN5lCdQjfTJofiiGoUz2NiCGBwgwHzZ3xjcFHl2/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=Do7koE%2BK%2BwTNanRC7OhiDbB4oME%3D"><img src="https://blog.kakaocdn.net/dna/7AABt/btsM1fpw7Vc/AAAAAAAAAAAAAAAAAAAAAPGAznN5lCdQjfTJofiiGoUz2NiCGBwgwHzZ3xjcFHl2/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=Do7koE%2BK%2BwTNanRC7OhiDbB4oME%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2F7AABt%2FbtsM1fpw7Vc%2FAAAAAAAAAAAAAAAAAAAAAPGAznN5lCdQjfTJofiiGoUz2NiCGBwgwHzZ3xjcFHl2%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DDo7koE%252BK%252BwTNanRC7OhiDbB4oME%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1440" height="682" data-origin-width="1440" data-origin-height="682" data-phocus-index="1"></span></figure>
+<p></p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1440" data-origin-height="384" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/QNxQN/btsM05OjITE/AAAAAAAAAAAAAAAAAAAAACzMZVL6DULLL1kxWVfuNDSnE6xuBjgyA0xFsRK_RbLJ/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=00Q9gyMKeRhfWJoceuRknKxx%2FGA%3D" data-phocus="https://blog.kakaocdn.net/dna/QNxQN/btsM05OjITE/AAAAAAAAAAAAAAAAAAAAACzMZVL6DULLL1kxWVfuNDSnE6xuBjgyA0xFsRK_RbLJ/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=00Q9gyMKeRhfWJoceuRknKxx%2FGA%3D"><img src="https://blog.kakaocdn.net/dna/QNxQN/btsM05OjITE/AAAAAAAAAAAAAAAAAAAAACzMZVL6DULLL1kxWVfuNDSnE6xuBjgyA0xFsRK_RbLJ/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=00Q9gyMKeRhfWJoceuRknKxx%2FGA%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FQNxQN%2FbtsM05OjITE%2FAAAAAAAAAAAAAAAAAAAAACzMZVL6DULLL1kxWVfuNDSnE6xuBjgyA0xFsRK_RbLJ%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3D00Q9gyMKeRhfWJoceuRknKxx%252FGA%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1440" height="384" data-origin-width="1440" data-origin-height="384" data-phocus-index="2"></span></figure>
+<p></p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">그리고 이렇게 나온 q, k , v가 드디어 attention 연산이 되는데, 이건 기존 attention 계산이랑 똑같다</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="665" data-origin-height="239" style="margin-left: 50%; transform: translateX(-50%); width: 665px; max-width: 665px;"><span data-url="https://blog.kakaocdn.net/dna/Eh1FL/btsM12JMaTZ/AAAAAAAAAAAAAAAAAAAAAMNo6E3BQRwL4xKuxgarDsF09YkkMfwq5Zusi6b-QlTB/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=0SeT205ILDlmBLAVHZ3Dw%2FcFhaw%3D" data-phocus="https://blog.kakaocdn.net/dna/Eh1FL/btsM12JMaTZ/AAAAAAAAAAAAAAAAAAAAAMNo6E3BQRwL4xKuxgarDsF09YkkMfwq5Zusi6b-QlTB/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=0SeT205ILDlmBLAVHZ3Dw%2FcFhaw%3D"><img src="https://blog.kakaocdn.net/dna/Eh1FL/btsM12JMaTZ/AAAAAAAAAAAAAAAAAAAAAMNo6E3BQRwL4xKuxgarDsF09YkkMfwq5Zusi6b-QlTB/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=0SeT205ILDlmBLAVHZ3Dw%2FcFhaw%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FEh1FL%2FbtsM12JMaTZ%2FAAAAAAAAAAAAAAAAAAAAAMNo6E3BQRwL4xKuxgarDsF09YkkMfwq5Zusi6b-QlTB%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3D0SeT205ILDlmBLAVHZ3Dw%252FcFhaw%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="665" height="239" data-origin-width="665" data-origin-height="239" data-phocus-index="3"></span></figure>
+<p></p>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style5">
+<h3 data-ke-size="size23" id="2)%20MOE-1"><a href="#2)%20MOE-1">2) MOE</a></h3>
+<p data-ke-size="size18">MOE도 너무유명하니까, 기존 MOE에서 어떻게 달라졌는지를 위주로 살펴보자.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">먼저 MOE를 간단하게 설명하자면,&nbsp;&nbsp;</p>
+<p data-ke-size="size18">이건 아주 간단한 형태의 Feed Forward Network 이다.</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1083" data-origin-height="598" style="margin-left: 50%; transform: translateX(-50%); width: 454px; max-width: 454px;"><span data-url="https://blog.kakaocdn.net/dna/CFIVS/btsM4HZbSDC/AAAAAAAAAAAAAAAAAAAAAE08FUFVXLLH7gjwRzhoZEHtUDaxeS27ar7AH5sCQNY-/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=CLm5jZu1OxAEDRrTKYrPQh4EiR0%3D" data-phocus="https://blog.kakaocdn.net/dna/CFIVS/btsM4HZbSDC/AAAAAAAAAAAAAAAAAAAAAE08FUFVXLLH7gjwRzhoZEHtUDaxeS27ar7AH5sCQNY-/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=CLm5jZu1OxAEDRrTKYrPQh4EiR0%3D"><img src="https://blog.kakaocdn.net/dna/CFIVS/btsM4HZbSDC/AAAAAAAAAAAAAAAAAAAAAE08FUFVXLLH7gjwRzhoZEHtUDaxeS27ar7AH5sCQNY-/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=CLm5jZu1OxAEDRrTKYrPQh4EiR0%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FCFIVS%2FbtsM4HZbSDC%2FAAAAAAAAAAAAAAAAAAAAAE08FUFVXLLH7gjwRzhoZEHtUDaxeS27ar7AH5sCQNY-%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DCLm5jZu1OxAEDRrTKYrPQh4EiR0%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="454" height="251" data-origin-width="1083" data-origin-height="598" data-phocus-index="4"></span></figure>
+<p></p>
+<p data-ke-size="size16">MOE는 이런 FFN이 여러개 있는 형태이다. FFN 각각이 각자 잘하는걸 담당하는 expert들인거고, token이 어떤 expert에 들어갈지, 선택되어서 들어간다.</p>
+<p data-ke-size="size16">이게 좋은게, FFN 하나가 n개의 active parameter 이 있다고 치자.&nbsp;</p>
+<p data-ke-size="size16">그럼 MOE로 설계를 해서 FFN이 5개가 되면 총 param 수는 5xn개 일거지만, 실제로 activate 한 param은 n개가 되니까, 같은 연산량으로 훨씬 훨씬 많은 정보를 담을 수 있다.</p>
+<p data-ke-size="size16">근데 이 MOE의 가장 고질적인 문제가, 예를 들어, 수학을 잘하는 expert, 물리를 잘하는 expert , 음악을 잘하는 expert가 있다고 치자. 만약 수학 데이터가 들어왔으면 이 토큰이 수학을 잘하는 expert한테 들어가야한다는걸 어떻게 알지? 에 대한 문제가 있다. 그리고 수학을 잘하는 expert한테 들어갔다고 치자. 근데 만약에 데이터가 수학 데이터밖에 없으면, 물리 expert랑 음악 expert는 영영 activate 가 안된다.&nbsp;</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">이런 문제를 해결하기 위해 Deepseek는 어떤 방법을 사용했을까?</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1440" data-origin-height="815" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/JOYnj/btsM1cTDYol/AAAAAAAAAAAAAAAAAAAAAG8bGu8Z5blr_8oYj8jdFzHV8y4UP_XL4p5Ftiz8mttK/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=NOcZHamAoYGgOAoJLy3aaa0QzLE%3D" data-phocus="https://blog.kakaocdn.net/dna/JOYnj/btsM1cTDYol/AAAAAAAAAAAAAAAAAAAAAG8bGu8Z5blr_8oYj8jdFzHV8y4UP_XL4p5Ftiz8mttK/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=NOcZHamAoYGgOAoJLy3aaa0QzLE%3D" data-alt=")"><img src="https://blog.kakaocdn.net/dna/JOYnj/btsM1cTDYol/AAAAAAAAAAAAAAAAAAAAAG8bGu8Z5blr_8oYj8jdFzHV8y4UP_XL4p5Ftiz8mttK/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=NOcZHamAoYGgOAoJLy3aaa0QzLE%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FJOYnj%2FbtsM1cTDYol%2FAAAAAAAAAAAAAAAAAAAAAG8bGu8Z5blr_8oYj8jdFzHV8y4UP_XL4p5Ftiz8mttK%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DNOcZHamAoYGgOAoJLy3aaa0QzLE%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1440" height="815" data-origin-width="1440" data-origin-height="815" data-phocus-index="5"></span><figcaption>)</figcaption>
+</figure>
+<p></p>
+<p data-ke-size="size18">차례대로 보자. (12)번 식에서 보면, 각 term의 역할이 각각 skip connection, shared experts, routed expert로 실제 MOE부분은 세번쨰 term이다.&nbsp; 이 세번째 term이 뭔지 각각 (13) (14) (15)식에 설명이 되어있다.</p>
+<p data-ke-size="size18">Nr개의 expert들이 있고, 모든 expert들을 더해준다. Active expert들만 더해주는게 아니라, 모든 expert를 더해주는게 핵심이다.</p>
+<p data-ke-size="size18">즉 모든 expert들은 router에서 나오는 weight(gi,t) - (13)번식 을 가지고 있을것이고, 인풋에서 나오는 각각의 expert output 이 있을것이다.</p>
+<p data-ke-size="size18"><span style="text-align: start;">&nbsp;weight(gi,t) - (13)번식이 어떻게 나오는지 따라가보면 (15)번식을 보면된다. 먼저 input ut에 대해서, ei를 곱해줌으로써 차원을 각각 expert의 number 에 맞게 늘리고, 각각의 expert에 sigmoid를 씌워주는 느낌으로, 각 expert들이 얼마나&nbsp; token ut에 자신있는지에 대한 weign를 뽑는다.</span></p>
+<p data-ke-size="size18"><span style="text-align: start;">이걸 가지고, topK expert를 뽑고, 나머지는 0으로 만든다. 그러니까 물리 문제가 나오면, 수학 체육 과학 물리 음악 예술 음식 뭐 이런 expert들이 있다고 치면, top k를 뽑으면 수학 과학 물리 이런 애들의 weight만 그대로 가져가고 나머지는 0으로 만든다.</span></p>
+<p data-ke-size="size18"><span style="text-align: start;">그리고 이거를 normalize시키는게 (13)번식.</span></p>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style2">
+<p data-ke-size="size18"><b>Complementary Sequence-Wise Auxiliary Loss</b></p>
+<p data-ke-size="size18">extreme한 imbalance를 해결하기 위해 추가적인 loss가 필요하다. 이건 다른 MOE에서도 많이 쓰이는 전략인데 이게 그렇게 좋은 방법은 아니다. 왜냐하면 Lbal를 가장 optimize를 할 수 있는 경우를 생각해보면 그냥 모든 expert에 똑같이 optimize가 되면 되는데, 이게 우리의 최종 목표는 아니니까, 잘 optimize하지는 못한다.</p>
+<p data-ke-size="size18">그래서 이 Loss는 아주아주 조금 0.0001정다만 쓰고, Auciliary-Loss-Free 라는걸 사용한다.&nbsp;</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1440" data-origin-height="750" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/bnS0r6/btsM99wcXGq/AAAAAAAAAAAAAAAAAAAAAMU22LtPRgPEzMOarKaFKlVkHwwTsy0pQAus1pnYfeOn/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=XuoVUzjwkYcTDNCK09cR%2FpE1eqc%3D" data-phocus="https://blog.kakaocdn.net/dna/bnS0r6/btsM99wcXGq/AAAAAAAAAAAAAAAAAAAAAMU22LtPRgPEzMOarKaFKlVkHwwTsy0pQAus1pnYfeOn/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=XuoVUzjwkYcTDNCK09cR%2FpE1eqc%3D"><img src="https://blog.kakaocdn.net/dna/bnS0r6/btsM99wcXGq/AAAAAAAAAAAAAAAAAAAAAMU22LtPRgPEzMOarKaFKlVkHwwTsy0pQAus1pnYfeOn/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=XuoVUzjwkYcTDNCK09cR%2FpE1eqc%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FbnS0r6%2FbtsM99wcXGq%2FAAAAAAAAAAAAAAAAAAAAAMU22LtPRgPEzMOarKaFKlVkHwwTsy0pQAus1pnYfeOn%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DXuoVUzjwkYcTDNCK09cR%252FpE1eqc%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1440" height="750" data-origin-width="1440" data-origin-height="750" data-phocus-index="6"></span></figure>
+<p></p>
+<p data-ke-size="size16">&nbsp;</p>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style2">
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">Auxiliary-Loss-Free Load Balancing</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1549" data-origin-height="265" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/czj3rG/btsNdUy9JD4/AAAAAAAAAAAAAAAAAAAAAKabqyRJawIPIRPr_z-ejG_dn1uEShTUuagW-dmKxxKp/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=1%2FQM%2F4chu7T038i%2B8APxpepdzfM%3D" data-phocus="https://blog.kakaocdn.net/dna/czj3rG/btsNdUy9JD4/AAAAAAAAAAAAAAAAAAAAAKabqyRJawIPIRPr_z-ejG_dn1uEShTUuagW-dmKxxKp/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=1%2FQM%2F4chu7T038i%2B8APxpepdzfM%3D"><img src="https://blog.kakaocdn.net/dna/czj3rG/btsNdUy9JD4/AAAAAAAAAAAAAAAAAAAAAKabqyRJawIPIRPr_z-ejG_dn1uEShTUuagW-dmKxxKp/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=1%2FQM%2F4chu7T038i%2B8APxpepdzfM%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2Fczj3rG%2FbtsNdUy9JD4%2FAAAAAAAAAAAAAAAAAAAAAKabqyRJawIPIRPr_z-ejG_dn1uEShTUuagW-dmKxxKp%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3D1%252FQM%252F4chu7T038i%252B8APxpepdzfM%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1549" height="265" data-origin-width="1549" data-origin-height="265" data-phocus-index="7"></span></figure>
+<p></p>
+<p data-ke-size="size16">모든 expert마다 sigmoit weight (Si,t) 가 있는데, 여기에 bias가 붙는다. bias가 클 수록 routing 될 확률이 높아지는것. 이걸 어떻게 optimize하냐면, 해당 expert가 overloaded 되면 bias를 줄이고, underloaded 되면 bias를 늘린다. 즉 특정 expert에 너무 많은토큰이 들어가면 bias를 줄이고, 너무 안들어가는가 싶으면 늘린다.</p>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style5">
+<p data-ke-size="size18"><b>Multi Token Prediction</b></p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1644" data-origin-height="732" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/b4sO0z/btsNd33Fwhp/AAAAAAAAAAAAAAAAAAAAABEjGlASiBWDNRY745oMlmzcM05sqcyxMcqsbAnEiJ4G/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=izDLmeMJhOK9z48nAe6eIzyasWM%3D" data-phocus="https://blog.kakaocdn.net/dna/b4sO0z/btsNd33Fwhp/AAAAAAAAAAAAAAAAAAAAABEjGlASiBWDNRY745oMlmzcM05sqcyxMcqsbAnEiJ4G/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=izDLmeMJhOK9z48nAe6eIzyasWM%3D"><img src="https://blog.kakaocdn.net/dna/b4sO0z/btsNd33Fwhp/AAAAAAAAAAAAAAAAAAAAABEjGlASiBWDNRY745oMlmzcM05sqcyxMcqsbAnEiJ4G/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=izDLmeMJhOK9z48nAe6eIzyasWM%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2Fb4sO0z%2FbtsNd33Fwhp%2FAAAAAAAAAAAAAAAAAAAAABEjGlASiBWDNRY745oMlmzcM05sqcyxMcqsbAnEiJ4G%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DizDLmeMJhOK9z48nAe6eIzyasWM%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1644" height="732" data-origin-width="1644" data-origin-height="732" data-phocus-index="8"></span></figure>
+<p></p>
+<p data-ke-size="size16">다음으로는 Multi Token Prediction을 보자. 아이디어만 먼저 보자면,</p>
+<p data-ke-size="size16">우리는 보통 Next Token Prediction을 하는데, 그 이유가 단순히 다음 token을 predict해서, 하나만 예측했다면 뒤에꺼까지 더 예측을 해서 속도를 빠르게 하기 위함이다. 근데 DeepSeek는 next token prediction을, richer information을 얻기 위해 하게 된다.</p>
+    </div>
+    
+    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+        <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    </div>
+</body>
+</html>

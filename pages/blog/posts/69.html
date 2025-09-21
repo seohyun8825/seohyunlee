@@ -1,0 +1,162 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto-Encoding Variational Bayes — happy8825 - Seohyun Lee Blog</title>
+    <meta name="description" content="VAE에 대해 이해하기전에 autoencoder부터 보면
+Autoencoder?
+Autoencoder 기본 구조
+오토인코더는 입력 데이터 X를 받아 더 낮은 차원의 latent representation Z로 인코딩한 뒤, 이를 다시 입력 데이터와 같은 차원의 출력 X′로 복원하는 신경">
+    <link rel="stylesheet" href="../../styles.css">
+    <style>
+        body { 
+            background: #0d0f17; 
+            color: #fff; 
+            font-family: 'Inter', sans-serif; 
+            line-height: 1.6; 
+            margin: 0; 
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .post-header {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 2rem;
+            margin-bottom: 2rem;
+        }
+        .post-meta {
+            color: #888;
+            margin-bottom: 1rem;
+        }
+        .post-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .post-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        .post-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 1rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .post-content p {
+            margin-bottom: 1rem;
+        }
+        .post-content h1, .post-content h2, .post-content h3 {
+            color: #667eea;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .post-content blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 1rem;
+            margin: 1.5rem 0;
+            color: #ccc;
+            font-style: italic;
+        }
+        .post-content code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .post-content pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            color: #667eea;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            background: rgba(102, 126, 234, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    
+    <div class="post-header">
+        <div class="post-meta">
+            <span>📅 2024-08-04</span>
+            <span> | 🏷️ Computer Vision Paper Review</span>
+            <span> | 🔗 <a href="https://happy8825.tistory.com/32" target="_blank">Original Post</a></span>
+            <span> | 📊 5 images</span>
+        </div>
+        <h1 class="post-title">Auto-Encoding Variational Bayes — happy8825</h1>
+        
+    </div>
+    
+    <div class="post-content">
+        <p data-ke-size="size16">VAE에 대해 이해하기전에 autoencoder부터 보면</p>
+<h2 data-ke-size="size26" id="Autoencoder%3F-1"><a href="#Autoencoder%3F-1">Autoencoder?</a></h2>
+<h3 data-ke-size="size23" id="Autoencoder%20%EA%B8%B0%EB%B3%B8%20%EA%B5%AC%EC%A1%B0-1"><a href="#Autoencoder%20%EA%B8%B0%EB%B3%B8%20%EA%B5%AC%EC%A1%B0-1">Autoencoder 기본 구조</a></h3>
+<p data-ke-size="size16">오토인코더는 입력 데이터 X를 받아 더 낮은 차원의 latent representation Z로 인코딩한 뒤, 이를 다시 입력 데이터와 같은 차원의 출력 X′로 복원하는 신경망 구조이다. 크게 두부분으로 나뉘는데,</p>
+<ol style="list-style-type: decimal;" data-ke-list-type="decimal">
+<li><b>인코더 :</b> 입력 데이터 X를 받아 잠재 표현 Z로 변환</li>
+<li><b>디코더(Decoder)</b>: 잠재 표현 Z를 받아 원본 데이터와 유사한 데이터 X′로 복원함</li>
+</ol>
+<h3 data-ke-size="size23" id="%EC%98%A4%ED%86%A0%EC%9D%B8%EC%BD%94%EB%8D%94%EC%9D%98%20%ED%95%9C%EA%B3%84-1"><a href="#%EC%98%A4%ED%86%A0%EC%9D%B8%EC%BD%94%EB%8D%94%EC%9D%98%20%ED%95%9C%EA%B3%84-1">오토인코더의 한계</a></h3>
+<p data-ke-size="size16">전통적인 오토인코더는 데이터의 잠재 표현 Z를 어떻게 사용해 새로운 샘플을 생성할지에 대한 명확한 방법이 없고, 잠재 공간의 분포에 대한 가정이 없기 때문에, 잠재 변수 Z에서 샘플을 임의로 추출하여 의미 있는 새로운 데이터를 생성하기 어렵다.</p>
+<p data-ke-size="size16">그래서 새로운 데이터에 대해서 reconstruction이 어렵고, 때문에 학습을 위해 encoder decoder 다 가져다 쓰지만, 실제로 쓰이는건 encoder.</p>
+<h2 data-ke-size="size26" id="Variational%20Auto%20Encoder%3F-1"><a href="#Variational%20Auto%20Encoder%3F-1">Variational Auto Encoder?</a></h2>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1280" data-origin-height="590" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/bsxpbH/btsIUu4s4jD/AAAAAAAAAAAAAAAAAAAAAHiYpaj3FBe22mwlSrx62Poz97NBqGdseID3N1EsKjFO/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=GTlCQJ%2B1L8hIhhOUbxzoMXLIYuc%3D" data-phocus="https://blog.kakaocdn.net/dna/bsxpbH/btsIUu4s4jD/AAAAAAAAAAAAAAAAAAAAAHiYpaj3FBe22mwlSrx62Poz97NBqGdseID3N1EsKjFO/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=GTlCQJ%2B1L8hIhhOUbxzoMXLIYuc%3D"><img src="https://blog.kakaocdn.net/dna/bsxpbH/btsIUu4s4jD/AAAAAAAAAAAAAAAAAAAAAHiYpaj3FBe22mwlSrx62Poz97NBqGdseID3N1EsKjFO/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=GTlCQJ%2B1L8hIhhOUbxzoMXLIYuc%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FbsxpbH%2FbtsIUu4s4jD%2FAAAAAAAAAAAAAAAAAAAAAHiYpaj3FBe22mwlSrx62Poz97NBqGdseID3N1EsKjFO%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DGTlCQJ%252B1L8hIhhOUbxzoMXLIYuc%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1280" height="590" data-origin-width="1280" data-origin-height="590" data-phocus-index="0"></span></figure>
+<p></p>
+<p data-ke-size="size16">VAE는 이러한 한계를 극복하기 위해 잠재 공간의 분포에 대한 가정을 도입했음. VAE는 잠재 변수 Z가 특정 확률 분포(예: 가우시안 분포)를 따른다고 가정한다.</p>
+<ol style="list-style-type: decimal;" data-ke-list-type="decimal">
+<li><b>인코더</b>: 입력 데이터 X로부터 잠재 변수 Z의 분포의 매개변수(평균이나 분산등)를 예측한다. 이를 통해 잠재 공간에서 각 데이터 포인트 주변의 분포를 모델링한다.</li>
+<li><b>디코더</b>: 잠재 공간에서 샘플링된 잠재 변수 Z를 사용해 원본 데이터를 복원하려고 시도한다</li>
+</ol>
+<p data-ke-size="size16">VAE의 핵심은 인코더가 예측한 분포로부터 잠재 변수 Z를 샘플링해서, 이 샘플을 사용해 디코더가 원본 데이터와 유사한 새로운 데이터를 생성할 수 있도록 하는것.</p>
+<p data-ke-size="size16">이 과정은 또한 데이터가 잠재 공간에 어떻게 배치되는지를 학습하게 하며, 이를 통해 새로운 데이터를 생성할 때 잠재 공간에서 의미 있는 점을 선택할 수 있게 됨.</p>
+<p data-ke-size="size16">즉 VAE를 image generation에 쓰기 위해서, 만약 z의 분포를 알 수 있다면 디코더 부분을 학습시킬 수 있으니까 디코더를 이용한 generation이 가능해질 것임. 즉, <b>VAE는 p(z)가 N(0,1)임을 가정하고, kl-divergence loss를 통해서 실제 인코더에서 학습시킨 q(z|x) 가 p(z)와 비슷해지도록 한게 핵심 포인트임.</b></p>
+<h2 data-ke-size="size26" id="How%20to%20Train%20VAE%3F-1"><a href="#How%20to%20Train%20VAE%3F-1">How to Train VAE?</a></h2>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1280" data-origin-height="738" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/X8DFf/btsIUkVi9sB/AAAAAAAAAAAAAAAAAAAAAL28uTk521UU1AOLJh2HX8ZLyecAvKrCXI9ZpO8XtkH_/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=Wo%2F0%2FtEaZ3veQj%2F9V1Urze3AqCc%3D" data-phocus="https://blog.kakaocdn.net/dna/X8DFf/btsIUkVi9sB/AAAAAAAAAAAAAAAAAAAAAL28uTk521UU1AOLJh2HX8ZLyecAvKrCXI9ZpO8XtkH_/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=Wo%2F0%2FtEaZ3veQj%2F9V1Urze3AqCc%3D"><img src="https://blog.kakaocdn.net/dna/X8DFf/btsIUkVi9sB/AAAAAAAAAAAAAAAAAAAAAL28uTk521UU1AOLJh2HX8ZLyecAvKrCXI9ZpO8XtkH_/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=Wo%2F0%2FtEaZ3veQj%2F9V1Urze3AqCc%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FX8DFf%2FbtsIUkVi9sB%2FAAAAAAAAAAAAAAAAAAAAAL28uTk521UU1AOLJh2HX8ZLyecAvKrCXI9ZpO8XtkH_%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DWo%252F0%252FtEaZ3veQj%252F9V1Urze3AqCc%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1280" height="738" data-origin-width="1280" data-origin-height="738" data-phocus-index="1"></span></figure>
+<p></p>
+<p data-ke-size="size16">전체적인 구조는 다음과 같다</p>
+<p data-ke-size="size16">Auto Encoder와는 다르게, Reconstruction error 뿐만 아니라, encoder 에서 뽑아낸 분포가 얼마나 정규분포와 닮았는지에 대한 KL Divergence도 함께 loss값으로 쓴다.</p>
+<p data-ke-size="size16">Loss 함수 유도과정</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1280" data-origin-height="892" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/yGgDh/btsIUSYjSxc/AAAAAAAAAAAAAAAAAAAAAGsS5HJwN2zFaqK4nEx9H8_tvyTHKOb3n39j8mg6ryn_/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=Ie5lRz44ouq5wvpI0Dg5g7zGZp8%3D" data-phocus="https://blog.kakaocdn.net/dna/yGgDh/btsIUSYjSxc/AAAAAAAAAAAAAAAAAAAAAGsS5HJwN2zFaqK4nEx9H8_tvyTHKOb3n39j8mg6ryn_/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=Ie5lRz44ouq5wvpI0Dg5g7zGZp8%3D"><img src="https://blog.kakaocdn.net/dna/yGgDh/btsIUSYjSxc/AAAAAAAAAAAAAAAAAAAAAGsS5HJwN2zFaqK4nEx9H8_tvyTHKOb3n39j8mg6ryn_/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=Ie5lRz44ouq5wvpI0Dg5g7zGZp8%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FyGgDh%2FbtsIUSYjSxc%2FAAAAAAAAAAAAAAAAAAAAAGsS5HJwN2zFaqK4nEx9H8_tvyTHKOb3n39j8mg6ryn_%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DIe5lRz44ouq5wvpI0Dg5g7zGZp8%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1280" height="892" data-origin-width="1280" data-origin-height="892" data-phocus-index="2"></span></figure>
+<p></p>
+<p data-ke-size="size16">마지막 무시 부분이, 저부분도 구할수 있으면 당연히 더 정확하고 좋겠지만, 아쉽게도 p(z|x)가 intractable해서 구할 수 없음. 근데 마침 저게 kl divergence이고, 항상 0 보다 크다는 성질때문에, 저 식을 제외 한 나머지 부분이 ELBO로 lower bound가 되는 것이다.</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1280" data-origin-height="902" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/Eg855/btsIUyFLOiB/AAAAAAAAAAAAAAAAAAAAAM5RKGN0lLTMZyQnWWxjBvVaqNEvRHU9_Ne1tnYyx0Sd/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=gslXHvnODGXaErrbS9emJbGqenc%3D" data-phocus="https://blog.kakaocdn.net/dna/Eg855/btsIUyFLOiB/AAAAAAAAAAAAAAAAAAAAAM5RKGN0lLTMZyQnWWxjBvVaqNEvRHU9_Ne1tnYyx0Sd/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=gslXHvnODGXaErrbS9emJbGqenc%3D"><img src="https://blog.kakaocdn.net/dna/Eg855/btsIUyFLOiB/AAAAAAAAAAAAAAAAAAAAAM5RKGN0lLTMZyQnWWxjBvVaqNEvRHU9_Ne1tnYyx0Sd/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=gslXHvnODGXaErrbS9emJbGqenc%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FEg855%2FbtsIUyFLOiB%2FAAAAAAAAAAAAAAAAAAAAAM5RKGN0lLTMZyQnWWxjBvVaqNEvRHU9_Ne1tnYyx0Sd%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DgslXHvnODGXaErrbS9emJbGqenc%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1280" height="902" data-origin-width="1280" data-origin-height="902" data-phocus-index="3"></span></figure>
+<p></p>
+<p data-ke-size="size16">실제 loss 함수는 아까 구한거에서 마이너스를 씌워서, 그걸 최소화시키도록 학습시키면 되는것. 중간에 빨간 부분이 좀 의아한 부분이긴 한데, monte carlo에 따라 식을 저렇게 바꿔 쓸수 있다는데, Monte carlo가 L이 충분이 클때 성립하는걸로 알고 있는데, 논문에서는 그냥 1로 해버린것 같음..</p>
+<h2 data-ke-size="size26" id="Reparameterization%20Trick-1"><a href="#Reparameterization%20Trick-1">Reparameterization Trick</a></h2>
+<p data-ke-size="size16">랜덤 노이즈에서 mu랑 시그마를 직접 얻으려고 하는것보다, learn the parameter to transform</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1280" data-origin-height="785" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/bOAfX2/btsITUJkZZ7/AAAAAAAAAAAAAAAAAAAAAFbV8WNnuF6ZTtRl6fBg1j7idMQiI-P4wphxF2B9ujo3/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=bNMEHJqZxAdJYf0VGlTjDNRgPio%3D" data-phocus="https://blog.kakaocdn.net/dna/bOAfX2/btsITUJkZZ7/AAAAAAAAAAAAAAAAAAAAAFbV8WNnuF6ZTtRl6fBg1j7idMQiI-P4wphxF2B9ujo3/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=bNMEHJqZxAdJYf0VGlTjDNRgPio%3D"><img src="https://blog.kakaocdn.net/dna/bOAfX2/btsITUJkZZ7/AAAAAAAAAAAAAAAAAAAAAFbV8WNnuF6ZTtRl6fBg1j7idMQiI-P4wphxF2B9ujo3/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=bNMEHJqZxAdJYf0VGlTjDNRgPio%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FbOAfX2%2FbtsITUJkZZ7%2FAAAAAAAAAAAAAAAAAAAAAFbV8WNnuF6ZTtRl6fBg1j7idMQiI-P4wphxF2B9ujo3%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DbNMEHJqZxAdJYf0VGlTjDNRgPio%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1280" height="785" data-origin-width="1280" data-origin-height="785" data-phocus-index="4"></span></figure>
+<p></p>
+<p data-ke-size="size16">이렇게 해주는 이유는, sampling이 미분 가능한 연산이 아니라서, 미분이 되게 하기 위해 조그만한 trick 을 써준건데</p>
+<p data-ke-size="size16">원래는 z가 z∼qϕ(z|x) 에서 (인코더) 직접 샘플링 되었기 때문에 stochasticity 즉, 모델의 작동 과정에 무작위성이 포함되니까 미분이 불가능함.</p>
+<p data-ke-size="size16">정리해보자면,</p>
+<p data-ke-size="size16">그래서 직관적으로 이해해보자면, 무작위성을 모델의 입력으로부터 분리시키는 trick이라고 볼 수 있음.</p>
+<p data-ke-size="size16">z가 인코더를 거친 distribtion에서 바로 샘플링한 stochasitc한 변수였다면, reparameterize trick을 거치고 나면, &nbsp;ϵ∼N(0,I)에서 sampling한&nbsp;ϵ에 대해&nbsp;z=μ(X)+Σ1/2∗ϵ이라고 나타낼 수 있게 되는 것.</p>
+<p data-ke-size="size16">이렇게 하면 z는&nbsp;(μ,Σ)에 대해 미분이 가능해짐</p>
+<h1>구현 코드( <a href="https://www.notion.so/VAE-code-83d8481634584392af5a9c1ea5461a84?pvs=4" target="_blank" rel="noopener&nbsp;noreferrer">https://www.notion.so/VAE-code-83d8481634584392af5a9c1ea5461a84?pvs=4</a>)</h1>
+<p data-ke-size="size16">노션에 코드까지 함꼐 정리되어있습니다&nbsp;</p>
+<p data-ke-size="size16">&nbsp;</p>
+    </div>
+    
+    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+        <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    </div>
+</body>
+</html>

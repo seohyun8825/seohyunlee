@@ -1,0 +1,133 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universality with Logistic — happy8825 - Seohyun Lee Blog</title>
+    <meta name="description" content="균등 분포로부터 logistic 분포를 생성할 수 있음&nbsp;
+&nbsp;
+증명 :&nbsp;
+
+
+즉 CDF의 역함수를 사용해 uniform 분포에서 logistic 분포를 생성할 수 있다.
+&nbsp;
+
+
+&nbsp;
+&nbsp;">
+    <link rel="stylesheet" href="../../styles.css">
+    <style>
+        body { 
+            background: #0d0f17; 
+            color: #fff; 
+            font-family: 'Inter', sans-serif; 
+            line-height: 1.6; 
+            margin: 0; 
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .post-header {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 2rem;
+            margin-bottom: 2rem;
+        }
+        .post-meta {
+            color: #888;
+            margin-bottom: 1rem;
+        }
+        .post-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .post-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        .post-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 1rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .post-content p {
+            margin-bottom: 1rem;
+        }
+        .post-content h1, .post-content h2, .post-content h3 {
+            color: #667eea;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .post-content blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 1rem;
+            margin: 1.5rem 0;
+            color: #ccc;
+            font-style: italic;
+        }
+        .post-content code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .post-content pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            color: #667eea;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            background: rgba(102, 126, 234, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    
+    <div class="post-header">
+        <div class="post-meta">
+            <span>📅 2024-10-07</span>
+            <span> | 🏷️ Statistics</span>
+            <span> | 🔗 <a href="https://happy8825.tistory.com/63" target="_blank">Original Post</a></span>
+            <span> | 📊 2 images</span>
+        </div>
+        <h1 class="post-title">Universality with Logistic — happy8825</h1>
+        
+    </div>
+    
+    <div class="post-content">
+        <p data-ke-size="size16">균등 분포로부터 logistic 분포를 생성할 수 있음&nbsp;</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">증명 :&nbsp;</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1304" data-origin-height="1385" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/3oBAu/btsJXr7iFzk/AAAAAAAAAAAAAAAAAAAAAD7LqiGPTNkO2-VZ4lHXF1ZRVr6rQ7AkM6uvb-8V2sKN/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=OUzf%2BKeqboLgrV1Rt6JqqlkYaC8%3D" data-phocus="https://blog.kakaocdn.net/dna/3oBAu/btsJXr7iFzk/AAAAAAAAAAAAAAAAAAAAAD7LqiGPTNkO2-VZ4lHXF1ZRVr6rQ7AkM6uvb-8V2sKN/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=OUzf%2BKeqboLgrV1Rt6JqqlkYaC8%3D"><img src="https://blog.kakaocdn.net/dna/3oBAu/btsJXr7iFzk/AAAAAAAAAAAAAAAAAAAAAD7LqiGPTNkO2-VZ4lHXF1ZRVr6rQ7AkM6uvb-8V2sKN/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=OUzf%2BKeqboLgrV1Rt6JqqlkYaC8%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2F3oBAu%2FbtsJXr7iFzk%2FAAAAAAAAAAAAAAAAAAAAAD7LqiGPTNkO2-VZ4lHXF1ZRVr6rQ7AkM6uvb-8V2sKN%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DOUzf%252BKeqboLgrV1Rt6JqqlkYaC8%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1304" height="1385" data-origin-width="1304" data-origin-height="1385" data-phocus-index="0"></span></figure>
+<p></p>
+<p data-ke-size="size16">즉 CDF의 역함수를 사용해 uniform 분포에서 logistic 분포를 생성할 수 있다.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="948" data-origin-height="796" style="margin-left: 50%; transform: translateX(-50%); width: 948px; max-width: 948px;"><span data-url="https://blog.kakaocdn.net/dna/bjjuAC/btsJWq2wjHA/AAAAAAAAAAAAAAAAAAAAAEIcIUDk23UWdiXdfwby1kJzKYe1k73bPJFJHJASnZ8F/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=1aUwSQwb7uxcNk89Pc8Nfs08HEE%3D" data-phocus="https://blog.kakaocdn.net/dna/bjjuAC/btsJWq2wjHA/AAAAAAAAAAAAAAAAAAAAAEIcIUDk23UWdiXdfwby1kJzKYe1k73bPJFJHJASnZ8F/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=1aUwSQwb7uxcNk89Pc8Nfs08HEE%3D"><img src="https://blog.kakaocdn.net/dna/bjjuAC/btsJWq2wjHA/AAAAAAAAAAAAAAAAAAAAAEIcIUDk23UWdiXdfwby1kJzKYe1k73bPJFJHJASnZ8F/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=1aUwSQwb7uxcNk89Pc8Nfs08HEE%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FbjjuAC%2FbtsJWq2wjHA%2FAAAAAAAAAAAAAAAAAAAAAEIcIUDk23UWdiXdfwby1kJzKYe1k73bPJFJHJASnZ8F%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3D1aUwSQwb7uxcNk89Pc8Nfs08HEE%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="948" height="796" data-origin-width="948" data-origin-height="796" data-phocus-index="1"></span></figure>
+<p></p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">&nbsp;</p>
+    </div>
+    
+    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+        <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    </div>
+</body>
+</html>

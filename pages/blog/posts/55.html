@@ -1,0 +1,181 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CLOVA: A Closed-LOop Visual Assistant with Tool Usage and Update — happy8825 - Seohyun Lee Blog</title>
+    <meta name="description" content="
+새로운 지식을 학습할 수 있는 능력을 갖춘 visual assistance를 개발하기 위한 연구로, 기존의 visual assistant의 한계를 극복한 방법을 제안한 논문이다.
+&nbsp;
+기존에는 주어진 작업에 대한 instruction이 주어지면, LLM을 사용해 프로그램을 생성">
+    <link rel="stylesheet" href="../../styles.css">
+    <style>
+        body { 
+            background: #0d0f17; 
+            color: #fff; 
+            font-family: 'Inter', sans-serif; 
+            line-height: 1.6; 
+            margin: 0; 
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .post-header {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 2rem;
+            margin-bottom: 2rem;
+        }
+        .post-meta {
+            color: #888;
+            margin-bottom: 1rem;
+        }
+        .post-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .post-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        .post-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 1rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .post-content p {
+            margin-bottom: 1rem;
+        }
+        .post-content h1, .post-content h2, .post-content h3 {
+            color: #667eea;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .post-content blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 1rem;
+            margin: 1.5rem 0;
+            color: #ccc;
+            font-style: italic;
+        }
+        .post-content code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .post-content pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            color: #667eea;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            background: rgba(102, 126, 234, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    
+    <div class="post-header">
+        <div class="post-meta">
+            <span>📅 2024-09-02</span>
+            <span> | 🏷️ Computer Vision Paper Review</span>
+            <span> | 🔗 <a href="https://happy8825.tistory.com/45" target="_blank">Original Post</a></span>
+            <span> | 📊 4 images</span>
+        </div>
+        <h1 class="post-title">CLOVA: A Closed-LOop Visual Assistant with Tool Usage and Update — happy8825</h1>
+        
+    </div>
+    
+    <div class="post-content">
+        <hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style5">
+<p data-ke-size="size18">새로운 지식을 학습할 수 있는 능력을 갖춘 visual assistance를 개발하기 위한 연구로, 기존의 visual assistant의 한계를 극복한 방법을 제안한 논문이다.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">기존에는 주어진 작업에 대한 instruction이 주어지면, LLM을 사용해 프로그램을 생성하고, 해당 프로그램을 실행해서 시각 도구들을 활용해 작업한다. 예를 들어 "우산 왼쪽에 있는 사람이 무엇을 하고 있는가?" 라는 질문에 LLM은 우산을 찾고, 우산 왼쪽 영역을 잘라내고, 사람을 찾아 그 사람이 무엇을 하고 있는지 질문하는 VQA 도구를 사용해 작업을 수행한다.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">이 방법은 효과적이었지만, 이런 도구들이 고정되어 있기에, 새로운 지식을 요구하는 task는 잘 하지 못한다. 예를 들어, 봉준호의 얼굴을 라벨링하라고 지시했을 떄, 도구가 봉준호를 인식하지 못하면 잘못된 결과가 제공될 수 있음. 이런 상황에서 visual assistance는 봉준호에 대한 정보를 학습하고, 이걸 다른 사진에서도 일반화할 수 있어야 한다. 즉 <b>실패로부터 새로운 지식을 신속하게 습득할 수 있는 학습 능력을 부여하자가 이 논문의 핵심 아이디어.</b></p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">제안된 framework는 CLOVA(Closed-LOop Visual Assistant)로, closed loop에서의 학습을 통해 사용된 도구를 업데이트 해서 새로운 환경에 더 잘 적응할 수 있게 한다.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18"><b>총 세가지 단계, Inference, reflection, learning이 제안되었다.</b> Inference 단계에서는 LLM을 사용해 프로그램을 생성하고, 해당 도구를 실행해서 작업을 수행한다. Reflection 단계에서는 인간의 feedback을 사용해 도구 update 가 필요한 부분을 식별하고, Learning 단계에서는 Clova가 자동으로 데이터를 수집하고 도구를 업데이트한다.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">이 과정에서 세가지 주요 challenge 가 있었는데</p>
+<p data-ke-size="size18">우선<b> 첫째, 업데이트가 필요한 도구를 식별하는게 어렵다</b>. LLM이 여러 단계에 걸쳐 프로그램을 생성하고 실행하니까, 어떤 도구가 제대로 작옹하지 않았는지, 어떤 부분이 문제를 일으켰는지 정확하게 파악하는것이 어려움.</p>
+<p data-ke-size="size18">둘째, 학습해야할 지식이 예측할 수 없기에 <b>자동으로 학습 데이터를 수집</b>해야한다</p>
+<p data-ke-size="size18">셋쨰, <b>도구를 어떻게 효율적으로 업데이트할까?</b></p>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style5">
+<p data-ke-size="size18">어떻게 해결했는지 보자, 이건 전체적인 pipeline</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1092" data-origin-height="632" style="margin-left: 50%; transform: translateX(-50%); width: 1092px; max-width: 1092px;"><span data-url="https://blog.kakaocdn.net/dna/bYSTR3/btsJmzeflsK/AAAAAAAAAAAAAAAAAAAAACUHov-YbEJ9_V6ZwQpXLW1M62meGLd9__gH1h7XSsr9/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=MMk8V6ZshR4%2FoctBpgAT%2B5bXQaE%3D" data-phocus="https://blog.kakaocdn.net/dna/bYSTR3/btsJmzeflsK/AAAAAAAAAAAAAAAAAAAAACUHov-YbEJ9_V6ZwQpXLW1M62meGLd9__gH1h7XSsr9/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=MMk8V6ZshR4%2FoctBpgAT%2B5bXQaE%3D"><img src="https://blog.kakaocdn.net/dna/bYSTR3/btsJmzeflsK/AAAAAAAAAAAAAAAAAAAAACUHov-YbEJ9_V6ZwQpXLW1M62meGLd9__gH1h7XSsr9/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=MMk8V6ZshR4%2FoctBpgAT%2B5bXQaE%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FbYSTR3%2FbtsJmzeflsK%2FAAAAAAAAAAAAAAAAAAAAACUHov-YbEJ9_V6ZwQpXLW1M62meGLd9__gH1h7XSsr9%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DMMk8V6ZshR4%252FoctBpgAT%252B5bXQaE%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1092" height="632" data-origin-width="1092" data-origin-height="632" data-phocus-index="0"></span></figure>
+<p></p>
+<p data-ke-size="size18">이게 어떻게 돌아가냐면</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">일단 처음에 task instruction이 주어지면 LLM은 주어진 task instruction을 기반으로 프로그램을 만든다.</p>
+<p data-ke-size="size18">이 프로그램이 하나씩 line 별로 실행되면서, result 를 아웃풋한다.</p>
+<p data-ke-size="size18">이거에 대해 사람이 맞았는지 틀렸는지 피드백하고</p>
+<p data-ke-size="size18">LLM이 이 result랑 피드백 전체를 고려해서 critique를 생성한다. 이 critique를 기반으로 자동으로 데이터를 찾아 took kit/LLM을 Prompt tuning하고,</p>
+<p data-ke-size="size18">업데이트된 툴킷&amp;LLM을 기반으로 다시 프로그램을 만든다.</p>
+<p data-ke-size="size18">이런 과정 반복~~</p>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style5">
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">1. Inference 단계</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1160" data-origin-height="748" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/cpmofD/btsJnuiW5tR/AAAAAAAAAAAAAAAAAAAAAMLBV6y8P4Yb7VRcSf9pfXvu24wbl5GYKIsi77VJf2Ot/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=F%2Fvds5Zet96dgG8bgpvbq855uLE%3D" data-phocus="https://blog.kakaocdn.net/dna/cpmofD/btsJnuiW5tR/AAAAAAAAAAAAAAAAAAAAAMLBV6y8P4Yb7VRcSf9pfXvu24wbl5GYKIsi77VJf2Ot/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=F%2Fvds5Zet96dgG8bgpvbq855uLE%3D"><img src="https://blog.kakaocdn.net/dna/cpmofD/btsJnuiW5tR/AAAAAAAAAAAAAAAAAAAAAMLBV6y8P4Yb7VRcSf9pfXvu24wbl5GYKIsi77VJf2Ot/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=F%2Fvds5Zet96dgG8bgpvbq855uLE%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FcpmofD%2FbtsJnuiW5tR%2FAAAAAAAAAAAAAAAAAAAAAMLBV6y8P4Yb7VRcSf9pfXvu24wbl5GYKIsi77VJf2Ot%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DF%252Fvds5Zet96dgG8bgpvbq855uLE%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1160" height="748" data-origin-width="1160" data-origin-height="748" data-phocus-index="1"></span></figure>
+<p></p>
+<p data-ke-size="size18">VISPROG랑 비슷한 방식을 사용하지만, 직접 바로 program을 생성하지 않고, 먼저 LLM을 통해 plan을 만들고, 그 plan에 기반해서 프로그램을 만든다. 여기서 plan은 infefence 랑 reflection 단계에서 intermediate reasoning chain으로 볼 수 있는데, 주어진 instruction에 대해 CLOVA는 Demonstration Pool에서 incontext example을 선택한다.&nbsp;</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">이 Demonstration Pool 이 뭐냐면, Plan이나 program 생성을 위한 예시들이 모여있는데,</p>
+<p data-ke-size="size18">Plan에 대해서 올바른 예시(instruction,plan), 틀린 예시(instruction, plan, reason), Program에 대해서 올바른 예시(instruction,plan,program), 틀린 예시(instruction, plan, program, reason),</p>
+<p data-ke-size="size18">이렇게 모여져있다.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">Bert 가 feature를 뽑아 유사한 예시들을 가져와서, 이게 LLM에 들어가 Task 를 풀기 위한 Plan이 나온다.</p>
+<p data-ke-size="size18">나온 Plan을 기반으로 비슷한 방식으로 Program이 만들어진다.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">만든 프로그램은 interpreter 모듈에 들어가서 실행된다. (VISPROG)랑 유사한 방식으로 실행됨.</p>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style5">
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">2. Reflection Phase</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1044" data-origin-height="878" style="margin-left: 50%; transform: translateX(-50%); width: 1044px; max-width: 1044px;"><span data-url="https://blog.kakaocdn.net/dna/cxLD3I/btsJmKUgDqK/AAAAAAAAAAAAAAAAAAAAAJwID6N12KLZF03tWy1rlxgLfMfoOeKCdVh5zUJuJD_k/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=NzCXHzhovJK4LHjj3wltUtjKaa4%3D" data-phocus="https://blog.kakaocdn.net/dna/cxLD3I/btsJmKUgDqK/AAAAAAAAAAAAAAAAAAAAAJwID6N12KLZF03tWy1rlxgLfMfoOeKCdVh5zUJuJD_k/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=NzCXHzhovJK4LHjj3wltUtjKaa4%3D"><img src="https://blog.kakaocdn.net/dna/cxLD3I/btsJmKUgDqK/AAAAAAAAAAAAAAAAAAAAAJwID6N12KLZF03tWy1rlxgLfMfoOeKCdVh5zUJuJD_k/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=NzCXHzhovJK4LHjj3wltUtjKaa4%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FcxLD3I%2FbtsJmKUgDqK%2FAAAAAAAAAAAAAAAAAAAAAJwID6N12KLZF03tWy1rlxgLfMfoOeKCdVh5zUJuJD_k%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DNzCXHzhovJK4LHjj3wltUtjKaa4%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1044" height="878" data-origin-width="1044" data-origin-height="878" data-phocus-index="2"></span></figure>
+<p></p>
+<p data-ke-size="size18">다음은 Reflection 단계인데, 인간의 피드백을 받는 단계로, instruction에 대해 올바른 응답이면 바로 종료한다.</p>
+<p data-ke-size="size18">틀렸다면, 생성한 plan과 program에 대해 global한 reflect가 진행된다</p>
+<p data-ke-size="size18">이걸 기반으로 learning Phase에서 tool이 update 가 되고, 업데이트된 tool이 올바르게 되었다면 종료된다.</p>
+<p data-ke-size="size18">만약 여전히 실패한다면 line별로 reflect 한다.</p>
+<p data-ke-size="size18">이런 local reflection을 기반으로 learning phase 가 업데이트된다</p>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style5">
+<p data-ke-size="size18">3. Learning Phase</p>
+<p data-ke-size="size18">Reflection 단계를 통해 나온 Critique를 바탕으로 학습이 되는데, 이때 두가지 경우로 나뉜다.</p>
+<p data-ke-size="size18">LLM이 plan혹은 program을 잘못 output한경우, 혹은 Tool이 잘못 작동한경우로 나뉜다.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">LLM이 plan 혹은 program을 잘못 output 한 경우부터 보자.</p>
+<p data-ke-size="size18">이 경우 LLM을 업데이트헤주게 되는데, 정확히는 Demonstration Pool을 업데이트해준다.</p>
+<p data-ke-size="size18">잘못 output한 critique를 demonstration pool에 추가하고, 이걸 다시 검증하는 방식으로 업데이트된다</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">만약 Tool이 잘못 작동한 경우, 틀린 원이이 되는 tool을 학습시키기 위한 데이터를 모은다. 그리고 instance 가각에 대해 prompt tuning을 하는데, CoOP와 같은 방식으로, 모델에 입력으로 들어가는 vector이 optimize된다.</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1266" data-origin-height="1108" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/bGD3aV/btsJnuXVxVB/AAAAAAAAAAAAAAAAAAAAAD2qt1NebNPDNZW5Lye3oiN9exKZMaqKt4J6QsT-f0Gp/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=4HUAIHoQ4I%2FRQyaSSUvtWBRLJq0%3D" data-phocus="https://blog.kakaocdn.net/dna/bGD3aV/btsJnuXVxVB/AAAAAAAAAAAAAAAAAAAAAD2qt1NebNPDNZW5Lye3oiN9exKZMaqKt4J6QsT-f0Gp/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=4HUAIHoQ4I%2FRQyaSSUvtWBRLJq0%3D"><img src="https://blog.kakaocdn.net/dna/bGD3aV/btsJnuXVxVB/AAAAAAAAAAAAAAAAAAAAAD2qt1NebNPDNZW5Lye3oiN9exKZMaqKt4J6QsT-f0Gp/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=4HUAIHoQ4I%2FRQyaSSUvtWBRLJq0%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FbGD3aV%2FbtsJnuXVxVB%2FAAAAAAAAAAAAAAAAAAAAAD2qt1NebNPDNZW5Lye3oiN9exKZMaqKt4J6QsT-f0Gp%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3D4HUAIHoQ4I%252FRQyaSSUvtWBRLJq0%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1266" height="1108" data-origin-width="1266" data-origin-height="1108" data-phocus-index="3"></span></figure>
+<p></p>
+<p data-ke-size="size16">&nbsp;</p>
+    </div>
+    
+    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+        <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    </div>
+</body>
+</html>

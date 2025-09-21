@@ -1,0 +1,213 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flow matching guide and code 6탄 - Instantaneous Change of Variables — happy8825 - Seohyun Lee Blog</title>
+    <meta name="description" content="
+&nbsp;
+&nbsp;
+
+
+
+&nbsp;
+이 글에서는, 연속적 Normalizing Flow 등을 다룰 때 “최종 분포” p1의 밀도를 구하거나, 특히 log p1(x) 값을 계산하고자 하는 과정을 설명한다.차원이 큰 문제에서 Jacobian determinant를 직접 계산하기가 ">
+    <link rel="stylesheet" href="../../styles.css">
+    <style>
+        body { 
+            background: #0d0f17; 
+            color: #fff; 
+            font-family: 'Inter', sans-serif; 
+            line-height: 1.6; 
+            margin: 0; 
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .post-header {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 2rem;
+            margin-bottom: 2rem;
+        }
+        .post-meta {
+            color: #888;
+            margin-bottom: 1rem;
+        }
+        .post-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .post-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        .post-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 1rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .post-content p {
+            margin-bottom: 1rem;
+        }
+        .post-content h1, .post-content h2, .post-content h3 {
+            color: #667eea;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .post-content blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 1rem;
+            margin: 1.5rem 0;
+            color: #ccc;
+            font-style: italic;
+        }
+        .post-content code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .post-content pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            color: #667eea;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            background: rgba(102, 126, 234, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    
+    <div class="post-header">
+        <div class="post-meta">
+            <span>📅 2025-02-23</span>
+            <span> | 🏷️ Flow Matching</span>
+            <span> | 🔗 <a href="https://happy8825.tistory.com/97" target="_blank">Original Post</a></span>
+            <span> | 📊 4 images</span>
+        </div>
+        <h1 class="post-title">Flow matching guide and code 6탄 - Instantaneous Change of Variables — happy8825</h1>
+        
+    </div>
+    
+    <div class="post-content">
+        <!-- MathJax 불러오기(필요하다면) -->
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">
+
+</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">이 글에서는, 연속적 Normalizing Flow 등을 다룰 때 “최종 분포” <code>p<sub>1</sub></code>의 밀도를 구하거나, 특히 <code>log p<sub>1</sub>(x)</code> 값을 계산하고자 하는 과정을 설명한다.<br>차원이 큰 문제에서 Jacobian determinant를 직접 계산하기가 복잡하고 비싸므로, continuity equation과 flow 개념을 활용해 “로그밀도”의 시간 변화를 추적한 뒤, 초기 로그밀도와의 관계로 <code>log p<sub>1</sub>(x)</code>를 효율적으로 구하는 방법, ODE solver 의 코드까지 살펴보겠다.</p>
+<hr data-ke-style="style1">
+<p data-ke-size="size16">먼저 Continuity Equation 에서 시작해보자.</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="2896" data-origin-height="3022" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/b7E0gp/btsMyl5m5kn/AAAAAAAAAAAAAAAAAAAAAEldF6355sEaX9aB-r8FT3Tn3Ep9X631srraOEUvKUER/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=A4kWSHOtuy5WGZ8T2RJzhoPIwxY%3D" data-phocus="https://blog.kakaocdn.net/dna/b7E0gp/btsMyl5m5kn/AAAAAAAAAAAAAAAAAAAAAEldF6355sEaX9aB-r8FT3Tn3Ep9X631srraOEUvKUER/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=A4kWSHOtuy5WGZ8T2RJzhoPIwxY%3D"><img src="https://blog.kakaocdn.net/dna/b7E0gp/btsMyl5m5kn/AAAAAAAAAAAAAAAAAAAAAEldF6355sEaX9aB-r8FT3Tn3Ep9X631srraOEUvKUER/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=A4kWSHOtuy5WGZ8T2RJzhoPIwxY%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2Fb7E0gp%2FbtsMyl5m5kn%2FAAAAAAAAAAAAAAAAAAAAAEldF6355sEaX9aB-r8FT3Tn3Ep9X631srraOEUvKUER%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DA4kWSHOtuy5WGZ8T2RJzhoPIwxY%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="2896" height="3022" data-origin-width="2896" data-origin-height="3022" data-phocus-index="0"></span></figure>
+<p></p>
+<p data-ke-size="size16">이렇게 쭉 전개하면 다음과 같은 식이 나온다.</p>
+<p data-ke-size="size16">최종 식을 해석해보자면,&nbsp;"최종 로그밀도(우리가 구하려고자 하는)” = “초기 로그밀도" - divergence적분인거다.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">어느정도 간단하게 만들어놓긴 했지만 아직도 div 부분 계산이 어렵다. 이식을 간단하게 풀기 위해&nbsp; Hutchinson’s Trick를 사용한다.</p>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style1">
+<p data-ke-size="size16"><span style="text-align: start;">&nbsp;Hutchinson’s Trick이란,,</span></p>
+<p data-pm-slice="1 1 []" data-ke-size="size16">행렬 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="0" style="font-size: 116%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D434 TEX-I"></mjx-c></mjx-mi></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>A</mi></math></mjx-assistive-mml></mjx-container>의&nbsp; trace(<mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="1" style="font-size: 116%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-texatom texclass="ORD"><mjx-mi class="mjx-n"><mjx-c class="mjx-c74"></mjx-c><mjx-c class="mjx-c72"></mjx-c><mjx-c class="mjx-c61"></mjx-c><mjx-c class="mjx-c63"></mjx-c><mjx-c class="mjx-c65"></mjx-c></mjx-mi></mjx-texatom><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D434 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow data-mjx-texclass="ORD"><mi data-mjx-auto-op="false">trace</mi></mrow><mo stretchy="false">(</mo><mi>A</mi><mo stretchy="false">)</mo></math></mjx-assistive-mml></mjx-container>)를 직접 구하지 않고,</p>
+<p data-ke-size="size16">임의의 무작위 벡터 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="2" style="font-size: 116%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-texatom texclass="ORD"><mjx-mi class="mjx-b"><mjx-c class="mjx-c1D433 TEX-B"></mjx-c></mjx-mi></mjx-texatom></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow data-mjx-texclass="ORD"><mi mathvariant="bold">z</mi></mrow></math></mjx-assistive-mml></mjx-container>로부터 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="3" style="font-size: 116%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-msup><mjx-texatom texclass="ORD"><mjx-mi class="mjx-b"><mjx-c class="mjx-c1D433 TEX-B"></mjx-c></mjx-mi></mjx-texatom><mjx-script style="vertical-align: 0.363em;"><mjx-mi class="mjx-n" size="s"><mjx-c class="mjx-c22A4"></mjx-c></mjx-mi></mjx-script></mjx-msup><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D434 TEX-I"></mjx-c></mjx-mi><mjx-mstyle><mjx-mspace style="width: 0.167em;"></mjx-mspace></mjx-mstyle><mjx-texatom texclass="ORD"><mjx-mi class="mjx-b"><mjx-c class="mjx-c1D433 TEX-B"></mjx-c></mjx-mi></mjx-texatom></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><msup><mrow data-mjx-texclass="ORD"><mi mathvariant="bold">z</mi></mrow><mi mathvariant="normal">⊤</mi></msup><mi>A</mi><mstyle scriptlevel="0"><mspace width="0.167em"></mspace></mstyle><mrow data-mjx-texclass="ORD"><mi mathvariant="bold">z</mi></mrow></math></mjx-assistive-mml></mjx-container>를 샘플링해 평균 냄으로써 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="4" style="font-size: 116%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-texatom texclass="ORD"><mjx-mi class="mjx-n"><mjx-c class="mjx-c74"></mjx-c><mjx-c class="mjx-c72"></mjx-c><mjx-c class="mjx-c61"></mjx-c><mjx-c class="mjx-c63"></mjx-c><mjx-c class="mjx-c65"></mjx-c></mjx-mi></mjx-texatom><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D434 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow data-mjx-texclass="ORD"><mi data-mjx-auto-op="false">trace</mi></mrow><mo stretchy="false">(</mo><mi>A</mi><mo stretchy="false">)</mo></math></mjx-assistive-mml></mjx-container>를 추정하는 방식이다. 샘플이 많으면 lotp 에 의해 저렇게 근사가 가능하다고 하니 참 근사하다.</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="2520" data-origin-height="468" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/5U1en/btsMyIsgtKD/AAAAAAAAAAAAAAAAAAAAAK87Rn4mk_c3pxGdpXUqMjnzVioNtqAl2Pvzg9scvjjH/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=GXcXwmgwLsV%2FSz%2Fg%2Be7CTHeJsk4%3D" data-phocus="https://blog.kakaocdn.net/dna/5U1en/btsMyIsgtKD/AAAAAAAAAAAAAAAAAAAAAK87Rn4mk_c3pxGdpXUqMjnzVioNtqAl2Pvzg9scvjjH/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=GXcXwmgwLsV%2FSz%2Fg%2Be7CTHeJsk4%3D"><img src="https://blog.kakaocdn.net/dna/5U1en/btsMyIsgtKD/AAAAAAAAAAAAAAAAAAAAAK87Rn4mk_c3pxGdpXUqMjnzVioNtqAl2Pvzg9scvjjH/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=GXcXwmgwLsV%2FSz%2Fg%2Be7CTHeJsk4%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2F5U1en%2FbtsMyIsgtKD%2FAAAAAAAAAAAAAAAAAAAAAK87Rn4mk_c3pxGdpXUqMjnzVioNtqAl2Pvzg9scvjjH%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DGXcXwmgwLsV%252FSz%252Fg%252Be7CTHeJsk4%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="2520" height="468" data-origin-width="2520" data-origin-height="468" data-phocus-index="1"></span></figure>
+<p></p>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style5">
+<p data-ke-size="size16">그래서 결국 우리가 구하려고 하는 logP1(x)는</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="642" data-origin-height="232" style="margin-left: 50%; transform: translateX(-50%); width: 642px; max-width: 642px;"><span data-url="https://blog.kakaocdn.net/dna/C5Cxw/btsMy4aOMow/AAAAAAAAAAAAAAAAAAAAAG-f9kFsnbJqyWRm4jlJL4-ibPxC4za7JsC6MlSJ3Sd4/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=OSb2APrajz8o0jqyWs3xjodENdw%3D" data-phocus="https://blog.kakaocdn.net/dna/C5Cxw/btsMy4aOMow/AAAAAAAAAAAAAAAAAAAAAG-f9kFsnbJqyWRm4jlJL4-ibPxC4za7JsC6MlSJ3Sd4/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=OSb2APrajz8o0jqyWs3xjodENdw%3D"><img src="https://blog.kakaocdn.net/dna/C5Cxw/btsMy4aOMow/AAAAAAAAAAAAAAAAAAAAAG-f9kFsnbJqyWRm4jlJL4-ibPxC4za7JsC6MlSJ3Sd4/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=OSb2APrajz8o0jqyWs3xjodENdw%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FC5Cxw%2FbtsMy4aOMow%2FAAAAAAAAAAAAAAAAAAAAAG-f9kFsnbJqyWRm4jlJL4-ibPxC4za7JsC6MlSJ3Sd4%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DOSb2APrajz8o0jqyWs3xjodENdw%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="642" height="232" data-origin-width="642" data-origin-height="232" data-phocus-index="2"></span></figure>
+<p></p>
+<p data-ke-size="size16">이 식에 의해 다음과 같이 써줄 수 있다.</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="573" data-origin-height="90" style="margin-left: 50%; transform: translateX(-50%); width: 573px; max-width: 573px;"><span data-url="https://blog.kakaocdn.net/dna/dtbVnH/btsMzfpFrDw/AAAAAAAAAAAAAAAAAAAAAIsThvPdQdRadsa4LD6b0OHJQZASS8-1r05iHS9wwK6r/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=Sq%2BULF%2BKXK3woH%2F2KMTtfK5ihC4%3D" data-phocus="https://blog.kakaocdn.net/dna/dtbVnH/btsMzfpFrDw/AAAAAAAAAAAAAAAAAAAAAIsThvPdQdRadsa4LD6b0OHJQZASS8-1r05iHS9wwK6r/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=Sq%2BULF%2BKXK3woH%2F2KMTtfK5ihC4%3D"><img src="https://blog.kakaocdn.net/dna/dtbVnH/btsMzfpFrDw/AAAAAAAAAAAAAAAAAAAAAIsThvPdQdRadsa4LD6b0OHJQZASS8-1r05iHS9wwK6r/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=Sq%2BULF%2BKXK3woH%2F2KMTtfK5ihC4%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FdtbVnH%2FbtsMzfpFrDw%2FAAAAAAAAAAAAAAAAAAAAAIsThvPdQdRadsa4LD6b0OHJQZASS8-1r05iHS9wwK6r%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DSq%252BULF%252BKXK3woH%252F2KMTtfK5ihC4%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="573" height="90" data-origin-width="573" data-origin-height="90" data-phocus-index="3"></span></figure>
+<p></p>
+<p data-pm-slice="1 1 []" data-ke-size="size16">즉, 시간 1에서 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="5" style="font-size: 116%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>x</mi></math></mjx-assistive-mml></mjx-container>를 주고 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="6" style="font-size: 116%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-texatom texclass="OPEN"><mjx-mo class="mjx-sop"><mjx-c class="mjx-c28 TEX-S1"></mjx-c></mjx-mo></mjx-texatom><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D453 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mn class="mjx-n"><mjx-c class="mjx-c31"></mjx-c></mjx-mn><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-mo class="mjx-n"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="2"><mjx-c class="mjx-c1D454 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mn class="mjx-n"><mjx-c class="mjx-c31"></mjx-c></mjx-mn><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-texatom texclass="CLOSE"><mjx-mo class="mjx-sop"><mjx-c class="mjx-c29 TEX-S1"></mjx-c></mjx-mo></mjx-texatom></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow data-mjx-texclass="OPEN"><mo minsize="1.2em" maxsize="1.2em">(</mo></mrow><mi>f</mi><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo><mo>,</mo><mi>g</mi><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo><mrow data-mjx-texclass="CLOSE"><mo minsize="1.2em" maxsize="1.2em">)</mo></mrow></math></mjx-assistive-mml></mjx-container>=(x,0) 으로 역방향으로&nbsp; <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="7" style="font-size: 116%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D453 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mn class="mjx-n"><mjx-c class="mjx-c30"></mjx-c></mjx-mn><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-mo class="mjx-n"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="2"><mjx-c class="mjx-c1D454 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mn class="mjx-n"><mjx-c class="mjx-c30"></mjx-c></mjx-mn><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>f</mi><mo stretchy="false">(</mo><mn>0</mn><mo stretchy="false">)</mo><mo>,</mo><mi>g</mi><mo stretchy="false">(</mo><mn>0</mn><mo stretchy="false">)</mo></math></mjx-assistive-mml></mjx-container>로부터 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="8" style="font-size: 116%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-n"><mjx-c class="mjx-c6C"></mjx-c><mjx-c class="mjx-c6F"></mjx-c><mjx-c class="mjx-c67"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2061"></mjx-c></mjx-mo><mjx-msub space="2"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D45D TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c31"></mjx-c></mjx-mn></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>log</mi><mo data-mjx-texclass="NONE">⁡</mo><msub><mi>p</mi><mn>1</mn></msub><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></math></mjx-assistive-mml></mjx-container>를 구한다.</p>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style5">
+<p data-ke-size="size16">&nbsp;</p>
+<h4 data-ke-size="size20">Flow Matching ODE Solver 코드</h4>
+<p data-ke-size="size16">아래 코드는 <b>flow_matching</b> 라이브러리에서 제공하는 <code>ODESolver</code> 클래스와 학습된 <code>velocity_model</code> 을 사용해서, 주어진 점 <code>x_1</code>에 대한 <code>log p<sub>1</sub>(x)</code>를 계산할 수 있게 해준다. 즉, <i>초기 분포</i>를 <code>p<sub>0</sub></code>로 두고, 미분방정식을 역방향으로 적분해서 “시간 1에서 위치가 <code>x_1</code>”인 점들의 <i>초기 위치</i> <code>x_0</code>와 <i>최종 로그밀도</i> <code>log_p1</code> 값을 구하는 코드이다.</p>
+<pre class="bash" data-ke-language="bash"><code class="hljs language-bash">from flow_matching.solver import ODESolver
+from flow_matching.utils import ModelWrapper
+from torch.distributions.normal import Normal
+
+<span class="hljs-comment"># velocity_model: model(x_t, t) -&gt; u_t(x_t)</span>
+velocity_model: ModelWrapper = ...
+
+<span class="hljs-comment"># 우리가 log p1(x)를 구하고 싶은 점(여기서는 표준정규분포에서 임의 생성)</span>
+x_1 = torch.randn(batch_size, *data_dim)
+
+<span class="hljs-comment"># ODESolver 생성</span>
+solver = ODESolver(velocity_model=velocity_model)
+
+<span class="hljs-comment"># 초기 분포 p0 = Gaussian(0, I)의 log_density 정의</span>
+gaussian_log_density = Normal(
+    torch.zeros(size=data_dim),
+    torch.ones(size=data_dim)
+).log_prob
+
+num_steps = 100
+
+<span class="hljs-comment"># compute_likelihood를 호출해서 x_0, log_p1를 구한다</span>
+x_0, log_p1 = solver.compute_likelihood(
+    x_1=x_1,
+    method=<span class="hljs-string">'midpoint'</span>,
+    step_size=1.0 / num_steps,
+    log_p0=gaussian_log_density
+)</code></pre>
+<p data-ke-size="size16">최종 시점에서 <code>x_1</code>이라는 점이 있을 때, 이를 ODE 역방향으로 추적해 보면 <i>초기 시점(0)</i>에서 어느 위치 <code>x_0</code>였고, 전체 div 적분을 통해 <code>log p<sub>1</sub>(x<sub>1</sub>)</code>를 어떻게 계산할 수 있는가를 자동으로 해주는 구조이다.</p>
+<p data-ke-size="size16">따라서 <b>실제 데이터셋</b>을 <code>x_1</code> 자리에 넣으면, 그 점의 <code>log p<sub>1</sub></code>를 구할 수 있고, 동시에 그 점이 "<i> 초기 분포</i>&nbsp;p<sub>0</sub>" 공간에서 어떤 위치(<code>x_0</code>)였는지도 알수있다.</p>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style1">
+<p data-ke-size="size16">&nbsp;</p>
+<!-- MathJax 3.x 설정 (원하는 경우 사용)
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$','$$'], ['\\[','\\]']]
+      }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+  -->
+<p data-ke-size="size16">&nbsp;</p>
+<h3 data-ke-size="size23" id="Training%20flow%20models-1"><a href="#Training%20flow%20models-1">Training flow models</a></h3>
+<p data-ke-size="size16">그럼 <i>Instantaneous Change of Variables</i>를 통해 만들어진 ODE식을 어떻게 실제 학습과정에서 활용할까. 결국 “Flow-based” 모델을 “데이터 분포에 맞게” 학습하기 위해서는, <code>log p<sub>1</sub><sup>θ</sup>(x)</code>를 계산할 수 있어야 하고, 이를 최대화(또는 KL발산 최소화)해야 한다.</p>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style1">
+<h4 data-ke-size="size20">학습목표</h4>
+<p data-ke-size="size16"><i>Flow-based</i> 모델에서, 학습 파라미터 <code>θ</code>를 갖는 속도장 <code>u<sub>t</sub><sup>θ</sup></code>를 정의한다고 하자. 이를 통해 “시간 1에서의 분포” <code>p<sub>1</sub><sup>θ</sup></code>가 형성된다. 우리는 이 <code>p<sub>1</sub><sup>θ</sup></code>가, 실제 데이터 분포 <code>q</code>와 가깝도록 하고 싶다. 즉,</p>
+<p style="text-align: center;" data-ke-size="size16"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" display="true" tabindex="0" ctxtmenu_counter="9" style="font-size: 116%; position: relative;"><mjx-math display="true" class="MJX-TEX" aria-hidden="true" style="margin-left: 0px; margin-right: 0px;"><mjx-msubsup><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D45D TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.247em; margin-left: 0px;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D703 TEX-I"></mjx-c></mjx-mi><mjx-spacer style="margin-top: 0.182em;"></mjx-spacer><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c31"></mjx-c></mjx-mn></mjx-script></mjx-msubsup><mjx-mstyle><mjx-mspace style="width: 0.278em;"></mjx-mspace></mjx-mstyle><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c2248"></mjx-c></mjx-mo><mjx-mstyle><mjx-mspace style="width: 0.278em;"></mjx-mspace></mjx-mstyle><mjx-mi class="mjx-i" space="4"><mjx-c class="mjx-c1D45E TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2E"></mjx-c></mjx-mo><mjx-mstyle><mjx-mspace style="width: 1em;"></mjx-mspace></mjx-mstyle></mjx-math><mjx-assistive-mml unselectable="on" display="block"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><msubsup><mi>p</mi><mn>1</mn><mi>θ</mi></msubsup><mstyle scriptlevel="0"><mspace width="0.278em"></mspace></mstyle><mo>≈</mo><mstyle scriptlevel="0"><mspace width="0.278em"></mspace></mstyle><mi>q</mi><mo>.</mo><mstyle scriptlevel="0"><mspace width="1em"></mspace></mstyle></math></mjx-assistive-mml></mjx-container></p>
+<p data-ke-size="size16">예를 들어, <b>KL발산</b>(Kullback-Leibler divergence)을 이용해 아래와 같은 목표함수를 최소화한다고 할 수 있다:</p>
+<p style="text-align: center;" data-ke-size="size16"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" display="true" tabindex="0" ctxtmenu_counter="10" style="font-size: 116%; position: relative;"><mjx-math display="true" class="MJX-TEX" aria-hidden="true" style="width: 25.144em; margin-left: 0px; margin-right: 0px;"><mjx-texatom texclass="ORD"><mjx-mi class="mjx-cal mjx-i"><mjx-c class="mjx-c4C TEX-C"></mjx-c></mjx-mi></mjx-texatom><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D703 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-mstyle><mjx-mspace style="width: 0.278em;"></mjx-mspace></mjx-mstyle><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mstyle><mjx-mspace style="width: 0.278em;"></mjx-mspace></mjx-mstyle><mjx-msub space="4"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D437 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-texatom size="s" texclass="ORD"><mjx-texatom texclass="ORD"><mjx-mi class="mjx-n"><mjx-c class="mjx-c4B"></mjx-c><mjx-c class="mjx-c4C"></mjx-c></mjx-mi></mjx-texatom></mjx-texatom></mjx-script></mjx-msub><mjx-mstyle style="width: 0px; margin-right: -0.167em;"><mjx-mspace style="margin-right: -0.167em;"></mjx-mspace></mjx-mstyle><mjx-texatom texclass="OPEN"><mjx-mo class="mjx-sop"><mjx-c class="mjx-c28 TEX-S1"></mjx-c></mjx-mo></mjx-texatom><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D45E TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-mstyle><mjx-mspace style="width: 0.278em;"></mjx-mspace></mjx-mstyle><mjx-msubsup space="2"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D45D TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.247em; margin-left: 0px;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D703 TEX-I"></mjx-c></mjx-mi><mjx-spacer style="margin-top: 0.182em;"></mjx-spacer><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c31"></mjx-c></mjx-mn></mjx-script></mjx-msubsup><mjx-texatom texclass="CLOSE"><mjx-mo class="mjx-sop"><mjx-c class="mjx-c29 TEX-S1"></mjx-c></mjx-mo></mjx-texatom><mjx-mstyle><mjx-mspace style="width: 0.278em;"></mjx-mspace></mjx-mstyle><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mstyle><mjx-mspace style="width: 0.278em;"></mjx-mspace></mjx-mstyle><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c2212"></mjx-c></mjx-mo><mjx-mstyle><mjx-mspace style="width: 0.167em;"></mjx-mspace></mjx-mstyle><mjx-msub><mjx-texatom texclass="ORD"><mjx-mi class="mjx-ds mjx-b"><mjx-c class="mjx-c1D53C TEX-A"></mjx-c></mjx-mi></mjx-texatom><mjx-script style="vertical-align: -0.15em;"><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D44C TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c223C"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D45E TEX-I"></mjx-c></mjx-mi></mjx-texatom></mjx-script></mjx-msub><mjx-texatom texclass="OPEN"><mjx-mo class="mjx-sop"><mjx-c class="mjx-c5B TEX-S1"></mjx-c></mjx-mo></mjx-texatom><mjx-mi class="mjx-n"><mjx-c class="mjx-c6C"></mjx-c><mjx-c class="mjx-c6F"></mjx-c><mjx-c class="mjx-c67"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2061"></mjx-c></mjx-mo><mjx-msubsup space="2"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D45D TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.247em; margin-left: 0px;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D703 TEX-I"></mjx-c></mjx-mi><mjx-spacer style="margin-top: 0.182em;"></mjx-spacer><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c31"></mjx-c></mjx-mn></mjx-script></mjx-msubsup><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D44C TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-texatom texclass="CLOSE"><mjx-mo class="mjx-sop"><mjx-c class="mjx-c5D TEX-S1"></mjx-c></mjx-mo></mjx-texatom><mjx-mstyle><mjx-mspace style="width: 0.278em;"></mjx-mspace></mjx-mstyle><mjx-mo class="mjx-n" space="3"><mjx-c class="mjx-c2B"></mjx-c></mjx-mo><mjx-mstyle><mjx-mspace style="width: 0.278em;"></mjx-mspace></mjx-mstyle><mjx-mtext class="mjx-n" space="3"><mjx-c class="mjx-c63"></mjx-c><mjx-c class="mjx-c6F"></mjx-c><mjx-c class="mjx-c6E"></mjx-c><mjx-c class="mjx-c73"></mjx-c><mjx-c class="mjx-c74"></mjx-c><mjx-c class="mjx-c61"></mjx-c><mjx-c class="mjx-c6E"></mjx-c><mjx-c class="mjx-c74"></mjx-c><mjx-c class="mjx-c2E"></mjx-c></mjx-mtext><mjx-mstyle><mjx-mspace style="width: 1em;"></mjx-mspace></mjx-mstyle></mjx-math><mjx-assistive-mml unselectable="on" display="block"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow data-mjx-texclass="ORD"><mi data-mjx-variant="-tex-calligraphic" mathvariant="script">L</mi></mrow><mo stretchy="false">(</mo><mi>θ</mi><mo stretchy="false">)</mo><mstyle scriptlevel="0"><mspace width="0.278em"></mspace></mstyle><mo>=</mo><mstyle scriptlevel="0"><mspace width="0.278em"></mspace></mstyle><msub><mi>D</mi><mrow data-mjx-texclass="ORD"><mrow data-mjx-texclass="ORD"><mi data-mjx-auto-op="false">KL</mi></mrow></mrow></msub><mstyle scriptlevel="0"><mspace width="-0.167em"></mspace></mstyle><mrow data-mjx-texclass="OPEN"><mo minsize="1.2em" maxsize="1.2em">(</mo></mrow><mi>q</mi><mo>,</mo><mstyle scriptlevel="0"><mspace width="0.278em"></mspace></mstyle><msubsup><mi>p</mi><mn>1</mn><mi>θ</mi></msubsup><mrow data-mjx-texclass="CLOSE"><mo minsize="1.2em" maxsize="1.2em">)</mo></mrow><mstyle scriptlevel="0"><mspace width="0.278em"></mspace></mstyle><mo>=</mo><mstyle scriptlevel="0"><mspace width="0.278em"></mspace></mstyle><mo>−</mo><mstyle scriptlevel="0"><mspace width="0.167em"></mspace></mstyle><msub><mrow data-mjx-texclass="ORD"><mi mathvariant="double-struck">E</mi></mrow><mrow data-mjx-texclass="ORD"><mi>Y</mi><mo>∼</mo><mi>q</mi></mrow></msub><mrow data-mjx-texclass="OPEN"><mo minsize="1.2em" maxsize="1.2em">[</mo></mrow><mi>log</mi><mo data-mjx-texclass="NONE">⁡</mo><msubsup><mi>p</mi><mn>1</mn><mi>θ</mi></msubsup><mo stretchy="false">(</mo><mi>Y</mi><mo stretchy="false">)</mo><mrow data-mjx-texclass="CLOSE"><mo minsize="1.2em" maxsize="1.2em">]</mo></mrow><mstyle scriptlevel="0"><mspace width="0.278em"></mspace></mstyle><mo>+</mo><mstyle scriptlevel="0"><mspace width="0.278em"></mspace></mstyle><mtext>constant.</mtext><mstyle scriptlevel="0"><mspace width="1em"></mspace></mstyle></math></mjx-assistive-mml></mjx-container></p>
+<p data-ke-size="size16">여기서 <code>p<sub>1</sub><sup>θ</sup></code>는 “X<sub>1</sub> = ψ<sub>1</sub><sup>θ</sup>(X<sub>0</sub>)”의 분포, <code>ψ<sub>t</sub><sup>θ</sup></code>는 속도장 <code>u<sub>t</sub><sup>θ</sup></code>에 의해 결정되는 “흐름(flow)”이고, 우리가 구하고자 하는 것은 <code>log p<sub>1</sub><sup>θ</sup>(Y)</code>의 값이다.</p>
+<h3 data-ke-size="size23" id="ODE%EB%A5%BC%20%ED%86%B5%ED%95%9C%20log%20p1%CE%B8(x)%20%EA%B3%84%EC%82%B0-1"><a href="#ODE%EB%A5%BC%20%ED%86%B5%ED%95%9C%20log%20p1%CE%B8(x)%20%EA%B3%84%EC%82%B0-1">ODE를 통한 log p1θ(x) 계산</a></h3>
+<p data-ke-size="size16">이전에 언급한<i>&nbsp;Instantaneous Change of Variables</i>을 통해, <code>log p<sub>1</sub><sup>θ</sup>(x)</code>를 unbiased하게 추정할 수 있다. 다시 말해서, ODE를 <b>정확히</b> simulate하면 <code>log p<sub>1</sub><sup>θ</sup>(x)</code>를 divergence 적분과 초기 밀도 <code>p<sub>0</sub></code>를 통해 산출 가능하다.</p>
+<p data-ke-size="size16">그러나 <b>학습</b> 과정에서 매 스텝마다 “정확한 ODE 해”를 구하는 것은 많은 계산 비용이 들고, 근사로 처리할 경우 그라디언트가 편향될 수 있다는 단점이 있다.</p>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style1">
+<p data-ke-size="size16">위와 같은 KL발산(<code>ℒ(θ)</code>)을 최소화하려면, <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" display="true" tabindex="0" ctxtmenu_counter="11" style="font-size: 116%; position: relative;"><mjx-math display="true" class="MJX-TEX" aria-hidden="true" style="margin-left: 0px; margin-right: 0px;"><mjx-msub><mjx-mi class="mjx-n"><mjx-c class="mjx-c2207"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D703 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub><mjx-mstyle><mjx-mspace style="width: 0.278em;"></mjx-mspace></mjx-mstyle><mjx-texatom texclass="ORD"><mjx-mi class="mjx-cal mjx-i"><mjx-c class="mjx-c4C TEX-C"></mjx-c></mjx-mi></mjx-texatom><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D703 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="block"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><msub><mi mathvariant="normal">∇</mi><mi>θ</mi></msub><mstyle scriptlevel="0"><mspace width="0.278em"></mspace></mstyle><mrow data-mjx-texclass="ORD"><mi data-mjx-variant="-tex-calligraphic" mathvariant="script">L</mi></mrow><mo stretchy="false">(</mo><mi>θ</mi><mo stretchy="false">)</mo></math></mjx-assistive-mml></mjx-container> 를 반복적으로 구해야 한다. 그런데 <code>log p<sub>1</sub><sup>θ</sup>(x)</code>가 “ODE 적분(시간 0~1)을 통해 정의”된 함수라면, 매번 정밀한 ODE 시뮬레이션이 필요하고, 이는 매우 비싼 연산이 될 수 있다.</p>
+<h2 data-ke-size="size26" id="Flow%20matching%3F-1"><a href="#Flow%20matching%3F-1">Flow matching?</a></h2>
+<p data-ke-size="size16">뒤에서 소개될 Flow matching은 <b>학습 과정에서</b> 매번 <i>ODE를 풀지 않아도</i> 되는 “simulation-free” 방식이다. 즉 기존 Flow based 모델이 <i>Instantaneous Change of Variables</i> 을 통해 학습 중 ODE를 풀었기에 계산 부담이 컸던 반면, <i>Flow Matching</i>은 그 부분을 효율적으로 해결한다.</p>
+    </div>
+    
+    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+        <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    </div>
+</body>
+</html>

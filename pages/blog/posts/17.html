@@ -1,0 +1,172 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Titans: Learning to Memorize at Test Time — happy8825 - Seohyun Lee Blog</title>
+    <meta name="description" content="
+
+
+이 논문은 Google에서 트랜스포머 다음 세대로 제시한 Titans 이라는 논문이다.&nbsp;
+
+모델 구조
+Titans 아키텍처: 핵심 구성요소와 설계
+Titans는 (1) Core Module(Short-Term Memory), (2) Long-Term Memory Modul">
+    <link rel="stylesheet" href="../../styles.css">
+    <style>
+        body { 
+            background: #0d0f17; 
+            color: #fff; 
+            font-family: 'Inter', sans-serif; 
+            line-height: 1.6; 
+            margin: 0; 
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .post-header {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 2rem;
+            margin-bottom: 2rem;
+        }
+        .post-meta {
+            color: #888;
+            margin-bottom: 1rem;
+        }
+        .post-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .post-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        .post-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 1rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .post-content p {
+            margin-bottom: 1rem;
+        }
+        .post-content h1, .post-content h2, .post-content h3 {
+            color: #667eea;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .post-content blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 1rem;
+            margin: 1.5rem 0;
+            color: #ccc;
+            font-style: italic;
+        }
+        .post-content code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .post-content pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            color: #667eea;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            background: rgba(102, 126, 234, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    
+    <div class="post-header">
+        <div class="post-meta">
+            <span>📅 2025-02-15</span>
+            <span> | 🏷️ Computer Vision Paper Review</span>
+            <span> | 🔗 <a href="https://happy8825.tistory.com/95" target="_blank">Original Post</a></span>
+            <span> | 📊 3 images</span>
+        </div>
+        <h1 class="post-title">Titans: Learning to Memorize at Test Time — happy8825</h1>
+        
+    </div>
+    
+    <div class="post-content">
+        <!-- MathJax를 이용한 수식 렌더링 (버전3) -->
+
+
+<p data-ke-size="size16">이 논문은 Google에서 트랜스포머 다음 세대로 제시한 <b>Titans</b> 이라는 논문이다.&nbsp;</p>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style5">
+<h2 data-ke-size="size26" id="%EB%AA%A8%EB%8D%B8%20%EA%B5%AC%EC%A1%B0-1"><a href="#%EB%AA%A8%EB%8D%B8%20%EA%B5%AC%EC%A1%B0-1">모델 구조</a></h2>
+<h2 data-ke-size="size26" id="Titans%20%EC%95%84%ED%82%A4%ED%85%8D%EC%B2%98%3A%20%ED%95%B5%EC%8B%AC%20%EA%B5%AC%EC%84%B1%EC%9A%94%EC%86%8C%EC%99%80%20%EC%84%A4%EA%B3%84-1"><a href="#Titans%20%EC%95%84%ED%82%A4%ED%85%8D%EC%B2%98%3A%20%ED%95%B5%EC%8B%AC%20%EA%B5%AC%EC%84%B1%EC%9A%94%EC%86%8C%EC%99%80%20%EC%84%A4%EA%B3%84-1">Titans 아키텍처: 핵심 구성요소와 설계</a></h2>
+<p data-ke-size="size18">Titans는 <b>(1) Core Module(Short-Term Memory)</b>, <b>(2) Long-Term Memory Module</b>, <b>(3) Persistent Memory</b>의 세 가지 메모리 체계를 분리하여 운영하는 <i>“hyper-heads”</i> 아이디어를 제시한다. &nbsp;구체적으로:</p>
+<ol style="list-style-type: decimal;" data-ke-list-type="decimal">
+<li><b>Core Module (Short-Term Memory)</b><br>사실상 Transformer 유사 구조의 어텐션 모듈로서, 제한된 길이(슬라이딩 윈도우 등)의 최근 토큰들에 대해 <i>self-attention</i>을 수행한다.<br>일반적인 Transformer와 동일하게 <i>쿼리-키-밸류 (query-key-value)</i> 어텐션을 활용하지만, 큰 시퀀스 전체에 대해서는 하지 않고 최근 토큰 구간에만 국한해서 <b>단기 메모리(short-term memory)</b> 역할을 맡는다.</li>
+<li><b>Long-Term Memory Module</b><br>Titans에서 가장 핵심적인 부분으로, 시퀀스를 처리하며 <b>과거의 정보를 network parameter 형태로 지속적으로 학습‧저장</b>한다.<br>Core와 달리, <i>context window</i>가 새로 시작되어도 날아가지 않으며, 실질적으로 “아주 오래된 과거”를 참조할 수 있도록 정보를 누적한다.<br>이 long-term memory는 모델 내부에서 <i>associative memory</i>처럼 작동하며, 현재 입력(또는 현재 시점의 hidden representation)을 쿼리로 하여 과거에 저장된 정보를 retrieve한다.</li>
+<li><b>Persistent Memory</b><br>입력 독립적인, <i>사전에 학습된 고정 파라미터</i>로서, 특정 태스크나 도메인에 대한 일반적 지식을 담는 역할을 한다.<br>구현상, <b>추가 학습 가능한 토큰</b>을 입력 시퀀스 앞단에 붙이는 형태로 다루기도 하며(‘prefix token’과 유사), 이는 모델이 “항상” 참고할 수 있는<b>prior knowledge</b>으로 작동한다.<br>Transformer에서 관찰되는, 초기 토큰에 집중하는 attention bias를 완화하고, 모델에 도메인/태스크 특화된 정보를 미리 제공하는 역할도 한다.</li>
+</ol>
+<p data-ke-size="size18">이 세 가지 기억 요소가 결합되어, Titans는 시퀀스 전체 처리 과정에서 <b>short-term</b>은 Core가, <b>long-term은</b>&nbsp;Long-Term Memory가, <b>global/prior 지식</b>은 Persistent Memory가 각각 담당하도록 구성한다. 이는 인간 두뇌가 돌아가는 방식에서 가져온 아디이ㅓ라고 한다.</p>
+<p data-ke-size="size18"><b>상호작용 방식 개요</b>: Titans가 길이가 매우 긴 시퀀스를 처리할 때, 일반적으로 <b>시퀀스를 여러 세그먼트(segment)</b>나 <b>슬라이딩 윈도우</b>로 나누어 Core Attention을 수행한다. 이때 <b>Long-Term Memory</b>는 과거 정보를 지속적으로 업데이트하며, Core가 필요할 때마다 과거 요약을 인출할 수 있도록 지원한다. 또한 <b>Persistent Memory</b>는 각 세그먼트를 처리할 때마다 입력 앞단에 함께 들어가거나(혹은 별도 브랜치로 병합) Core Attention의 초기 상태를 형성해 준다.</p>
+<p data-ke-size="size18">결과적으로, Titans는 Transformer 특유의 assosiative meory를&nbsp;유지하면서도, (1) <i>무제한 길이의 과거</i>를 압축/추상 형태로 저장할 수 있는 long-term memory를 사용하고, (2) <i>persistent memory</i>로 사전에 학습된 지식을 공유한다. 기존 Transformer가 <i>context window</i>만으로 모든 과거를 직접 들고 있다가 그 길이가 넘어가면 잊어버리는 것에 비해, Titans는 본격적인 “장기적 기억” 모듈을 별도로 마련했다고 볼 수 있다.</p>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style5">
+<h3 data-ke-size="size23" id="Transformer%20%EB%B0%8F%20RNN%EA%B3%BC%EC%9D%98%20%EB%B9%84%EA%B5%90-1"><a href="#Transformer%20%EB%B0%8F%20RNN%EA%B3%BC%EC%9D%98%20%EB%B9%84%EA%B5%90-1">Transformer 및 RNN과의 비교</a></h3>
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li><b>Transformer&nbsp;</b><br>모든 토큰을 key/value로 저장하여 <i>self-attention</i>으로 상호 참조하는 구조이지만, 시퀀스 길이가 커지면 계산량(메모리)이 <i>O(n<sup>2</sup>)</i>로 급증한다.<br>일정 길이를 넘어가는 토큰은 보통 잘라내거나, segment 단위로 묶어서 처리를 시도해야 한다.<br>즉, “최근 토큰”에 대해서는 완벽히 참조 가능하지만, <b>아주 먼 과거</b>에 대해서는 추가 메커니즘 없이는 접근이 불가능하다.</li>
+<li><b>Recurrent Models (RNN, LSTM 등)</b><br>고정된 크기의 hidden state에 순차적으로 입력을 반영한다(시간축으로 한 스텝씩 업데이트).<br>이로 인해 (길이가 긴) 과거 정보가 점차 hidden vector 안에 “압축”되면서 사라지거나 희석된다.<br>이론적으로는 장기 의존성을 배울 수 있으나, 실제로는 gradient vanishing/explosion 등의 문제로 매우 긴 시퀀스에서는 성능이 크게 저하된다.</li>
+<li><b>Titans</b><br>Transformer 스타일의 Attention(단기 정확도 ↑)과, 별도의 Long-Term Memory(장기 기억) + Persistent Memory(사전 지식)를 결합한다.<br><i>Long-Term Memory 모듈</i>은 메타 러닝처럼 작동하여, <i>테스트 단계에서도</i> 가중치를 online 업데이트하며 새 정보를 배운다.<br>계산 복잡도 측면에서, Attention은 각 세그먼트(또는 윈도우)에 대해서만 수행하므로 Transformer처럼 전체 길이에 대해 O(n<sup>2</sup>)로 폭증하지 않으며, Long-Term Memory는 매번 작은 네트워크 업데이트만 수행하므로 <i>O(n)</i>으로 확장 가능하다.<br>이는 “2M 토큰 이상의 시퀀스”를 실질적으로 처리하면서도 중요한 정보를 잃지 않고 높은 정확도를 달성했다고 한다.</li>
+</ul>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style5">
+<h3 data-ke-size="size23" id="Long-Term%20Memory%20%EB%AA%A8%EB%93%88%EC%9D%98%20%EC%9E%91%EB%8F%99%20%EB%B0%A9%EC%8B%9D-1"><a href="#Long-Term%20Memory%20%EB%AA%A8%EB%93%88%EC%9D%98%20%EC%9E%91%EB%8F%99%20%EB%B0%A9%EC%8B%9D-1">Long-Term Memory 모듈의 작동 방식</a></h3>
+<h4 data-ke-size="size20">Titans에서 가장 핵심적인 부분은 <b>Neural Long-Term Memory</b>로, <i>가중치 자체가 ‘fast weight(빠른 학습되는 가중치)’</i>로 작동하며, 시퀀스가 들어올 때마다 <i>inner-loop</i> 방식으로 online update를 진행한다. 구체적으로:</h4>
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li><b>Memory as a Meta-Learner</b><br>Long-Term Memory 네트워크 <code>M</code>은 입력으로 들어오는 중간 표현 <code>z</code>로부터 key(<i>k</i>)와 value(<i>v</i>)를 뽑아낸 뒤,<br><br><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="0" style="font-size: 116%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D458 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-msub space="4"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D44A TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em; margin-left: -0.104em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D458 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub><mjx-mstyle><mjx-mspace style="width: 0.167em;"></mjx-mspace></mjx-mstyle><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D467 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-mstyle><mjx-mspace style="width: 1em;"></mjx-mspace></mjx-mstyle><mjx-mi class="mjx-i" space="2"><mjx-c class="mjx-c1D463 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-msub space="4"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D44A TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em; margin-left: -0.104em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D463 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub><mjx-mstyle><mjx-mspace style="width: 0.167em;"></mjx-mspace></mjx-mstyle><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D467 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>k</mi><mo>=</mo><msub><mi>W</mi><mi>k</mi></msub><mstyle scriptlevel="0"><mspace width="0.167em"></mspace></mstyle><mi>z</mi><mo>,</mo><mstyle scriptlevel="0"><mspace width="1em"></mspace></mstyle><mi>v</mi><mo>=</mo><msub><mi>W</mi><mi>v</mi></msub><mstyle scriptlevel="0"><mspace width="0.167em"></mspace></mstyle><mi>z</mi><mo>,</mo></math></mjx-assistive-mml></mjx-container><br><br>주어진 <code>k</code>를 입력으로 넣었을 때 해당 네트워크가 <code>v</code>를 재현하도록(회귀 혹은 분류 에러를 최소화) <b>학습</b>한다. 즉, <i><span>\</span>( \mathcal{L}_{\text{mem}}( M(k),\, v ) <span>\</span>)</i> 같은 형태의 로스를 정의하고, <b>메모리 네트워크 가중치</b> <span>\</span>( \Theta <span>\</span>)에 대해 online gradient descent를&nbsp;수행한다.<br>이렇게 메모리가 “(key → value) 연결”을 배워두면, 훗날 유사한 쿼리(=key) <span>\</span>( k' <span>\</span>)가 들어왔을 때 <span>\</span>( \hat{v} = M(k') <span>\</span>) 를 인출하게 되는 식이다.<br>중요한 점은 <i>테스트 시점</i>에도 이 memory는 계속 업데이트된다는 것이다. 즉, 원래 nerual network 생각해보면 학습이 끝나고 추론 시점에 가중치를 바꾸지 않지만, Titans는 “meta-learning” 개념을 도입하여 <b>추론 과정에서도</b> memory 파라미터를 수정한다.</li>
+<li><b>Surprise 기반 메모리 업데이트</b><br><i>어떤 정보를 저장할지(업데이트할지) 결정하는 지표</i>로, Titans는 “surprise” 개념을 활용한다.<br>일반적으론 입력 토큰이 모델 예측과 크게 어긋날 때, 혹은 gradient가 크게 발생할 때가 <i>surprise가</i>&nbsp;큰 이벤트로 간주된다.<br>한 토큰에서만 갑자기 surprise가 커진 뒤 이어지는 토큰들이 “맥락상 전부 중요”할 수도 있으므로, Titans는 gradient 크기를 momentum방식으로 누적하여 <b>상황별로 더 오래/짧게 surprise를 유지</b>한다.<br>이 “surprise 지표”가 일정 threshodl를 넘으면, Memory 모듈이 새로운 key-value를 학습하기 위해 gradient descent를 강하게 적용한다. 반대로 surprise가 낮으면 업데이트를 미루거나 최소화한다.</li>
+<li><b>Gating &amp; Forgetting</b><br>Memory 모듈이 모든 정보를 계속 쌓으면(=가중치가 무한정 커지면) “ 과부화되어서 특정 중요 정보를 잃어버릴 위험이 있다.<br>이를 위해 Titans는 <b>forget 게이트</b>를 두어, 새로운 업데이트를 반영하기 전에 기존 가중치를 일부 reset하는 방식을 만들었다.<br>예를 들어, 어떤 시점에서 게이트 <code>g_t</code>가 1에 가까우면, “이전 기억을 대폭 지우고 새 정보를 저장”하는 형태가 되고, 0에 가까우면 “기존 기억을 거의 유지”한 채 부분 업데이트만 수행하는 식이다.<br>이렇게 <i>데이터 의존적 게이팅</i>을 도입함으로써, 장기기억을 <i>필요한 만큼만</i> 적절히 변경‧유지할 수 있다.</li>
+<li><b>Non-linear Deep Memory</b><br>Titans에서는 Memory 모듈을 간단한 선형 레이어 대신 <b>MLP로 </b>&nbsp;구성한다고 제안한다.<br>이로써 단순 RNN(선형 상태 업데이트)에 비해 훨씬 복잡한 패턴을 표현 가능하다.<br>실제 실험에서도, 단층보다 여러 층(깊은 MLP)으로 Memory를 구성할 때 더 성능이 좋았다고 한다.</li>
+<li><b>Parallelizable Training</b><br>Memory가 “recurrent”하게 동작한다고 해서 학습 때 순차적(시뮬레이션 식)으로만 처리해야 하는 것은 아니다. 논문에서는 메모리 업데이트를 <i>gradient descent</i> 연산(배치 형태)으로 취급하여 병렬화가 가능하다고 설명한다.<br>즉, 하나의 긴 시퀀스를 여러 미니배치로 나누어도, 각각의 (key, value) 쌍에 대해 memory 업데이트의 효과를 한꺼번에 계산할 수 있는 구조가 마련되어 있다는 것이다.<br>이는 긴 시퀀스 학습 시 기존 RNN류 모델들에서 나타나는 “긴 backprop 시간” 문제를 완화해주며, 실제로 2M 이상의 시퀀스를 GPU/TPU로 병렬 학습했다는 결과를 제시한다.</li>
+</ul>
+<p data-ke-size="size16">정리하면, <b>Titans의 Long-Term Memory</b>는 “(key → value) 연상 관계를 빠르게 학습‧인출”하는 내부 뉴럴넷으로, 새로운 데이터가 들어올 때마다 surprise 기반으로 업데이트되고, 오래된 정보는 게이팅/망각 규칙에 따라 부분적으로 지워지거나 유지된다. 이는 고정된 hidden state 하나로 과거를 저장하는 RNN 접근과 달리, 훨씬 long dependency를 다룰수 있따.</p>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style5">
+<h3 data-ke-size="size23" id="Titans%EC%9D%98%20%EC%84%B8%20%EA%B0%80%EC%A7%80%20Variant-1"><a href="#Titans%EC%9D%98%20%EC%84%B8%20%EA%B0%80%EC%A7%80%20Variant-1">Titans의 세 가지 Variant</a></h3>
+<p data-ke-size="size16"><span style="text-align: start;">논문에서는 Long-Term Memory를 전체 모델에 통합하는 방식에 따라&nbsp;</span><b>MAC</b><span style="text-align: start;">,&nbsp;</span><b>MAG</b><span style="text-align: start;">,&nbsp;</span><b>MAL</b><span style="text-align: start;">세 가지 아키텍처를 소개한다</span><span style="text-align: start;"></span><span style="color: #333333; text-align: start;">.</span></p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1545" data-origin-height="521" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/bQbjG4/btsMkLO7LO4/AAAAAAAAAAAAAAAAAAAAAHJpx4HUlZvkG9KGCGF3b7kIm6aPhG1W2NUL2gBYK2co/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=nu0n0AhYTFFRiEIoNKZB2I6YKBI%3D" data-phocus="https://blog.kakaocdn.net/dna/bQbjG4/btsMkLO7LO4/AAAAAAAAAAAAAAAAAAAAAHJpx4HUlZvkG9KGCGF3b7kIm6aPhG1W2NUL2gBYK2co/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=nu0n0AhYTFFRiEIoNKZB2I6YKBI%3D" data-alt="MAC"><img src="https://blog.kakaocdn.net/dna/bQbjG4/btsMkLO7LO4/AAAAAAAAAAAAAAAAAAAAAHJpx4HUlZvkG9KGCGF3b7kIm6aPhG1W2NUL2gBYK2co/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=nu0n0AhYTFFRiEIoNKZB2I6YKBI%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FbQbjG4%2FbtsMkLO7LO4%2FAAAAAAAAAAAAAAAAAAAAAHJpx4HUlZvkG9KGCGF3b7kIm6aPhG1W2NUL2gBYK2co%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3Dnu0n0AhYTFFRiEIoNKZB2I6YKBI%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1545" height="521" data-origin-width="1545" data-origin-height="521" data-phocus-index="0"></span><figcaption>MAC</figcaption>
+</figure>
+<p></p>
+<p data-ke-size="size16"><b>MAC (Memory as Context)</b><br>세그먼트마다 Long-Term Memory의 메로리 출력을 <i>“context token”</i>처럼 취급하여 Core Attention에 함께 넣는다.<br>즉, <code>입력 세그먼트 S<sub>t</sub></code> + <code>Memory 출력(y<sub>t</sub>)</code> + <code>Persistent Memory 토큰들</code>을 모두 어텐션에 넣어, 해당 세그먼트 처리 시에 long-term 정보를 활용할 수 있게 한다.<br>그런 다음, 어텐션 결과를 바탕으로 Long-Term Memory를 업데이트.<br><b>장점</b>: Attention이 메모리 출력과 현재 토큰 간의 상호작용을 자유롭게 학습하므로, <i>중요 토큰만 메모리에 저장</i>하게끔 자연스럽게 학습될 수 있음(Attention이 선택적으로 강조).<br><b>단점</b>: 매 세그먼트마다 “모든 토큰 + 메모리 출력”에 대해 풀 어텐션을 하므로, 세그먼트 길이가 커지면 계산량이 커질 수 있따.</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1642" data-origin-height="521" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/WFpVi/btsMkJqgNyg/AAAAAAAAAAAAAAAAAAAAAOZnFpkCeJZ2PcbzeEG75G7ToVQgN0tTxt-UQBX7Uro-/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=5ATs8SgTR4AkGfVmbnvSI64qfL8%3D" data-phocus="https://blog.kakaocdn.net/dna/WFpVi/btsMkJqgNyg/AAAAAAAAAAAAAAAAAAAAAOZnFpkCeJZ2PcbzeEG75G7ToVQgN0tTxt-UQBX7Uro-/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=5ATs8SgTR4AkGfVmbnvSI64qfL8%3D" data-alt="MAG"><img src="https://blog.kakaocdn.net/dna/WFpVi/btsMkJqgNyg/AAAAAAAAAAAAAAAAAAAAAOZnFpkCeJZ2PcbzeEG75G7ToVQgN0tTxt-UQBX7Uro-/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=5ATs8SgTR4AkGfVmbnvSI64qfL8%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FWFpVi%2FbtsMkJqgNyg%2FAAAAAAAAAAAAAAAAAAAAAOZnFpkCeJZ2PcbzeEG75G7ToVQgN0tTxt-UQBX7Uro-%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3D5ATs8SgTR4AkGfVmbnvSI64qfL8%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1642" height="521" data-origin-width="1642" data-origin-height="521" data-phocus-index="1"></span><figcaption>MAG</figcaption>
+</figure>
+<p></p>
+<p data-ke-size="size16"><b>MAG (Memory as Gating)</b><br>Core Attention(<i>Sliding Window Attention</i> 형태)과 Long-Term Memory를 <i>병렬적으로</i> 돌린 뒤, <b>출력 두 개를 게이트로 합성</b>한다.<br>예를 들어, 현재 시점에서,<br><code>SWA(슬라이딩 윈도우 어텐션) 결과 = h<sup>SWA</sup><sub>t</sub></code>, <code>Long-Term Memory 모듈 출력 = h<sup>LTM</sup><sub>t</sub></code> 라고 할 때,<br><br><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="1" style="font-size: 116%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D45C TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D461 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="4"><mjx-c class="mjx-c1D70E TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mtext class="mjx-n"><mjx-c class="mjx-c67"></mjx-c><mjx-c class="mjx-c61"></mjx-c><mjx-c class="mjx-c74"></mjx-c><mjx-c class="mjx-c65"></mjx-c></mjx-mtext><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="3"><mjx-c class="mjx-c22C5"></mjx-c></mjx-mo><mjx-msubsup space="3"><mjx-mi class="mjx-i"><mjx-c class="mjx-c210E TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.26em; margin-left: 0px;"><mjx-texatom size="s" texclass="ORD"><mjx-mtext class="mjx-n"><mjx-c class="mjx-c4C"></mjx-c><mjx-c class="mjx-c54"></mjx-c><mjx-c class="mjx-c4D"></mjx-c></mjx-mtext></mjx-texatom><mjx-spacer style="margin-top: 0.18em;"></mjx-spacer><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D461 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msubsup><mjx-mstyle><mjx-mspace style="width: 0.278em;"></mjx-mspace></mjx-mstyle><mjx-mo class="mjx-n" space="3"><mjx-c class="mjx-c2B"></mjx-c></mjx-mo><mjx-mstyle><mjx-mspace style="width: 0.278em;"></mjx-mspace></mjx-mstyle><mjx-texatom space="3" texclass="OPEN"><mjx-mo class="mjx-sop"><mjx-c class="mjx-c28 TEX-S1"></mjx-c></mjx-mo></mjx-texatom><mjx-mn class="mjx-n"><mjx-c class="mjx-c31"></mjx-c></mjx-mn><mjx-mo class="mjx-n" space="3"><mjx-c class="mjx-c2212"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="3"><mjx-c class="mjx-c1D70E TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mtext class="mjx-n"><mjx-c class="mjx-c67"></mjx-c><mjx-c class="mjx-c61"></mjx-c><mjx-c class="mjx-c74"></mjx-c><mjx-c class="mjx-c65"></mjx-c></mjx-mtext><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-texatom texclass="CLOSE"><mjx-mo class="mjx-sop"><mjx-c class="mjx-c29 TEX-S1"></mjx-c></mjx-mo></mjx-texatom><mjx-mo class="mjx-n" space="3"><mjx-c class="mjx-c22C5"></mjx-c></mjx-mo><mjx-msubsup space="3"><mjx-mi class="mjx-i"><mjx-c class="mjx-c210E TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.269em; margin-left: 0px;"><mjx-texatom size="s" texclass="ORD"><mjx-mtext class="mjx-n"><mjx-c class="mjx-c53"></mjx-c><mjx-c class="mjx-c57"></mjx-c><mjx-c class="mjx-c41"></mjx-c></mjx-mtext></mjx-texatom><mjx-spacer style="margin-top: 0.18em;"></mjx-spacer><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D461 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msubsup><mjx-mo class="mjx-n"><mjx-c class="mjx-c2E"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>o</mi><mi>t</mi></msub><mo>=</mo><mi>σ</mi><mo stretchy="false">(</mo><mtext>gate</mtext><mo stretchy="false">)</mo><mo>⋅</mo><msubsup><mi>h</mi><mi>t</mi><mrow data-mjx-texclass="ORD"><mtext>LTM</mtext></mrow></msubsup><mstyle scriptlevel="0"><mspace width="0.278em"></mspace></mstyle><mo>+</mo><mstyle scriptlevel="0"><mspace width="0.278em"></mspace></mstyle><mrow data-mjx-texclass="OPEN"><mo minsize="1.2em" maxsize="1.2em">(</mo></mrow><mn>1</mn><mo>−</mo><mi>σ</mi><mo stretchy="false">(</mo><mtext>gate</mtext><mo stretchy="false">)</mo><mrow data-mjx-texclass="CLOSE"><mo minsize="1.2em" maxsize="1.2em">)</mo></mrow><mo>⋅</mo><msubsup><mi>h</mi><mi>t</mi><mrow data-mjx-texclass="ORD"><mtext>SWA</mtext></mrow></msubsup><mo>.</mo></math></mjx-assistive-mml></mjx-container><br><br><b>장점</b>: (1) 연속 처리(토큰별 슬라이딩 윈도우)로 효율적, (2) <i>게이트</i>가 상황에 따라 “장기메모리 vs. 단기어텐션” 비중을 동적으로 조절.<br><b>단점</b>: Attention과 Memory가 분리되어 있으므로, Memory 쪽에 불필요한 정보가 많이 들어갈 우려도 있음(물론 surprise/gating으로 완화 가능)</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1744" data-origin-height="524" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/Ur1d3/btsMkWpnExW/AAAAAAAAAAAAAAAAAAAAAIMNY89KKu2u43OWUFNoD9b5kGyhuu5woIqz6XyY13Dy/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=D2ZX6V48agJHgue0Z5bGC4oTXXg%3D" data-phocus="https://blog.kakaocdn.net/dna/Ur1d3/btsMkWpnExW/AAAAAAAAAAAAAAAAAAAAAIMNY89KKu2u43OWUFNoD9b5kGyhuu5woIqz6XyY13Dy/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=D2ZX6V48agJHgue0Z5bGC4oTXXg%3D"><img src="https://blog.kakaocdn.net/dna/Ur1d3/btsMkWpnExW/AAAAAAAAAAAAAAAAAAAAAIMNY89KKu2u43OWUFNoD9b5kGyhuu5woIqz6XyY13Dy/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=D2ZX6V48agJHgue0Z5bGC4oTXXg%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FUr1d3%2FbtsMkWpnExW%2FAAAAAAAAAAAAAAAAAAAAAIMNY89KKu2u43OWUFNoD9b5kGyhuu5woIqz6XyY13Dy%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DD2ZX6V48agJHgue0Z5bGC4oTXXg%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1744" height="524" data-origin-width="1744" data-origin-height="524" data-phocus-index="2"></span></figure>
+<p></p>
+<p data-ke-size="size16"><b>MAL (Memory as a Layer)</b><br>Long-Term Memory 모듈을 <i>RNN 레이어</i>처럼 쓰고, 그다음에 Attention 레이어를 쌓거나하는 식으로 <i>순차적으로 stack</i>한다.<br>예시:<br><br><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="2" style="font-size: 116%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-msubsup><mjx-mi class="mjx-i"><mjx-c class="mjx-c210E TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.267em; margin-left: 0px;"><mjx-texatom size="s" texclass="ORD"><mjx-mtext class="mjx-n"><mjx-c class="mjx-c6D"></mjx-c><mjx-c class="mjx-c65"></mjx-c><mjx-c class="mjx-c6D"></mjx-c></mjx-mtext></mjx-texatom><mjx-spacer style="margin-top: 0.18em;"></mjx-spacer><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D461 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msubsup><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="4"><mjx-c class="mjx-c1D440 TEX-I"></mjx-c></mjx-mi><mjx-texatom texclass="OPEN"><mjx-mo class="mjx-sop"><mjx-c class="mjx-c28 TEX-S1"></mjx-c></mjx-mo></mjx-texatom><mjx-msubsup><mjx-mi class="mjx-i"><mjx-c class="mjx-c210E TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.296em; margin-left: 0px;"><mjx-texatom size="s" texclass="ORD"><mjx-mtext class="mjx-n"><mjx-c class="mjx-c6D"></mjx-c><mjx-c class="mjx-c65"></mjx-c><mjx-c class="mjx-c6D"></mjx-c></mjx-mtext></mjx-texatom><mjx-spacer style="margin-top: 0.18em;"></mjx-spacer><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D461 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2212"></mjx-c></mjx-mo><mjx-mn class="mjx-n"><mjx-c class="mjx-c31"></mjx-c></mjx-mn></mjx-texatom></mjx-script></mjx-msubsup><mjx-mo class="mjx-n"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-mstyle><mjx-mspace style="width: 0.167em;"></mjx-mspace></mjx-mstyle><mjx-msub space="2"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D461 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub><mjx-texatom texclass="CLOSE"><mjx-mo class="mjx-sop"><mjx-c class="mjx-c29 TEX-S1"></mjx-c></mjx-mo></mjx-texatom><mjx-mo class="mjx-n"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-mstyle><mjx-mspace style="width: 1em;"></mjx-mspace></mjx-mstyle><mjx-msubsup space="2"><mjx-mi class="mjx-i"><mjx-c class="mjx-c210E TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.267em; margin-left: 0px;"><mjx-texatom size="s" texclass="ORD"><mjx-mtext class="mjx-n"><mjx-c class="mjx-c61"></mjx-c><mjx-c class="mjx-c74"></mjx-c><mjx-c class="mjx-c74"></mjx-c><mjx-c class="mjx-c6E"></mjx-c></mjx-mtext></mjx-texatom><mjx-spacer style="margin-top: 0.18em;"></mjx-spacer><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D461 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msubsup><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mtext class="mjx-n" space="4"><mjx-c class="mjx-c53"></mjx-c><mjx-c class="mjx-c57"></mjx-c><mjx-c class="mjx-c41"></mjx-c></mjx-mtext><mjx-texatom texclass="OPEN"><mjx-mo class="mjx-sop"><mjx-c class="mjx-c28 TEX-S1"></mjx-c></mjx-mo></mjx-texatom><mjx-msubsup><mjx-mi class="mjx-i"><mjx-c class="mjx-c210E TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.274em; margin-left: 0px;"><mjx-texatom size="s" texclass="ORD"><mjx-mtext class="mjx-n"><mjx-c class="mjx-c6D"></mjx-c><mjx-c class="mjx-c65"></mjx-c><mjx-c class="mjx-c6D"></mjx-c></mjx-mtext></mjx-texatom><mjx-spacer style="margin-top: 0.18em;"></mjx-spacer><mjx-texatom size="s" texclass="ORD"><mjx-mo class="mjx-n"><mjx-c class="mjx-c2264"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D461 TEX-I"></mjx-c></mjx-mi></mjx-texatom></mjx-script></mjx-msubsup><mjx-texatom texclass="CLOSE"><mjx-mo class="mjx-sop"><mjx-c class="mjx-c29 TEX-S1"></mjx-c></mjx-mo></mjx-texatom><mjx-mo class="mjx-n"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-mstyle><mjx-mspace style="width: 1em;"></mjx-mspace></mjx-mstyle><mjx-msub space="2"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D45C TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D461 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="4"><mjx-c class="mjx-c1D453 TEX-I"></mjx-c></mjx-mi><mjx-texatom texclass="OPEN"><mjx-mo class="mjx-sop"><mjx-c class="mjx-c28 TEX-S1"></mjx-c></mjx-mo></mjx-texatom><mjx-msubsup><mjx-mi class="mjx-i"><mjx-c class="mjx-c210E TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.267em; margin-left: 0px;"><mjx-texatom size="s" texclass="ORD"><mjx-mtext class="mjx-n"><mjx-c class="mjx-c61"></mjx-c><mjx-c class="mjx-c74"></mjx-c><mjx-c class="mjx-c74"></mjx-c><mjx-c class="mjx-c6E"></mjx-c></mjx-mtext></mjx-texatom><mjx-spacer style="margin-top: 0.18em;"></mjx-spacer><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D461 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msubsup><mjx-texatom texclass="CLOSE"><mjx-mo class="mjx-sop"><mjx-c class="mjx-c29 TEX-S1"></mjx-c></mjx-mo></mjx-texatom><mjx-mo class="mjx-n"><mjx-c class="mjx-c2E"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><msubsup><mi>h</mi><mi>t</mi><mrow data-mjx-texclass="ORD"><mtext>mem</mtext></mrow></msubsup><mo>=</mo><mi>M</mi><mrow data-mjx-texclass="OPEN"><mo minsize="1.2em" maxsize="1.2em">(</mo></mrow><msubsup><mi>h</mi><mrow data-mjx-texclass="ORD"><mi>t</mi><mo>−</mo><mn>1</mn></mrow><mrow data-mjx-texclass="ORD"><mtext>mem</mtext></mrow></msubsup><mo>,</mo><mstyle scriptlevel="0"><mspace width="0.167em"></mspace></mstyle><msub><mi>x</mi><mi>t</mi></msub><mrow data-mjx-texclass="CLOSE"><mo minsize="1.2em" maxsize="1.2em">)</mo></mrow><mo>,</mo><mstyle scriptlevel="0"><mspace width="1em"></mspace></mstyle><msubsup><mi>h</mi><mi>t</mi><mrow data-mjx-texclass="ORD"><mtext>attn</mtext></mrow></msubsup><mo>=</mo><mtext>SWA</mtext><mrow data-mjx-texclass="OPEN"><mo minsize="1.2em" maxsize="1.2em">(</mo></mrow><msubsup><mi>h</mi><mrow data-mjx-texclass="ORD"><mo>≤</mo><mi>t</mi></mrow><mrow data-mjx-texclass="ORD"><mtext>mem</mtext></mrow></msubsup><mrow data-mjx-texclass="CLOSE"><mo minsize="1.2em" maxsize="1.2em">)</mo></mrow><mo>,</mo><mstyle scriptlevel="0"><mspace width="1em"></mspace></mstyle><msub><mi>o</mi><mi>t</mi></msub><mo>=</mo><mi>f</mi><mrow data-mjx-texclass="OPEN"><mo minsize="1.2em" maxsize="1.2em">(</mo></mrow><msubsup><mi>h</mi><mi>t</mi><mrow data-mjx-texclass="ORD"><mtext>attn</mtext></mrow></msubsup><mrow data-mjx-texclass="CLOSE"><mo minsize="1.2em" maxsize="1.2em">)</mo></mrow><mo>.</mo></math></mjx-assistive-mml></mjx-container><br><br><b>장점</b>: 구현이 직관적(기존 RNN+Transformer 느김)<br><b>단점</b>: Memory와 Attention이&nbsp; layer순서로만 연결되어 있어 상호작용이 제한적. 실험 결과 MAC, MAG에 비해 장기 의존 처리 성능이 떨어지는 경향이 있다.</p>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style5">
+<p data-ke-size="size16">정리하자면, 아주 직관적이면서, 인간의 뇌가 작동하는 방식으로 잘 모델링이 된것 같다. 기존 트랜스포머나 RNN이나 한계를 극복하기에 아주 좋은 방법인거 같다.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">다만 forget 게이트 부분은,, 타이탄에서는 중요이벤트만 제대로 보존하자! 하기 위해서 제시한거 같은데, 이걸 forget 게이트로 조절한다고는 하지만, 게이트말고 더 좋은 방법이 분명 있을거 같다. 그리고&nbsp; 확장해서 사용하기에는 구현이 매우 어려울거 같다는 생각이 든다..</p>
+<p data-ke-size="size16">&nbsp;</p>
+    </div>
+    
+    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+        <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    </div>
+</body>
+</html>

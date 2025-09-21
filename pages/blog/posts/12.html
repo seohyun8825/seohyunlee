@@ -1,0 +1,144 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visual-RFT: Visual Reinforcement Fine-Tuning — happy8825 - Seohyun Lee Blog</title>
+    <meta name="description" content="Intro
+Visual-RFT: Visual Reinforcement Fine-Tuning 논문에서는 Large Vision-Language Models를&nbsp; 강화학습 기반으로 파인튜닝하는 Visual Reinforcement Fine-Tuning을 제안한다. 기존 많이 사용되던">
+    <link rel="stylesheet" href="../../styles.css">
+    <style>
+        body { 
+            background: #0d0f17; 
+            color: #fff; 
+            font-family: 'Inter', sans-serif; 
+            line-height: 1.6; 
+            margin: 0; 
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .post-header {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 2rem;
+            margin-bottom: 2rem;
+        }
+        .post-meta {
+            color: #888;
+            margin-bottom: 1rem;
+        }
+        .post-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .post-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        .post-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 1rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .post-content p {
+            margin-bottom: 1rem;
+        }
+        .post-content h1, .post-content h2, .post-content h3 {
+            color: #667eea;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .post-content blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 1rem;
+            margin: 1.5rem 0;
+            color: #ccc;
+            font-style: italic;
+        }
+        .post-content code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .post-content pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            color: #667eea;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            background: rgba(102, 126, 234, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    
+    <div class="post-header">
+        <div class="post-meta">
+            <span>📅 2025-03-06</span>
+            <span> | 🏷️ Computer Vision Paper Review</span>
+            <span> | 🔗 <a href="https://happy8825.tistory.com/100" target="_blank">Original Post</a></span>
+            <span> | 📊 1 images</span>
+        </div>
+        <h1 class="post-title">Visual-RFT: Visual Reinforcement Fine-Tuning — happy8825</h1>
+        
+    </div>
+    
+    <div class="post-content">
+        <h3 data-ke-size="size23" id="Intro-1"><a href="#Intro-1">Intro</a></h3>
+<p data-ke-size="size16">Visual-RFT: Visual Reinforcement Fine-Tuning 논문에서는 Large Vision-Language Models를&nbsp; 강화학습 기반으로 파인튜닝하는 <b>Visual Reinforcement Fine-Tuning을</b> 제안한다. 기존 많이 사용되던 RLHF와는 달리&nbsp;<i>Verifiable Reward</i>를 사용하는 GRPO를 활용한다</p>
+<p data-ke-size="size16">즉, <b>“Visual-RFT”</b>는 기존 SFT방식이 아닌 reward function을 explicit 하게 정의하여 모델이 이미지 입력에 대한 다양한 response 를 만들고, 그 reward 정보를 통해 모델이 스스로 학습하도록 한 점이 핵심이다.</p>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style1">
+<p data-ke-size="size16"><b>LVLMs, </b>&nbsp;GPT-4나 Qwen2-VL 같은 모델들은 크게 pretraining, postraining 을 거쳐서 학습이 되는데,</p>
+<p data-ke-size="size16">Post training은 보통 supervised finetuning, RLHF 같은걸로 한다. RLHF의 가장 큰 단점이라고 하면, 인간 feedback이나 인간이 label한 선호도/비선호도 데이터가 있어야한다는건데, 이게 일일이 수집하는게 어려우니까, 최근에는 <i>“Verifiable Reward”</i>라는 객관적이고 자동화된 reward 계산 방식을 적용하려는 시도가 활발해졌다. 특히 <i>DeepSeek-R1</i>과 같은 모델에서 verifiable reward를 사용해서 성능을 엄청 끌어올렸고, 이걸 이 논문에서는 vision task를 풀기 위한 방법으로 확장한다.</p>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style1">
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="2092" data-origin-height="1244" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/Gm3Ai/btsMJF1ZPwD/AAAAAAAAAAAAAAAAAAAAABf5pehXa_Z1xGyIMla5y7Peui0F-h6vUhCPM7u-MoPq/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=ry4RXq1VZM%2BDLMq3qBuhny3AwQw%3D" data-phocus="https://blog.kakaocdn.net/dna/Gm3Ai/btsMJF1ZPwD/AAAAAAAAAAAAAAAAAAAAABf5pehXa_Z1xGyIMla5y7Peui0F-h6vUhCPM7u-MoPq/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=ry4RXq1VZM%2BDLMq3qBuhny3AwQw%3D"><img src="https://blog.kakaocdn.net/dna/Gm3Ai/btsMJF1ZPwD/AAAAAAAAAAAAAAAAAAAAABf5pehXa_Z1xGyIMla5y7Peui0F-h6vUhCPM7u-MoPq/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=ry4RXq1VZM%2BDLMq3qBuhny3AwQw%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FGm3Ai%2FbtsMJF1ZPwD%2FAAAAAAAAAAAAAAAAAAAAABf5pehXa_Z1xGyIMla5y7Peui0F-h6vUhCPM7u-MoPq%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3Dry4RXq1VZM%252BDLMq3qBuhny3AwQw%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="2092" height="1244" data-origin-width="2092" data-origin-height="1244" data-phocus-index="0"></span></figure>
+<p></p>
+<p data-ke-size="size16">(a)가 기존 방식, sft로 하면 dataset이 너무 많이 필요하다..</p>
+<p data-ke-size="size16">(b)가 새로 제안한 visual rft 방식</p>
+<h2 data-ke-size="size26" id="%C2%A0-1"><a href="#%C2%A0-1">&nbsp;</a></h2>
+<h2 data-ke-size="size26" id="Visual-RFT-1"><a href="#Visual-RFT-1">Visual-RFT</a></h2>
+<p data-ke-size="size16"><b>Visual-RFT</b>에서는 모델이 이미지와 질문을 입력받아, 답변 내용과 reasoning token(“<code>&lt;think&gt;...&lt;/think&gt;</code>”)을 함께 출력한다. 여기서 각 응답에 대한 reward는 정의된 <i>Verifiable Reward Function</i>으로부터 자동으로 계산된다.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">질문 <code>q</code>가 주어지고, 모델 정책 <code>π<sub>θ</sub></code>가 응답 <code>o</code>를 생성했을 때, 그 reward R을 최적화하는 문제는 아래와 같이 표현된다:</p>
+<div class="equation"><span class="block-math"> max<sub>π<sub>θ</sub></sub> E<sub>o ~ π<sub>θ</sub>(q)</sub>[ R<sub>RLVR</sub>(q, o) ]. </span></div>
+<p data-ke-size="size16">여기서 <code>R<sub>RLVR</sub></code>은 reward function으로, verifiable reward 방식을 따른다. 이때 KL-divergence를 통해 기존 모델 대비 지나치게 바뀌지 않도록 하는 항도 함께 최적화 목표에 들어간다:</p>
+<div class="equation"><span class="block-math"> E<sub>o ~ π<sub>θ</sub>(q)</sub>[ R(q, o) - β KL(π<sub>θ</sub>(o|q) || π<sub>ref</sub>(o|q)) ]. </span></div>
+<p data-ke-size="size16">논문에서는 GRPO알고리즘을 사용한다. 이는 별도의 critic 없이, 한 번의 생성에서 나온 여러 group 간 상대 비교를 통해 우수 응답에 가중을 주어 학습을 진행한다.</p>
+<h3 data-ke-size="size23" id="Verifiable%20Reward%20for%20Visual%20Task-1"><a href="#Verifiable%20Reward%20for%20Visual%20Task-1">Verifiable Reward for Visual Task</a></h3>
+<p data-ke-size="size16">Detection이랑 Classification task에 대한 reward function을 정의했다.</p>
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li><b>Detection</b>: 예측 바운딩박스 <code>b<sub>i</sub></code>와 실제 정답 바운딩박스 <code>b<sup>g</sup><sub>j</sub></code>의 IoU를 구해 임곗값 <code>τ</code> 이상이면 매칭으로 보고, IoU 평균값과 confidence를 함께 활용하여 reward를 계산한다. 즉, <code>R<sub>d</sub> = R<sub>IoU</sub> + R<sub>conf</sub> + R<sub>format</sub></code> 형태로 구성된다.</li>
+<li><b>분류(Classification) 보상</b>: 모델이 예측한 클래스 라벨이 정답과 일치하면 <code>1</code>, 아니면 <code>0</code>의 보상을 준다. 또한 출력 포맷을 지키는지 여부도 보상에 반영한다.</li>
+</ul>
+<p data-ke-size="size16">이렇게 구성된 reward function으로 , 각 정량적인 척도(IoU, 정확도 등)를 쉽게 계산해 바로 강화학습을 해줄수있다</p>
+<h3 data-ke-size="size23" id="Data%2C%20Finetuning%20step-1"><a href="#Data%2C%20Finetuning%20step-1">Data, Finetuning step</a></h3>
+<p data-ke-size="size16">Visual-RFT를 적용하기 위해서는 <i>“이미지 + 질문 + (간단한) 정답 정보”</i>를 가지는데이터가 필요하다. 이때, <i>sft labeled</i>&nbsp; data 를 대량으로 구성하지 않아도 <i>“정답 매칭”</i> 정도만 확인할 수 있는 설정이면 학습이 가능하다. 강화학습 중에는 모델이 <code>G</code>개의 응답을 생성하고, 각각에 대해 reward를 계산한 뒤 (<code>A<sub>i</sub></code>)를 구해 좋은 응답을 만든 파라미터 방향으로 policy model이 업데이트된다.</p>
+<hr data-ke-style="style1">
+<p data-ke-size="size16">&nbsp;</p>
+    </div>
+    
+    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+        <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    </div>
+</body>
+</html>

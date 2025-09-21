@@ -1,0 +1,154 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models — happy8825 - Seohyun Lee Blog</title>
+    <meta name="description" content="조금 오래된.. 작년 초 논문이긴 하지만, 특정 Task 에서 Sota를 달성하기 위해 어떤 방법을 사용했고, 특히 부족한 데이터셋은 어떻게 해결했는지 궁금해서 읽어봤다.
+&nbsp;
+우선 DeepSeekMath는 수학 벤치마크에서 당시 Sota를 달성했다. 두가지 접근법이 있었는데 아">
+    <link rel="stylesheet" href="../../styles.css">
+    <style>
+        body { 
+            background: #0d0f17; 
+            color: #fff; 
+            font-family: 'Inter', sans-serif; 
+            line-height: 1.6; 
+            margin: 0; 
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .post-header {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 2rem;
+            margin-bottom: 2rem;
+        }
+        .post-meta {
+            color: #888;
+            margin-bottom: 1rem;
+        }
+        .post-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .post-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        .post-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 1rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .post-content p {
+            margin-bottom: 1rem;
+        }
+        .post-content h1, .post-content h2, .post-content h3 {
+            color: #667eea;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .post-content blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 1rem;
+            margin: 1.5rem 0;
+            color: #ccc;
+            font-style: italic;
+        }
+        .post-content code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .post-content pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            color: #667eea;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            background: rgba(102, 126, 234, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    
+    <div class="post-header">
+        <div class="post-meta">
+            <span>📅 2025-04-27</span>
+            <span> | 🏷️ Computer Vision Paper Review</span>
+            <span> | 🔗 <a href="https://happy8825.tistory.com/107" target="_blank">Original Post</a></span>
+            <span> | 📊 3 images</span>
+        </div>
+        <h1 class="post-title">DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models — happy8825</h1>
+        
+    </div>
+    
+    <div class="post-content">
+        <p data-ke-size="size16">조금 오래된.. 작년 초 논문이긴 하지만, 특정 Task 에서 Sota를 달성하기 위해 어떤 방법을 사용했고, 특히 부족한 데이터셋은 어떻게 해결했는지 궁금해서 읽어봤다.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">우선 DeepSeekMath는 수학 벤치마크에서 당시 Sota를 달성했다. 두가지 접근법이 있었는데 아주아주 많은 고품질의 데이터셋을 모은것, 그리고 GRPO 이다.</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="918" data-origin-height="493" style="margin-left: 50%; transform: translateX(-50%); width: 918px; max-width: 918px;"><span data-url="https://blog.kakaocdn.net/dna/ciEgaX/btsNByVJfSf/AAAAAAAAAAAAAAAAAAAAAMtQ2d1HobQu2xQB_g9cEQq2FWPEtUyNll-pgMpdpQ3t/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=5%2By6VaKxy%2BuESQj0D3HBOUY4nPk%3D" data-phocus="https://blog.kakaocdn.net/dna/ciEgaX/btsNByVJfSf/AAAAAAAAAAAAAAAAAAAAAMtQ2d1HobQu2xQB_g9cEQq2FWPEtUyNll-pgMpdpQ3t/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=5%2By6VaKxy%2BuESQj0D3HBOUY4nPk%3D"><img src="https://blog.kakaocdn.net/dna/ciEgaX/btsNByVJfSf/AAAAAAAAAAAAAAAAAAAAAMtQ2d1HobQu2xQB_g9cEQq2FWPEtUyNll-pgMpdpQ3t/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=5%2By6VaKxy%2BuESQj0D3HBOUY4nPk%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FciEgaX%2FbtsNByVJfSf%2FAAAAAAAAAAAAAAAAAAAAAMtQ2d1HobQu2xQB_g9cEQq2FWPEtUyNll-pgMpdpQ3t%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3D5%252By6VaKxy%252BuESQj0D3HBOUY4nPk%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="918" height="493" data-origin-width="918" data-origin-height="493" data-phocus-index="0"></span></figure>
+<p></p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">먼저 아주아주 많은 고품질의 데이터셋은 어떻게 모았을까. 알다시피 데이터셋을 만드는건 돈이 많이 든다. GPT를 태워서 데이터셋을 만들다보면 순식간에 몇백이 나가있을거다..&nbsp;</p>
+<p data-ke-size="size16">여기서 소개한 데이터셋 모으기 파이프라인의 주요 아이디어는, 데이터를 제작하는게 아니고, 이미 있는 데이터셋을 잘 걸러내서 필요한것들을 잘 뽑아내보자 이다.&nbsp;</p>
+<p data-ke-size="size16">Common Crawl이라는 웹에서 그냥 크롤링한 아주 거대한 데이터셋에서, fastText-based classifier 를 사용해서 관련된 데이터셋을 쓕쓕 뽑아내온다. 총 120b math token을 뽑아왔는데, 샘플이 아주아주 크기때문에 규모가 작은 synthetic하거나 real data에 비하면, 대규모의 법칙에 따라, 조금 품질이 떨어져도 데이터가 어마무시하게 많다면 law of magnitude 의 이점을 보게될거다.</p>
+<p data-ke-size="size16">그래서 이미 데이터가 충분히 잘 있고, 그 중에서 우리가 high quality데이터를 잘 걸러낼 수 만 있으면 아주 많은 괜찮은 데이터셋을 얻을 수 있을것임을 주장한다.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">그럼 여기서 어떻게 high quality 데이터를 쓕쓕 뽑아왔는지를 살펴보자</p>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style5">
+<h4 data-ke-size="size20"><b> Data Collection </b></h4>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1174" data-origin-height="532" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/nAKfI/btsNAGmV4oD/AAAAAAAAAAAAAAAAAAAAAIrlZbuHuiNcIVy40cyzroVZ-kCeHyHbJh5PvektGNtj/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=YvfSVYuhOUHJDxl0RvQioeLwsm8%3D" data-phocus="https://blog.kakaocdn.net/dna/nAKfI/btsNAGmV4oD/AAAAAAAAAAAAAAAAAAAAAIrlZbuHuiNcIVy40cyzroVZ-kCeHyHbJh5PvektGNtj/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=YvfSVYuhOUHJDxl0RvQioeLwsm8%3D"><img src="https://blog.kakaocdn.net/dna/nAKfI/btsNAGmV4oD/AAAAAAAAAAAAAAAAAAAAAIrlZbuHuiNcIVy40cyzroVZ-kCeHyHbJh5PvektGNtj/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=YvfSVYuhOUHJDxl0RvQioeLwsm8%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FnAKfI%2FbtsNAGmV4oD%2FAAAAAAAAAAAAAAAAAAAAAIrlZbuHuiNcIVy40cyzroVZ-kCeHyHbJh5PvektGNtj%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DYvfSVYuhOUHJDxl0RvQioeLwsm8%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1174" height="532" data-origin-width="1174" data-origin-height="532" data-phocus-index="1"></span></figure>
+<p></p>
+<p data-ke-size="size16">데이터 필터링하는 process는 먼저, Seed Corpus 에서 시작한다.</p>
+<p data-ke-size="size16">Seed Corpus란, task에 관련되어있는 작지만 high quality 데이터셋이다. Seed Corpus의 문제점이, 양이 적다는것, 그리고 Diversity가 적다는 문제점이 있다.&nbsp;</p>
+<p data-ke-size="size16">예를 들어 DeepSeek Math 는 OpenWebMath를 Seed Corpus로 사용했는데, 이 데이터셋은 high quality 이긴 하지 양이 적고 다양하지는 않다.&nbsp;</p>
+<p data-ke-size="size16">그래서 데이터 파이프라인 아이디어는 간단하다. Seed Corpus를 받아서 양이랑 퀄리티 측면에서 늘려야한다.</p>
+<p data-ke-size="size16">이걸 하기 위해 Iterative 방법을 쓴다.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">Math Seed 에서 시작해서 먼저 FastText라는 Classifier 모델을 학습한다. Seed Corpus(High quality, 적은, relevant한 데이터) 에서 500,000개의 데이터, Common Crawl(웹에서 긁어모은 방대한 데이터)에서 500,000개 데이터를 가져와서 각각 positive, negative로 설정을 한다. 그리고 이 두가지를 split 하기 위한 Classifier(FastText) 모델을 학습한다.</p>
+<p data-ke-size="size16">여기서 드는 의문은 이게 제대로 classify가 될까.. 왜냐면 Common Crawl은 너무 다양한 데이터셋이 많은데, 이걸&nbsp; OpenWeb Math 데이터셋이랑 classifiy하는 부분이 좀 걸린다. 정확하게 classify 가 될지..?</p>
+<p data-ke-size="size16">근데 일단 잘 됐다고 치자. 그럼 2단계인 "Recall Math-Related Webpages from Common Crawl" 단계로 넘어간다. 여기서는 Classifier 에서 positive 점수가 높은&nbsp; 상위 40B의 데이터를 가져온다.</p>
+<p data-ke-size="size16">그럼 이게 Math Corpus 에 들어간다. 그럼 우선 40B의 데이터로 늘리기가 완료된거다. 근데 이거를 어떻게 120B까지 늘릴까?</p>
+<p data-ke-size="size16">Common Crawl은 웹사이트를 크롤링하는 데이터셋이니까, 데이터셋을 보면 다 URL이 있을거다.&nbsp; 도메인이 겹치는 URL들을 URL 이름으로 group하고,&nbsp; 해당 그룹에서 10프로 이상이 Positive로 판정이 됐으면 해당 URL을 전체를 다시 reconsider 하는 형태이다. 그래서 classifier 이 제대로 필터링을 못했어도, 이런식으로 연관된 버려진 데이터셋들을 다시 건져올수 있는거다.</p>
+<p data-ke-size="size16">그래서 이렇게 다시 건져진 데이터셋들까지가 4단계 annotation 프로세스로 들어간다. 논문에서는 MANUALLY ANNOTATED 했다고 써져있는데 그럼 하나씩 annotation을 다 단걸까..(그럼 결국 data genertion이잖아!!)</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">이렇게 Data를 확장을 하고 나면, 이게 다신 Math Seed 에 들어간다. 그리고 이 과정이 계속 반복되면서 데이터가 계속 확장된다. 확장된 Math Seed 로 Classifier 를 다시 학습시키면, Classifier 이 positive로 판별하는 범위는 더 다양해지고~ 이러면서 다양하면서 퀄리티 좋은 데이터를 만들 수 있게 된다.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">이런 파이프라인의 가능세계를 생각해보면 일단 두가지 가능성이 있다. Classifier 이 너무 관대해서 데이터를 왕창 왕창 늘려서 결국에 무한대의 웹에 있는 모든 데이터를 가지게 되는 경우, Classifier 이 너무너무 정확해서 4단계에 추가되는 데이터가 없어서 확장하지 않고 converge 하는 경우</p>
+<p data-ke-size="size16">전자의 경우 관련이 없는 데이터까지 가져오지 않게 언제 멈춰야하는지에 대한 기준을 세워야하고, 후자의 경우 오히려 좋다.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">논문을 읽어보면 이 파이프라인의 가능 세계는 후자에 가까운것 같다. 4번째 iteration을 돌고 나니 추가되는 데이터가 거의 없어서 총 120B의 데이터에 수렴했다고 한다.&nbsp;</p>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style5">
+<h4 data-ke-size="size20"><b>Validating the Quality of the DeepSeek Math Corpus</b></h4>
+<p data-ke-size="size16">데이터셋이 잘 만들어졌는지? 를 평가한다.</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1214" data-origin-height="350" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/bVWpTp/btsNBvdTZNl/AAAAAAAAAAAAAAAAAAAAAC_Pa6wCAHlYGTx0Jl4pmSazvTsuQsoY8Z0v5Apo9j0p/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=%2FrDIoDFRF9F7kI3Xp5KmJQ3xpa0%3D" data-phocus="https://blog.kakaocdn.net/dna/bVWpTp/btsNBvdTZNl/AAAAAAAAAAAAAAAAAAAAAC_Pa6wCAHlYGTx0Jl4pmSazvTsuQsoY8Z0v5Apo9j0p/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=%2FrDIoDFRF9F7kI3Xp5KmJQ3xpa0%3D"><img src="https://blog.kakaocdn.net/dna/bVWpTp/btsNBvdTZNl/AAAAAAAAAAAAAAAAAAAAAC_Pa6wCAHlYGTx0Jl4pmSazvTsuQsoY8Z0v5Apo9j0p/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=%2FrDIoDFRF9F7kI3Xp5KmJQ3xpa0%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FbVWpTp%2FbtsNBvdTZNl%2FAAAAAAAAAAAAAAAAAAAAAC_Pa6wCAHlYGTx0Jl4pmSazvTsuQsoY8Z0v5Apo9j0p%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3D%252FrDIoDFRF9F7kI3Xp5KmJQ3xpa0%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1214" height="350" data-origin-width="1214" data-origin-height="350" data-phocus-index="2"></span></figure>
+<p></p>
+    </div>
+    
+    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+        <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    </div>
+</body>
+</html>

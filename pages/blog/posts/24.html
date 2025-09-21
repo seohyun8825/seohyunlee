@@ -1,0 +1,149 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PyTorch Geometric 패키지 관련 환경설정 오류 해결 — happy8825 - Seohyun Lee Blog</title>
+    <meta name="description" content="Error
+Python 환경에서 PyTorch Geometric과 관련된 패키지를 설치하려고 할 때 다음과 같은 오류가 발생했음:
+ModuleNotFoundError: No module named 'torch_geometric'
+
+이후 추가 설치를 시도했으나 torch-scatter, ">
+    <link rel="stylesheet" href="../../styles.css">
+    <style>
+        body { 
+            background: #0d0f17; 
+            color: #fff; 
+            font-family: 'Inter', sans-serif; 
+            line-height: 1.6; 
+            margin: 0; 
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .post-header {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 2rem;
+            margin-bottom: 2rem;
+        }
+        .post-meta {
+            color: #888;
+            margin-bottom: 1rem;
+        }
+        .post-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .post-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        .post-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 1rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .post-content p {
+            margin-bottom: 1rem;
+        }
+        .post-content h1, .post-content h2, .post-content h3 {
+            color: #667eea;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .post-content blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 1rem;
+            margin: 1.5rem 0;
+            color: #ccc;
+            font-style: italic;
+        }
+        .post-content code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .post-content pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            color: #667eea;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            background: rgba(102, 126, 234, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    
+    <div class="post-header">
+        <div class="post-meta">
+            <span>📅 2024-12-29</span>
+            <span> | 🏷️ 개발</span>
+            <span> | 🔗 <a href="https://happy8825.tistory.com/84" target="_blank">Original Post</a></span>
+            <span> | 📊 0 images</span>
+        </div>
+        <h1 class="post-title">PyTorch Geometric 패키지 관련 환경설정 오류 해결 — happy8825</h1>
+        
+    </div>
+    
+    <div class="post-content">
+        <h3 data-ke-size="size23" id="Error-1"><a href="#Error-1">Error</a></h3>
+<p data-ke-size="size16">Python 환경에서 PyTorch Geometric과 관련된 패키지를 설치하려고 할 때 다음과 같은 오류가 발생했음:</p>
+<pre class="yaml"><code class="hljs language-yaml"><span class="hljs-attr">ModuleNotFoundError:</span> <span class="hljs-literal">No</span> <span class="hljs-string">module</span> <span class="hljs-string">named</span> <span class="hljs-string">'torch_geometric'</span>
+</code></pre>
+<p data-ke-size="size16">이후 추가 설치를 시도했으나 torch-scatter, torch-sparse, torch-cluster 같은 패키지에서 빌드 오류가 나타났음:</p>
+<pre class="subunit"><code class="hljs language-subunit"><span class="hljs-keyword">ERROR: </span>Failed building wheel for torch-scatter
+<span class="hljs-keyword">ERROR: </span>Failed building wheel for torch-sparse
+...
+RuntimeError: The detected CUDA version (12.1) mismatches the version that was used to compile PyTorch (11.8).
+</code></pre>
+<p data-ke-size="size16">이 오류는 PyTorch 버전, 내장된 CUDA 버전, 시스템 CUDA 버전 간의 불일치로 인해 발생한 문제였음.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<h3 data-ke-size="size23" id="%ED%95%B4%EA%B2%B0%20%EB%B0%A9%EB%B2%95-1"><a href="#%ED%95%B4%EA%B2%B0%20%EB%B0%A9%EB%B2%95-1">해결 방법</a></h3>
+<h4 data-ke-size="size20"><b>1. 설치된 버전 확인</b></h4>
+<p data-ke-size="size16">먼저, PyTorch 버전을 확인했음:</p>
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li><b>PyTorch 버전 확인</b><b></b></li>
+<li><b>명령어&nbsp; :</b>
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li>python -c "import torch; print(torch.__version__); print(torch.version.cuda)"</li>
+</ul>
+</li>
+<li>내꺼는 --&gt; 2.4.1+cu118 11.8</li>
+</ul>
+<h4 data-ke-size="size20"><b>2. PyTorch Geometric dependency 설치</b></h4>
+<p data-ke-size="size16">PyTorch와 CUDA 버전에 맞는 PyTorch Geometric 종속성을 설치했음. 아래 명령어를 사용했음:</p>
+<pre class="awk"><code class="hljs language-awk">pip install torch-scatter -f https:<span class="hljs-regexp">//</span>data.pyg.org<span class="hljs-regexp">/whl/</span>torch-<span class="hljs-number">2.4</span>.<span class="hljs-number">1</span>+cu118.html
+pip install torch-sparse -f https:<span class="hljs-regexp">//</span>data.pyg.org<span class="hljs-regexp">/whl/</span>torch-<span class="hljs-number">2.4</span>.<span class="hljs-number">1</span>+cu118.html
+pip install torch-cluster -f https:<span class="hljs-regexp">//</span>data.pyg.org<span class="hljs-regexp">/whl/</span>torch-<span class="hljs-number">2.4</span>.<span class="hljs-number">1</span>+cu118.html
+pip install torch-spline-conv -f https:<span class="hljs-regexp">//</span>data.pyg.org<span class="hljs-regexp">/whl/</span>torch-<span class="hljs-number">2.4</span>.<span class="hljs-number">1</span>+cu118.html
+pip install torch-geometric
+</code></pre>
+<p data-ke-size="size16">만약&nbsp;2.4.1&nbsp;말고&nbsp;다른&nbsp;버전을&nbsp;가지고&nbsp;있으면&nbsp;저부분&nbsp;숫자랑,&nbsp;cu118&nbsp;이&nbsp;숫자만&nbsp;바꿔서&nbsp;그대로&nbsp;설치하면&nbsp;됨</p>
+    </div>
+    
+    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+        <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    </div>
+</body>
+</html>

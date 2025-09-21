@@ -1,0 +1,185 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DogCFLD — happy8825 - Seohyun Lee Blog</title>
+    <meta name="description" content="쿠빅에서 진행했던 강아지 포즈 바꾸는 프로젝트이다
+&nbsp;
+프로젝트를 하게 된 계기는 강아지를 좋아해서! 가 절대 아니라, CVPR 2024 highight 받은 논문중에 Coarse-to-Fine Latent DIffusion for Pose-Guided Person Image S">
+    <link rel="stylesheet" href="../../styles.css">
+    <style>
+        body { 
+            background: #0d0f17; 
+            color: #fff; 
+            font-family: 'Inter', sans-serif; 
+            line-height: 1.6; 
+            margin: 0; 
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .post-header {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 2rem;
+            margin-bottom: 2rem;
+        }
+        .post-meta {
+            color: #888;
+            margin-bottom: 1rem;
+        }
+        .post-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .post-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        .post-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 1rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .post-content p {
+            margin-bottom: 1rem;
+        }
+        .post-content h1, .post-content h2, .post-content h3 {
+            color: #667eea;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .post-content blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 1rem;
+            margin: 1.5rem 0;
+            color: #ccc;
+            font-style: italic;
+        }
+        .post-content code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .post-content pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            color: #667eea;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            background: rgba(102, 126, 234, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    
+    <div class="post-header">
+        <div class="post-meta">
+            <span>📅 2024-07-11</span>
+            <span> | 🏷️ 이것저것</span>
+            <span> | 🔗 <a href="https://happy8825.tistory.com/16" target="_blank">Original Post</a></span>
+            <span> | 📊 7 images</span>
+        </div>
+        <h1 class="post-title">DogCFLD — happy8825</h1>
+        
+    </div>
+    
+    <div class="post-content">
+        <p data-ke-size="size18">쿠빅에서 진행했던 강아지 포즈 바꾸는 프로젝트이다</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">프로젝트를 하게 된 계기는<b> 강아지를 좋아해서! 가 절대 아니라</b>, CVPR 2024 highight 받은 논문중에 Coarse-to-Fine Latent DIffusion for Pose-Guided Person Image Synthesis(CFLD) 라는 논문이 있었다.</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="2368" data-origin-height="1082" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/scbFY/btsIu6QLsF0/AAAAAAAAAAAAAAAAAAAAALELoLh8gWirAkOB1kFN4-wAUgyyaGzpkTybqgcyqB7R/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=hD%2BObGimF8Wul9IoQDNGFV8rsgY%3D" data-phocus="https://blog.kakaocdn.net/dna/scbFY/btsIu6QLsF0/AAAAAAAAAAAAAAAAAAAAALELoLh8gWirAkOB1kFN4-wAUgyyaGzpkTybqgcyqB7R/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=hD%2BObGimF8Wul9IoQDNGFV8rsgY%3D"><img src="https://blog.kakaocdn.net/dna/scbFY/btsIu6QLsF0/AAAAAAAAAAAAAAAAAAAAALELoLh8gWirAkOB1kFN4-wAUgyyaGzpkTybqgcyqB7R/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=hD%2BObGimF8Wul9IoQDNGFV8rsgY%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FscbFY%2FbtsIu6QLsF0%2FAAAAAAAAAAAAAAAAAAAAALELoLh8gWirAkOB1kFN4-wAUgyyaGzpkTybqgcyqB7R%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DhD%252BObGimF8Wul9IoQDNGFV8rsgY%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="2368" height="1082" data-origin-width="2368" data-origin-height="1082" data-phocus-index="0"></span></figure>
+<p></p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">Input 이미지의 특성을 잘 살려주기 위해 coarse to fine 한 방식으로 디퓨전을 할 때 계속 컨디션을 주는 모델이다.</p>
+<p data-ke-size="size18">사실 CFLD말고도 pose 를 컨디션으로 넣어주기 위한 디퓨전 모델에 대한 연구들이 많았는데 PGIS나<span>&nbsp;</span>PoCoLD 등등</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">사실 결과를 보면 알겠지만, 모델 복잡도면에서 개선할 사항은 있어보이지만 정확도 측면에서 개선할 수 있는 방법은 없어보였다.. 결과가 너무 잘나와서ㅋㅋㅋ</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">생각해보게 된 주제가, 사람 포즈를 바꾸는 연구는 많이 있었는데 <b>왜 강아지 포즈를 바꾸는 연구는 없을까?</b> 잘 생각해보면 사람들은 움직이라는대로 잘 움직여주는데, 강아지들은 같이 사진 한번 찍기가 어렵다. 해피랑 사진을 찍으려면 카메라를 봐달라고 나갈까? 간식먹자~ 등등 강아지 관심을 끌기 위한 말을 해줘야한다.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">그럼 지금까지 왜 강아지 포즈바꾸기에 대한 연구가 없었을까? 일단 <b>데이터셋을 구하는게 너무 어렵다</b>. 강아지 키포인트를 따는것도 힘들고, 강아지 데이터셋 자체도 많이 없다. 그리고 <b>사람의 keypoint랑 강아지의 키포인트는 너무 다르다</b>. 사람의 keypoint 추출 방식을 강아지에 적용하기에는 무리가 있다.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">그래도 정말 다행히 데이터셋을 구했다!! APT-36K라는 데이터셋인데, 동물의 영상을 16개의 프레임으로 나눠서 키포인트를 추출해놓은 데이터셋이다.</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1092" data-origin-height="760" style="margin-left: 50%; transform: translateX(-50%); width: 1092px; max-width: 1092px;"><span data-url="https://blog.kakaocdn.net/dna/omrtW/btsItXN082w/AAAAAAAAAAAAAAAAAAAAAI_pDgHj0covqFY7fJy5Lkojvd7FL3B5VYEvzbgOGaaU/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=s1Xd69ZjU4dcJ8xLfD%2B%2Frre3syI%3D" data-phocus="https://blog.kakaocdn.net/dna/omrtW/btsItXN082w/AAAAAAAAAAAAAAAAAAAAAI_pDgHj0covqFY7fJy5Lkojvd7FL3B5VYEvzbgOGaaU/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=s1Xd69ZjU4dcJ8xLfD%2B%2Frre3syI%3D"><img src="https://blog.kakaocdn.net/dna/omrtW/btsItXN082w/AAAAAAAAAAAAAAAAAAAAAI_pDgHj0covqFY7fJy5Lkojvd7FL3B5VYEvzbgOGaaU/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=s1Xd69ZjU4dcJ8xLfD%2B%2Frre3syI%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FomrtW%2FbtsItXN082w%2FAAAAAAAAAAAAAAAAAAAAAI_pDgHj0covqFY7fJy5Lkojvd7FL3B5VYEvzbgOGaaU%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3Ds1Xd69ZjU4dcJ8xLfD%252B%252Frre3syI%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1092" height="760" data-origin-width="1092" data-origin-height="760" data-phocus-index="1"></span></figure>
+<p></p>
+<p data-ke-size="size18">그럼 CFLD 모델에 이 데이터셋을 써서 훈련을 시키기 위해서는 <b>input img, target img, target img 에 대한 pose 정보</b>가 있어야 했다. 그래서 훈련을 시켜줄떄는 input img 가 target img의 포즈를 취하도록 바꾼 후, 그 결과를 target img 랑 비교하면서 훈련하는 형태이다.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">연속되는 frame에서 각각 다른 frame을 pair 시켜서(예를 들면 frame 1이 인풋이라면 frame 3은 target) 이런식으로 데이터 로더를 구성해주고 model training 을 시켜줬다. 모델을 열심히 그려봤는데,,ㅎㅎ 다음과 같은 pipeline 으로 모델이 돌아간다.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1280" data-origin-height="856" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/bivekP/btsIu3zQuFX/AAAAAAAAAAAAAAAAAAAAAD-6miSk5lPIk9ucCsHK1EGQk99c6hlIQLyQY5yTdICw/img.jpg?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=r6tCCMoQLMKIBorS6W3fX4lIzbk%3D" data-phocus="https://blog.kakaocdn.net/dna/bivekP/btsIu3zQuFX/AAAAAAAAAAAAAAAAAAAAAD-6miSk5lPIk9ucCsHK1EGQk99c6hlIQLyQY5yTdICw/img.jpg?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=r6tCCMoQLMKIBorS6W3fX4lIzbk%3D"><img src="https://blog.kakaocdn.net/dna/bivekP/btsIu3zQuFX/AAAAAAAAAAAAAAAAAAAAAD-6miSk5lPIk9ucCsHK1EGQk99c6hlIQLyQY5yTdICw/img.jpg?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=r6tCCMoQLMKIBorS6W3fX4lIzbk%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FbivekP%2FbtsIu3zQuFX%2FAAAAAAAAAAAAAAAAAAAAAD-6miSk5lPIk9ucCsHK1EGQk99c6hlIQLyQY5yTdICw%2Fimg.jpg%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3Dr6tCCMoQLMKIBorS6W3fX4lIzbk%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1280" height="856" data-origin-width="1280" data-origin-height="856" data-phocus-index="2"></span></figure>
+<p></p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">모델 결과를 시각화해보기 전에 우려되었던 점이 CFLD는 사람 pose 바꾸기를 위한 모델이었고 VAE나 SwinTransformer 의 백본이 다 pretrained 된거라서 사람 pose 에 대한 bias가 들어가면 어떡하지?</p>
+<p data-ke-size="size18">그리고 사람은 포즈 이미지를 그려봤을떄 모양이 다 비슷한데, 강아지는 종별로 pose img 가 많이 다를 수 있다. 예를 들어 닥스훈트는 허리와 발 사이의 간격이 매우 짧지만 아메리칸 하운드 는 롱다리라서 길이 차이도 많이 난다.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">근데 걱정과는 달리 결과가 너무 잘나왔다ㅎㅎ</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="828" data-origin-height="936" style="margin-left: 50%; transform: translateX(-50%); width: 828px; max-width: 828px;"><span data-url="https://blog.kakaocdn.net/dna/29iih/btsIvccfEKr/AAAAAAAAAAAAAAAAAAAAAOYqGUTw3bRgattoysla6TBYLdXK8XNG-RANAQLyNWn0/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=BAtg%2BmGtHOxvUErmX%2F7KkSpPtZY%3D" data-phocus="https://blog.kakaocdn.net/dna/29iih/btsIvccfEKr/AAAAAAAAAAAAAAAAAAAAAOYqGUTw3bRgattoysla6TBYLdXK8XNG-RANAQLyNWn0/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=BAtg%2BmGtHOxvUErmX%2F7KkSpPtZY%3D"><img src="https://blog.kakaocdn.net/dna/29iih/btsIvccfEKr/AAAAAAAAAAAAAAAAAAAAAOYqGUTw3bRgattoysla6TBYLdXK8XNG-RANAQLyNWn0/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=BAtg%2BmGtHOxvUErmX%2F7KkSpPtZY%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2F29iih%2FbtsIvccfEKr%2FAAAAAAAAAAAAAAAAAAAAAOYqGUTw3bRgattoysla6TBYLdXK8XNG-RANAQLyNWn0%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DBAtg%252BmGtHOxvUErmX%252F7KkSpPtZY%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="828" height="936" data-origin-width="828" data-origin-height="936" data-phocus-index="3"></span></figure>
+<p></p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">자세히 보면 마지막 사진 갈색강아지 보면 물이 튀기는 장면도 있는데, 신기하게도 그 특성까지 그대로 복원해놓았다. 아마 HGA attention module을 통해 fine한 특성을 마지막에 합쳐준게 이런 특성도 잘 살릴 수 있게 해준것 같다.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">그럼 결과도 나왔으니 사실 프로젝트 원래 목적이었던! 억울하게 생긴 이 친구로 결과를 내보았다.</p>
+<p data-ke-size="size18">사실 그냥해도 잘나오는데, 컨퍼런스 포스터에 들어갈 사진이니 좀 더 잘 나오게 하기 위해 해피 사진 4장을 약 30분간 파인튜닝하는 방식으로 완전 오버피팅 시켜서 학습을 했다. 해피 데이터셋 만드려고 쿨쿨 자고있는 친구를 억지로 깨우고 다양한 포즈를 취하게 하면서 사진을 찍었더니 해피가 화가 많이 났다(ㅎㅎㅎㅎ)</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1496" data-origin-height="1496" style="margin-left: 50%; transform: translateX(-50%); width: 446px; max-width: 446px;"><span data-url="https://blog.kakaocdn.net/dna/bOSpTc/btsIuGx8o4x/AAAAAAAAAAAAAAAAAAAAAC5vrEw3UmwFjoDVQ7cR1lLWAXUI9k21QSkSMSmqkdJ9/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=GqIkTmFTOmH4LTVQryS%2BeNWPZfY%3D" data-phocus="https://blog.kakaocdn.net/dna/bOSpTc/btsIuGx8o4x/AAAAAAAAAAAAAAAAAAAAAC5vrEw3UmwFjoDVQ7cR1lLWAXUI9k21QSkSMSmqkdJ9/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=GqIkTmFTOmH4LTVQryS%2BeNWPZfY%3D"><img src="https://blog.kakaocdn.net/dna/bOSpTc/btsIuGx8o4x/AAAAAAAAAAAAAAAAAAAAAC5vrEw3UmwFjoDVQ7cR1lLWAXUI9k21QSkSMSmqkdJ9/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=GqIkTmFTOmH4LTVQryS%2BeNWPZfY%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FbOSpTc%2FbtsIuGx8o4x%2FAAAAAAAAAAAAAAAAAAAAAC5vrEw3UmwFjoDVQ7cR1lLWAXUI9k21QSkSMSmqkdJ9%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DGqIkTmFTOmH4LTVQryS%252BeNWPZfY%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="446" height="446" data-origin-width="1496" data-origin-height="1496" data-phocus-index="4"></span></figure>
+<p></p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">해피 데이터로더를 만들기 위해 Deeplapcut으로 키포인트 추출해주고, 모델을 돌렸는데</p>
+<p data-ke-size="size18">오잉? 성능이 더 안나왔다(가장 오른쪽이 아웃풋). 아마 포즈데이터가 기존 학습해켰던 모델이랑은 다르게 좀 세게 들어가서&nbsp; 그런것 같다</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="2058" data-origin-height="516" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/poiW4/btsIvjvBFMO/AAAAAAAAAAAAAAAAAAAAAF_6CJ8xUOIapC0UeiYe8c_lHmv25OCIVbIoRMkcV8NI/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=6BNoSa6kvhUXofKDxUbhNwcqOeA%3D" data-phocus="https://blog.kakaocdn.net/dna/poiW4/btsIvjvBFMO/AAAAAAAAAAAAAAAAAAAAAF_6CJ8xUOIapC0UeiYe8c_lHmv25OCIVbIoRMkcV8NI/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=6BNoSa6kvhUXofKDxUbhNwcqOeA%3D"><img src="https://blog.kakaocdn.net/dna/poiW4/btsIvjvBFMO/AAAAAAAAAAAAAAAAAAAAAF_6CJ8xUOIapC0UeiYe8c_lHmv25OCIVbIoRMkcV8NI/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=6BNoSa6kvhUXofKDxUbhNwcqOeA%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FpoiW4%2FbtsIvjvBFMO%2FAAAAAAAAAAAAAAAAAAAAAF_6CJ8xUOIapC0UeiYe8c_lHmv25OCIVbIoRMkcV8NI%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3D6BNoSa6kvhUXofKDxUbhNwcqOeA%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="2058" height="516" data-origin-width="2058" data-origin-height="516" data-phocus-index="5"></span></figure>
+<p></p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">포즈 데이터를 아주 약하게, 안보일 수도 있겠지만 자세히 보면 흰점이 해피 관절따라서 찍혀있다.</p>
+<p data-ke-size="size18">이렇게 바꿔서 파인튜닝을 약 20분정도 시켜줬더니 결과가 다행히! 잘나왔다. 가장 오른쪽이 아웃풋인데 얘가 해피보다 더 예쁘게 생긴거 같기두?&nbsp;</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="2060" data-origin-height="524" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/cTz4Yi/btsIvsTquHn/AAAAAAAAAAAAAAAAAAAAAC2azcvVgKGXb0qiDmpBiOMjuMOZQwMwyxd2fYjL9nnh/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=k%2BeTErPw2bhqxf%2F93oNnlyLIS3I%3D" data-phocus="https://blog.kakaocdn.net/dna/cTz4Yi/btsIvsTquHn/AAAAAAAAAAAAAAAAAAAAAC2azcvVgKGXb0qiDmpBiOMjuMOZQwMwyxd2fYjL9nnh/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=k%2BeTErPw2bhqxf%2F93oNnlyLIS3I%3D"><img src="https://blog.kakaocdn.net/dna/cTz4Yi/btsIvsTquHn/AAAAAAAAAAAAAAAAAAAAAC2azcvVgKGXb0qiDmpBiOMjuMOZQwMwyxd2fYjL9nnh/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=k%2BeTErPw2bhqxf%2F93oNnlyLIS3I%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FcTz4Yi%2FbtsIvsTquHn%2FAAAAAAAAAAAAAAAAAAAAAC2azcvVgKGXb0qiDmpBiOMjuMOZQwMwyxd2fYjL9nnh%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3Dk%252BeTErPw2bhqxf%252F93oNnlyLIS3I%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="2060" height="524" data-origin-width="2060" data-origin-height="524" data-phocus-index="6"></span></figure>
+<p></p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">사실 프로젝트를 하면서 해보고 싶거나 모델을 바꿔보고 싶은게 너무 많았다. 아까도 언급했던 닥스훈트와 아메리칸 하운드의 신체 차이를 해결하기 위한 방안도 여러 논문을 보고 생각을 해봤는데</p>
+<p data-ke-size="size18">그 중 가장 해보고 싶었던 것이 포즈맵도 디퓨전을 해가면서 Stochastical 하게 conditioning을 하고 싶었다. 포즈맵을 딱 정확하게 주지 않고,&nbsp; 노이즈를 추가해서 나머지 부분은 모델이 알아서 채워가게 하는, 이렇게 되면 딱 포즈에 맞춰서 생성되는게 아니라 포즈 비슷하게 생성은 되지만 더 자연스러운 output 이 나올것 같았다.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">그치만 시간의 한계와, 그렇게 하지 않아도 모델 결과가 잘 나왔기에,, 이번 플젝은 여기서 마무리하려고 한다!</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">궁금하면 깃허브로~ (<span>&nbsp;</span><a href="https://github.com/seohyun8825/DogCFLD">https://github.com/seohyun8825/DogCFLD</a><a style="color: #0070d1;" href="https://github.com/seohyun8825/DogCFLD"> )</a></p>
+<figure id="og_1720656770581" contenteditable="false" data-og-image="https://blog.kakaocdn.net/dna/bxea7J/hyWzqtpQcL/AAAAAAAAAAAAAAAAAAAAAN4fv1u38GcBQ-JS58n8GUXgTgULJK0T940kqqKRlbRn/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=4mdnRjPbgWXxswItiIFiyvKnqZk%3D" data-og-url="https://github.com/seohyun8825/DogCFLD" data-og-source-url="https://github.com/seohyun8825/DogCFLD" data-og-host="github.com" data-og-description="modified dataset part based on CFLD code. Contribute to seohyun8825/DogCFLD development by creating an account on GitHub." data-og-title="GitHub - seohyun8825/DogCFLD: modified dataset part based on CFLD code" data-og-type="object" data-ke-align="alignCenter" data-ke-type="opengraph"><a style="color: #000000;" href="https://github.com/seohyun8825/DogCFLD" data-source-url="https://github.com/seohyun8825/DogCFLD">
+<div>&nbsp;</div>
+<div>
+<p style="color: #000000;" data-ke-size="size16">GitHub - seohyun8825/DogCFLD: modified dataset part based on CFLD code</p>
+<p style="color: #909090;" data-ke-size="size16">modified dataset part based on CFLD code. Contribute to seohyun8825/DogCFLD development by creating an account on GitHub.</p>
+<p style="color: #909090;" data-ke-size="size16">github.com</p>
+</div>
+</a></figure>
+<p data-ke-size="size18">&nbsp;</p>
+    </div>
+    
+    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+        <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    </div>
+</body>
+</html>

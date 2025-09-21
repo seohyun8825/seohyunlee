@@ -1,0 +1,163 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visual Instruction Tuning (LLaVa) — happy8825 - Seohyun Lee Blog</title>
+    <meta name="description" content="Intro
+General-Purposed Image-Text instruction following assistant를 만들어보자!
+즉 이미지와 Question(context)가 주어졌을떄, Answer text를 생성하는 image text instruction model을 만드는게 ">
+    <link rel="stylesheet" href="../../styles.css">
+    <style>
+        body { 
+            background: #0d0f17; 
+            color: #fff; 
+            font-family: 'Inter', sans-serif; 
+            line-height: 1.6; 
+            margin: 0; 
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .post-header {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 2rem;
+            margin-bottom: 2rem;
+        }
+        .post-meta {
+            color: #888;
+            margin-bottom: 1rem;
+        }
+        .post-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .post-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        .post-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 1rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .post-content p {
+            margin-bottom: 1rem;
+        }
+        .post-content h1, .post-content h2, .post-content h3 {
+            color: #667eea;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .post-content blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 1rem;
+            margin: 1.5rem 0;
+            color: #ccc;
+            font-style: italic;
+        }
+        .post-content code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .post-content pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            color: #667eea;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            background: rgba(102, 126, 234, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    
+    <div class="post-header">
+        <div class="post-meta">
+            <span>📅 2024-10-07</span>
+            <span> | 🏷️ Computer Vision Paper Review</span>
+            <span> | 🔗 <a href="https://happy8825.tistory.com/64" target="_blank">Original Post</a></span>
+            <span> | 📊 3 images</span>
+        </div>
+        <h1 class="post-title">Visual Instruction Tuning (LLaVa) — happy8825</h1>
+        
+    </div>
+    
+    <div class="post-content">
+        <h4 data-ke-size="size20"><b>Intro</b></h4>
+<p data-ke-size="size18"><b>General-Purposed Image-Text instruction following assistant</b>를 만들어보자!</p>
+<p data-ke-size="size18">즉 이미지와 Question(context)가 주어졌을떄, Answer text를 생성하는<b> image text instruction model을 만드는게 목표</b>.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">이를 위해<b> LLaVA라는 pre-trained LLM, pretrained visual encoder 구조</b>를, <b>기존 Data를 reoformation 하는 방식으로 얻은 데이터셋으로</b>&nbsp;학습했다.</p>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style5">
+<h4 data-ke-size="size20"><b>Method</b></h4>
+<p data-ke-size="size18">Pretrained text only LLM로는 LLaMA를 사용했고. Pretrained vision encoder로는 ViT-L/14를 사용했음.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1292" data-origin-height="451" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/dhzYLU/btsJY5Wd6NK/AAAAAAAAAAAAAAAAAAAAABeWkelzlW2yzxfAzvAXApnwF6QgoJ0g-NJ585BlmYs5/img.jpg?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=Tzb%2FkJ1jWc1WVWsLmCZgWsdyIkM%3D" data-phocus="https://blog.kakaocdn.net/dna/dhzYLU/btsJY5Wd6NK/AAAAAAAAAAAAAAAAAAAAABeWkelzlW2yzxfAzvAXApnwF6QgoJ0g-NJ585BlmYs5/img.jpg?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=Tzb%2FkJ1jWc1WVWsLmCZgWsdyIkM%3D" data-alt="LLaVA pipeline"><img src="https://blog.kakaocdn.net/dna/dhzYLU/btsJY5Wd6NK/AAAAAAAAAAAAAAAAAAAAABeWkelzlW2yzxfAzvAXApnwF6QgoJ0g-NJ585BlmYs5/img.jpg?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=Tzb%2FkJ1jWc1WVWsLmCZgWsdyIkM%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FdhzYLU%2FbtsJY5Wd6NK%2FAAAAAAAAAAAAAAAAAAAAABeWkelzlW2yzxfAzvAXApnwF6QgoJ0g-NJ585BlmYs5%2Fimg.jpg%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DTzb%252FkJ1jWc1WVWsLmCZgWsdyIkM%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1292" height="451" data-origin-width="1292" data-origin-height="451" data-phocus-index="0"></span><figcaption>LLaVA pipeline</figcaption>
+</figure>
+<p></p>
+<p data-ke-size="size18">구조는 정말정말 간단하다.&nbsp; 그냥 이미지를 vision encoder 에 태우고 linear layer 하나 달아서 projection 시켜줌으로써 LLM(llama)의 입력이랑 맞춰준것.</p>
+<p data-ke-size="size18">그렇게 projected 된 Image feature은 language Instruction이랑 함께 llama에 들어감. -&gt; 이 llama가 일종의 디코더역할로 text, 즉 langage response를 generate 하는 역할을 한다.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">사실 모델 구조보다도 더 큰 contribution은 이걸<b> 학습시키기 위한 Data를 어떻게 만들었냐</b> 인거 같다.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">일단 기존의 multi modal 데이터셋을 보면, (text, image) paired 데이터셋으로, instruction following, 즉 (Query, Answer) 페어가 필요한<b> Visual instruction task을 위해 사용하기 적절하지 않았다.</b></p>
+<p data-ke-size="size18">근데 마침, GPT같은 LLM을 통해 query를 바탕으로 높은 수준의 데이터가 생성이 가능해지고 있는 놀라운 시대이다..</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">그래서 이미지랑, 이미지에 대한 caption이 주어진 상태에서,<b> gpt한테 caption처럼 설명하도록 만드는 query를 만들어보라고 요청</b>.</p>
+<p data-ke-size="size18">그래서 이렇게 나온 query까지 instruction following 용도로 사용할 수 있을 것. 즉<b> 쿼리랑, 이미지가 주어졌을떄, 이미지 caption처럼 답변하도록 모델을 훈련시키기 위한 데이터셋을 만들어낼 수 있음</b>.</p>
+<p data-ke-size="size18">이 방식을 논문에서는 <b>Naive 한 Data reformation pipeline</b>으로 정의하고 있는데, 이 데이터셋은</p>
+<p data-ke-size="size18">Diversity도 부족하고, indepth reasoning도 부족하는 문제가 있었음.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">그래서 논문에서는 <b>새로운 data reformation pipeline</b>을 제시한다.</p>
+<p data-ke-size="size18">COCO image 데이터셋에 대해 캡션, 이미지, bbox ( Xc, Xv, Xb) 가 주어지면, 사람이 직접 이미지에 대한 질문, 답변 쌍을 생성한다. 그 후 GPT한테, 캡션, bounding box, 사람이 직접 만든(질문, 답변)쌍을 주고,&nbsp; 사람이 직접 만든 질문 답변 쌍을 참고해서 ~~스타일의 user 'question', assistant 'answer'를 만들어보라고 요청.</p>
+<p data-ke-size="size18">그래서 {q,a}를 새롭게 만들어낸다.</p>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style5">
+<p data-ke-size="size18">&nbsp;</p>
+<h4 data-ke-size="size20"><b>Training</b></h4>
+<p data-ke-size="size18">모델 학습은 <b>Autoregressive </b>방식으로 이루어진다:</p>
+<p data-ke-size="size18">\[ p(X_a | X_v, X_{\text{instruct}}) = \prod_{i=1}^{L} p_\theta (x_i | X_v, X_{\text{instruct}}, x_{&lt;i}, X_{a,&lt;i}) \]</p>
+<p data-ke-size="size18">모델은 이미지와 명령어를 기반으로 답변 시퀀스의 각 토큰을 예측하는 방식으로 학습한다.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">위에 데이터 생성 부분에서 설명했던거처럼&nbsp; 이미지 \( X_v \)에 대해, conversation data \( (X^1_q, X^1_a, \dots, X^T_q, X^T_a) \)를 생성한다, \( X^t_{\text{instruct}} \)는 다음과 같은 방식으로 구성된다.</p>
+<p data-ke-size="size18">\[ X^t_{\text{instruct}} = \begin{cases} \{ [X^1_q, X_v] \text{ 또는 } [X_v, X^1_q] \}, &amp; t = 1 \\ X^t_q, &amp; t &gt; 1 \end{cases} \]</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">학습방식은 두가지 stage 로 나뉘는데</p>
+<p data-ke-size="size18"><u>Stage 1: Pre-training for Feature Alignment&nbsp;</u></p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1210" data-origin-height="444" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/b9l415/btsJXTQCRnI/AAAAAAAAAAAAAAAAAAAAAF1VO-424CK2svAr2cRs68NRx82NTp4gUn5DcgKX6G82/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=DdVk3jWblEuNu%2BDRvLHPM159rtM%3D" data-phocus="https://blog.kakaocdn.net/dna/b9l415/btsJXTQCRnI/AAAAAAAAAAAAAAAAAAAAAF1VO-424CK2svAr2cRs68NRx82NTp4gUn5DcgKX6G82/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=DdVk3jWblEuNu%2BDRvLHPM159rtM%3D"><img src="https://blog.kakaocdn.net/dna/b9l415/btsJXTQCRnI/AAAAAAAAAAAAAAAAAAAAAF1VO-424CK2svAr2cRs68NRx82NTp4gUn5DcgKX6G82/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=DdVk3jWblEuNu%2BDRvLHPM159rtM%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2Fb9l415%2FbtsJXTQCRnI%2FAAAAAAAAAAAAAAAAAAAAAF1VO-424CK2svAr2cRs68NRx82NTp4gUn5DcgKX6G82%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DDdVk3jWblEuNu%252BDRvLHPM159rtM%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1210" height="444" data-origin-width="1210" data-origin-height="444" data-phocus-index="1"></span></figure>
+<p></p>
+<p data-ke-size="size18">CC3M 데이터셋을 595K개의 image-text pair로 필터링하고,각 샘플은 single turn conversation으로 처리한다. 여기서는 Projection<span style="font-size: 1.12em; letter-spacing: 0px;"> \( W \)만이 학습이 된다. 이를 통해 \( H_v \)가 pretrained 된 LLM의 단어 임베딩과 align 된다.</span></p>
+<p data-ke-size="size18"><u>Stage 2: Fine-tuning End-to-End&nbsp;</u></p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1210" data-origin-height="444" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/b8LMrY/btsJXX6BU2G/AAAAAAAAAAAAAAAAAAAAAOXM9TxjZ9uLF0OrZc-VbA57tWQGiXehZzOI5ObW70kH/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=uEzu8Ja6J7SjRxw3oJlhY%2FNliqY%3D" data-phocus="https://blog.kakaocdn.net/dna/b8LMrY/btsJXX6BU2G/AAAAAAAAAAAAAAAAAAAAAOXM9TxjZ9uLF0OrZc-VbA57tWQGiXehZzOI5ObW70kH/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=uEzu8Ja6J7SjRxw3oJlhY%2FNliqY%3D"><img src="https://blog.kakaocdn.net/dna/b8LMrY/btsJXX6BU2G/AAAAAAAAAAAAAAAAAAAAAOXM9TxjZ9uLF0OrZc-VbA57tWQGiXehZzOI5ObW70kH/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=uEzu8Ja6J7SjRxw3oJlhY%2FNliqY%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2Fb8LMrY%2FbtsJXX6BU2G%2FAAAAAAAAAAAAAAAAAAAAAOXM9TxjZ9uLF0OrZc-VbA57tWQGiXehZzOI5ObW70kH%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DuEzu8Ja6J7SjRxw3oJlhY%252FNliqY%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1210" height="444" data-origin-width="1210" data-origin-height="444" data-phocus-index="2"></span></figure>
+<p></p>
+<p data-ke-size="size18">그 다음에는 Projection W랑 LLM이 학습이된다.</p>
+    </div>
+    
+    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+        <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    </div>
+</body>
+</html>

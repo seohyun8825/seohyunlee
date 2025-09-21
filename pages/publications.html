@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Publications - Seohyun Lee</title>
+    <meta name="description" content="Seohyun Lee - Publications" />
+    <meta property="og:title" content="Publications - Seohyun Lee" />
+    <meta property="og:description" content="Seohyun Lee's research publications and papers" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="a.jpg" />
+    <meta name="theme-color" content="#0d0f17" />
+    <link rel="icon" href="../src/images/a.jpg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../styles.css?v=2" />
+  </head>
+  <body>
+    <canvas id="bg"></canvas>
+
+    <header class="site-header">
+      <nav>
+        <a href="/" class="nav-link">About</a>
+        <a href="/pages/experience" class="nav-link">Experience</a>
+        <a href="/pages/awards" class="nav-link">Awards</a>
+        <a href="/pages/publications" class="nav-link active">Publications</a>
+        <a href="/pages/blog" class="nav-link">Blog</a>
+      </nav>
+    </header>
+
+    <main id="app">
+      <!-- Publications Page -->
+      <div class="page active" id="publications-page">
+        <section class="page-content">
+          <div class="page-header">
+            <h1>Publications</h1>
+            <!-- <div class="pipeline-image">
+              <img src="./src/images/pipeline.png" alt="" />
+            </div> -->
+          </div>
+          <ul class="pub-list">
+            <li class="pub">
+              <div class="pub-image">
+                <img src="../src/images/publications/drsimon.png" alt="DR.SIMON" />
+              </div>
+              <div class="pub-content">
+                <h3>DR.SIMON: Domain-wise Rewrite for Segment-Informed Medical Oversight Network</h3>
+                <p class="meta"><strong>Seohyun Lee</strong>, Suhyun Choe, Jaeha Choi, Jin Won Lee (2025). <em>MedAGI Workshop @ MICCAI 2025</em> — <strong>Oral Presentation</strong></p>
+                <p><a href="https://drsimon-rewrite.github.io/" target="_blank" rel="noopener">Project Page</a></p>
+              </div>
+            </li>
+            <li class="pub">
+              <div class="pub-image">
+                <img src="../src/images/publications/exaone.png" alt="Exaone 4.0 VL" />
+              </div>
+              <div class="pub-content">
+                <h3>Exaone 4.0 VL: Vision-Language Foundation Model for Enterprise AI Agent</h3>
+                <p class="meta">Main Contributor, LG AI Talk Concert 2025</p>
+                <p><a href="https://www.youtube.com/watch?v=EGzIMo4AizA&t=1323s" target="_blank" rel="noopener">Video</a></p>
+              </div>
+            </li>
+            <li class="pub">
+              <div class="pub-image">
+                <div class="slideshow-container">
+                  <div class="slideshow">
+                    <img src="../src/images/publications/odpg1.png" alt="ODPG 1" class="slide active" />
+                    <img src="../src/images/publications/odpg2.png" alt="ODPG 2" class="slide" />
+                    <img src="../src/images/publications/odpg3.png" alt="ODPG 3" class="slide" />
+                  </div>
+                </div>
+              </div>
+              <div class="pub-content">
+                <h3>ODPG: Outfitting Diffusion with Pose-Guided Conditions</h3>
+                <p class="meta"><strong>Seohyun Lee</strong>*, Jintae Park*, Sanghyeok Park* (2025). <em>VISAPP 2025</em> — <strong>Oral Presentation</strong></p>
+                <p><a href="https://www.scitepress.org/publishedPapers/2025/131506/pdf/index.html" target="_blank" rel="noopener">Paper</a></p>
+              </div>
+            </li>
+          </ul>
+        </section>
+      </div>
+
+      <footer class="footer">
+        <div class="contact">
+          <p> happy8825@korea.ac.kr</p>
+        </div>
+        <p>© <span id="year"></span> Seohyun Lee • All rights reserved.</p>
+      </footer>
+    </main>
+
+    <!-- Background music (default muted; enable via the toggle) -->
+    <audio id="bg-audio" src="../src/media/luxury.mp3" preload="auto" loop></audio>
+    <div class="audio-controls" role="group" aria-label="Background audio controls">
+      <button id="audio-toggle" class="audio-toggle" aria-pressed="false" aria-label="Toggle background music" title="Toggle background music">
+        <!-- Speaker ON icon -->
+        <svg class="icon icon-on" viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="currentColor" d="M3 9v6h4l5 4V5L7 9H3zm12.5 3c0-1.77-1.02-3.29-2.5-4.03v8.06c1.48-.74 2.5-2.26 2.5-4.03zm2.5 0c0 3.04-1.7 5.64-4.2 6.92l-.8-1.46C15.58 16.8 17 14.61 17 12s-1.42-4.8-3.99-5.46l.79-1.46C18.29 6.36 20 8.96 20 12z"/>
+        </svg>
+        <!-- Speaker OFF icon -->
+        <svg class="icon icon-off" viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="currentColor" d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.48 2.48c.01-.22.02-.44.02-.66zm-2.5 4.03c1.48-.74 2.5-2.26 2.5-4.03 0-.22-.01-.44-.04-.65L14 13.31v2.72zM3.41 1.86L2 3.27 7.73 9H3v6h4l5 4v-6.73l4.25 4.25c-.9.86-1.97 1.53-3.2 1.9l-.8-1.46c.89-.44 1.64-1.08 2.2-1.86L3.41 1.86zM14 5l-2-.01v4.28L14 11V5zM19 3l-3.19 3.19 1.41 1.41L20.41 4.4 19 3zM20.41 19.59 18.99 21l-3.2-3.2 1.42-1.41 3.2 3.2z"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Cache-bust to ensure latest JS loads -->
+    <script src="../scripts/script-publications.js?v=2"></script>
+  </body>
+  </html>

@@ -1,0 +1,196 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DDPM~DDIM — happy8825 - Seohyun Lee Blog</title>
+    <meta name="description" content="Diffusion 부터 복습해보자면!
+
+
+Forward Process (original image에서 노이즈 추가하는 과정)
+
+
+우리는 x0에서 노이즈를 추가해서 t시점의 이미지를 만들어내야하는데, 첫번째 식처럼 하나하나 이전 단계의 이미지를 이용해서 곱하고 있으면 너무 시간이 오래걸림">
+    <link rel="stylesheet" href="../../styles.css">
+    <style>
+        body { 
+            background: #0d0f17; 
+            color: #fff; 
+            font-family: 'Inter', sans-serif; 
+            line-height: 1.6; 
+            margin: 0; 
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .post-header {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 2rem;
+            margin-bottom: 2rem;
+        }
+        .post-meta {
+            color: #888;
+            margin-bottom: 1rem;
+        }
+        .post-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .post-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        .post-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 1rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .post-content p {
+            margin-bottom: 1rem;
+        }
+        .post-content h1, .post-content h2, .post-content h3 {
+            color: #667eea;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .post-content blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 1rem;
+            margin: 1.5rem 0;
+            color: #ccc;
+            font-style: italic;
+        }
+        .post-content code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .post-content pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            color: #667eea;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            background: rgba(102, 126, 234, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    
+    <div class="post-header">
+        <div class="post-meta">
+            <span>📅 2024-07-13</span>
+            <span> | 🏷️ Computer Vision Paper Review</span>
+            <span> | 🔗 <a href="https://happy8825.tistory.com/19" target="_blank">Original Post</a></span>
+            <span> | 📊 16 images</span>
+        </div>
+        <h1 class="post-title">DDPM~DDIM — happy8825</h1>
+        
+    </div>
+    
+    <div class="post-content">
+        <p data-ke-size="size18">Diffusion 부터 복습해보자면!</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1340" data-origin-height="236" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/cvvkHe/btsIyz6DxTd/AAAAAAAAAAAAAAAAAAAAAD_l-Rv6qsThbejvmYEa-3uK4AjaOZA21u1nQw5TcwCf/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=jB4iwNmvUxT%2Fy89%2FcgPC%2BuOIJII%3D" data-phocus="https://blog.kakaocdn.net/dna/cvvkHe/btsIyz6DxTd/AAAAAAAAAAAAAAAAAAAAAD_l-Rv6qsThbejvmYEa-3uK4AjaOZA21u1nQw5TcwCf/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=jB4iwNmvUxT%2Fy89%2FcgPC%2BuOIJII%3D"><img src="https://blog.kakaocdn.net/dna/cvvkHe/btsIyz6DxTd/AAAAAAAAAAAAAAAAAAAAAD_l-Rv6qsThbejvmYEa-3uK4AjaOZA21u1nQw5TcwCf/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=jB4iwNmvUxT%2Fy89%2FcgPC%2BuOIJII%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FcvvkHe%2FbtsIyz6DxTd%2FAAAAAAAAAAAAAAAAAAAAAD_l-Rv6qsThbejvmYEa-3uK4AjaOZA21u1nQw5TcwCf%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DjB4iwNmvUxT%252Fy89%252FcgPC%252BuOIJII%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1340" height="236" data-origin-width="1340" data-origin-height="236" data-phocus-index="0"></span></figure>
+<p></p>
+<p data-ke-size="size18">Forward Process (original image에서 노이즈 추가하는 과정)</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1340" data-origin-height="527" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/2JBGX/btsIx6xm4kD/AAAAAAAAAAAAAAAAAAAAADns5fUEdZhDZrprwf9gOaFksAbdRbpH143zX5S4qR4b/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=3R9AMWs9xPPcsX6fE75XPyM5B%2F8%3D" data-phocus="https://blog.kakaocdn.net/dna/2JBGX/btsIx6xm4kD/AAAAAAAAAAAAAAAAAAAAADns5fUEdZhDZrprwf9gOaFksAbdRbpH143zX5S4qR4b/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=3R9AMWs9xPPcsX6fE75XPyM5B%2F8%3D"><img src="https://blog.kakaocdn.net/dna/2JBGX/btsIx6xm4kD/AAAAAAAAAAAAAAAAAAAAADns5fUEdZhDZrprwf9gOaFksAbdRbpH143zX5S4qR4b/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=3R9AMWs9xPPcsX6fE75XPyM5B%2F8%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2F2JBGX%2FbtsIx6xm4kD%2FAAAAAAAAAAAAAAAAAAAAADns5fUEdZhDZrprwf9gOaFksAbdRbpH143zX5S4qR4b%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3D3R9AMWs9xPPcsX6fE75XPyM5B%252F8%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1340" height="527" data-origin-width="1340" data-origin-height="527" data-phocus-index="1"></span></figure>
+<p></p>
+<p data-ke-size="size18">우리는 x0에서 노이즈를 추가해서 t시점의 이미지를 만들어내야하는데, 첫번째 식처럼 하나하나 이전 단계의 이미지를 이용해서 곱하고 있으면 너무 시간이 오래걸림.</p>
+<p data-ke-size="size18">결국 t-1에서 t를 얻어내기 위해서는 t-1시점에서 노이즈를 추가해주면 되는건데 (이게 두번째 식) 이렇게 써주면 좋은 이유가 있음</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1340" data-origin-height="134" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/bmUySt/btsIx5rF8Q5/AAAAAAAAAAAAAAAAAAAAAJKey8ikULQbEMOk3o_LGOuk6ik2dAKR6I1WxDel6z-Y/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=5u9z3XI5bd7X8qzC5QhJfRlRSSA%3D" data-phocus="https://blog.kakaocdn.net/dna/bmUySt/btsIx5rF8Q5/AAAAAAAAAAAAAAAAAAAAAJKey8ikULQbEMOk3o_LGOuk6ik2dAKR6I1WxDel6z-Y/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=5u9z3XI5bd7X8qzC5QhJfRlRSSA%3D"><img src="https://blog.kakaocdn.net/dna/bmUySt/btsIx5rF8Q5/AAAAAAAAAAAAAAAAAAAAAJKey8ikULQbEMOk3o_LGOuk6ik2dAKR6I1WxDel6z-Y/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=5u9z3XI5bd7X8qzC5QhJfRlRSSA%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FbmUySt%2FbtsIx5rF8Q5%2FAAAAAAAAAAAAAAAAAAAAAJKey8ikULQbEMOk3o_LGOuk6ik2dAKR6I1WxDel6z-Y%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3D5u9z3XI5bd7X8qzC5QhJfRlRSSA%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1340" height="134" data-origin-width="1340" data-origin-height="134" data-phocus-index="2"></span></figure>
+<p></p>
+<p data-ke-size="size18">이렇게 표현 가능하다는건데, 하나씩 다 곱할 필요없이, reparameterize trick을 통해 nice 한 property를 얻어내는게 가능해진다는거</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1340" data-origin-height="529" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/k6KBt/btsIyYkKLPJ/AAAAAAAAAAAAAAAAAAAAAJU4AtvTPg-V8zuhdF-2mkpmv7k8TsVq_9dvo0WF1imd/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=DHKfwnSyDwIsXnl5auNm%2F5LLbb4%3D" data-phocus="https://blog.kakaocdn.net/dna/k6KBt/btsIyYkKLPJ/AAAAAAAAAAAAAAAAAAAAAJU4AtvTPg-V8zuhdF-2mkpmv7k8TsVq_9dvo0WF1imd/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=DHKfwnSyDwIsXnl5auNm%2F5LLbb4%3D"><img src="https://blog.kakaocdn.net/dna/k6KBt/btsIyYkKLPJ/AAAAAAAAAAAAAAAAAAAAAJU4AtvTPg-V8zuhdF-2mkpmv7k8TsVq_9dvo0WF1imd/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=DHKfwnSyDwIsXnl5auNm%2F5LLbb4%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2Fk6KBt%2FbtsIyYkKLPJ%2FAAAAAAAAAAAAAAAAAAAAAJU4AtvTPg-V8zuhdF-2mkpmv7k8TsVq_9dvo0WF1imd%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DDHKfwnSyDwIsXnl5auNm%252F5LLbb4%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1340" height="529" data-origin-width="1340" data-origin-height="529" data-phocus-index="3"></span></figure>
+<p></p>
+<p data-ke-size="size18">이 식을 조금 더 직관적으로 이해해보면, 알파t 바 부분이 t가 무한대로 커질수록 0 에 가까워짐(1보다 작은 알파값을 계속 곱하는거니까) ,</p>
+<p data-ke-size="size18">즉 q(xt|x0) 식에서 t가 무한대로 갈수록 N(0, I) 에 가까워지는것임(standard normal distribution에 수렴)</p>
+<p data-ke-size="size18">Reverse Process</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1340" data-origin-height="364" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/MEbvd/btsIyI96hrD/AAAAAAAAAAAAAAAAAAAAAAxTqxfU_C73kE6UhyzQ_gx-O-TQYXrkYmGahQCsG0Ek/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=knCFjc85xsQ1Bd6nU8XNeaigVtw%3D" data-phocus="https://blog.kakaocdn.net/dna/MEbvd/btsIyI96hrD/AAAAAAAAAAAAAAAAAAAAAAxTqxfU_C73kE6UhyzQ_gx-O-TQYXrkYmGahQCsG0Ek/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=knCFjc85xsQ1Bd6nU8XNeaigVtw%3D"><img src="https://blog.kakaocdn.net/dna/MEbvd/btsIyI96hrD/AAAAAAAAAAAAAAAAAAAAAAxTqxfU_C73kE6UhyzQ_gx-O-TQYXrkYmGahQCsG0Ek/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=knCFjc85xsQ1Bd6nU8XNeaigVtw%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FMEbvd%2FbtsIyI96hrD%2FAAAAAAAAAAAAAAAAAAAAAAxTqxfU_C73kE6UhyzQ_gx-O-TQYXrkYmGahQCsG0Ek%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DknCFjc85xsQ1Bd6nU8XNeaigVtw%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1340" height="364" data-origin-width="1340" data-origin-height="364" data-phocus-index="4"></span></figure>
+<p></p>
+<p data-ke-size="size18">이 식은 x0 과 xt 가 주어졌을 때 xt-1 을 구할 수 있는 식</p>
+<p data-ke-size="size18">근데 우리는 x0을 모르는거. 그래서 x0이 주어져 있지 않고 이전 step만 주어졌을때, 확률분포 구하는거를 네트워크를 통해 학습시켜야함.</p>
+<p data-ke-size="size18">그래서 학습시키는 함수 P에 대한 식을 새로 만들어줬는데 다음과 같음</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1340" data-origin-height="138" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/2bvtR/btsIzWT3QKj/AAAAAAAAAAAAAAAAAAAAAKbnbHB_ezJSrtsmNe6PsD_7L-6_oqi8nL4oKofJXSc5/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=rxgFEpVBHuqpsY%2BnqS8GnFRyrJc%3D" data-phocus="https://blog.kakaocdn.net/dna/2bvtR/btsIzWT3QKj/AAAAAAAAAAAAAAAAAAAAAKbnbHB_ezJSrtsmNe6PsD_7L-6_oqi8nL4oKofJXSc5/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=rxgFEpVBHuqpsY%2BnqS8GnFRyrJc%3D"><img src="https://blog.kakaocdn.net/dna/2bvtR/btsIzWT3QKj/AAAAAAAAAAAAAAAAAAAAAKbnbHB_ezJSrtsmNe6PsD_7L-6_oqi8nL4oKofJXSc5/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=rxgFEpVBHuqpsY%2BnqS8GnFRyrJc%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2F2bvtR%2FbtsIzWT3QKj%2FAAAAAAAAAAAAAAAAAAAAAKbnbHB_ezJSrtsmNe6PsD_7L-6_oqi8nL4oKofJXSc5%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DrxgFEpVBHuqpsY%252BnqS8GnFRyrJc%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1340" height="138" data-origin-width="1340" data-origin-height="138" data-phocus-index="5"></span></figure>
+<p></p>
+<p data-ke-size="size18">모델 구조는 전체적으로 다음과 같이 생겼다</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1340" data-origin-height="567" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/laaZE/btsIzdhGNVh/AAAAAAAAAAAAAAAAAAAAAJVgLdH_0V4WQbZU-OejOt4ofT77vrXJ1_M2_uYeoS18/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=CBxzMKIoYvyXc29%2Fw7TSVDRU%2Ba0%3D" data-phocus="https://blog.kakaocdn.net/dna/laaZE/btsIzdhGNVh/AAAAAAAAAAAAAAAAAAAAAJVgLdH_0V4WQbZU-OejOt4ofT77vrXJ1_M2_uYeoS18/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=CBxzMKIoYvyXc29%2Fw7TSVDRU%2Ba0%3D"><img src="https://blog.kakaocdn.net/dna/laaZE/btsIzdhGNVh/AAAAAAAAAAAAAAAAAAAAAJVgLdH_0V4WQbZU-OejOt4ofT77vrXJ1_M2_uYeoS18/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=CBxzMKIoYvyXc29%2Fw7TSVDRU%2Ba0%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FlaaZE%2FbtsIzdhGNVh%2FAAAAAAAAAAAAAAAAAAAAAJVgLdH_0V4WQbZU-OejOt4ofT77vrXJ1_M2_uYeoS18%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DCBxzMKIoYvyXc29%252Fw7TSVDRU%252Ba0%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1340" height="567" data-origin-width="1340" data-origin-height="567" data-phocus-index="6"></span></figure>
+<p></p>
+<p data-ke-size="size18">xt를 넣어주고, t(어떤 시점인지 함께) 넣어서 unet에 태워주면 분포의 평균과 분산을 예측하는 네트워크임.</p>
+<p data-ke-size="size18">이렇게 해서 나온 확률분포와, 정답 확률분포간을 비교하면서(kl divergence) 학습이 진행된다.</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1340" data-origin-height="336" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/dhlTeh/btsIyHXDz4h/AAAAAAAAAAAAAAAAAAAAADksz2yTAgLf_sJWzswZy4G5p1or2WDvP1nT7JxkVjXR/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=tJjGKTVU9Kg3bQKMNXLse8PYQzA%3D" data-phocus="https://blog.kakaocdn.net/dna/dhlTeh/btsIyHXDz4h/AAAAAAAAAAAAAAAAAAAAADksz2yTAgLf_sJWzswZy4G5p1or2WDvP1nT7JxkVjXR/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=tJjGKTVU9Kg3bQKMNXLse8PYQzA%3D"><img src="https://blog.kakaocdn.net/dna/dhlTeh/btsIyHXDz4h/AAAAAAAAAAAAAAAAAAAAADksz2yTAgLf_sJWzswZy4G5p1or2WDvP1nT7JxkVjXR/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=tJjGKTVU9Kg3bQKMNXLse8PYQzA%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FdhlTeh%2FbtsIyHXDz4h%2FAAAAAAAAAAAAAAAAAAAAADksz2yTAgLf_sJWzswZy4G5p1or2WDvP1nT7JxkVjXR%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DtJjGKTVU9Kg3bQKMNXLse8PYQzA%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1340" height="336" data-origin-width="1340" data-origin-height="336" data-phocus-index="7"></span></figure>
+<p></p>
+<p data-ke-size="size18">이부분이 DDPM이 나오게 된 배경이기도한데, 이런식으로 loss function을 만들게 되면, 시점별로 하나하나씩 다 비교를 해줘야 함.</p>
+<p data-ke-size="size18">그래서 DDPM에서 제안한거는</p>
+<p data-ke-size="size18">이전 스텝만을 예측하지 말고, 아예 x0(원본이미지)를 t 시점에서 바로 예측해버리자!</p>
+<p data-ke-size="size18">즉, 원래 diffusion 모델에서는 unet 네트워크가 그 다음 스텝의 mean이랑 variance를 예측했다면, 이렇게 하지 말고 어떤 시점이든간에 x0의 확률 분포를 바로 예측하자는것!</p>
+<p data-ke-size="size18">x0, xt, e 의 관계?</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1340" data-origin-height="517" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/bEnRSQ/btsIzzSjckr/AAAAAAAAAAAAAAAAAAAAAGCJ2ZgOOXAl4keqdNDZy_hhojawG0MX-HzN5y1lSWuJ/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=HZuam7ucuSASyU%2B7jWyiXTIN6oI%3D" data-phocus="https://blog.kakaocdn.net/dna/bEnRSQ/btsIzzSjckr/AAAAAAAAAAAAAAAAAAAAAGCJ2ZgOOXAl4keqdNDZy_hhojawG0MX-HzN5y1lSWuJ/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=HZuam7ucuSASyU%2B7jWyiXTIN6oI%3D"><img src="https://blog.kakaocdn.net/dna/bEnRSQ/btsIzzSjckr/AAAAAAAAAAAAAAAAAAAAAGCJ2ZgOOXAl4keqdNDZy_hhojawG0MX-HzN5y1lSWuJ/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=HZuam7ucuSASyU%2B7jWyiXTIN6oI%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FbEnRSQ%2FbtsIzzSjckr%2FAAAAAAAAAAAAAAAAAAAAAGCJ2ZgOOXAl4keqdNDZy_hhojawG0MX-HzN5y1lSWuJ%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DHZuam7ucuSASyU%252B7jWyiXTIN6oI%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1340" height="517" data-origin-width="1340" data-origin-height="517" data-phocus-index="8"></span></figure>
+<p></p>
+<p data-ke-size="size18">결국 xt는 x0이랑 엡실론 의 linear combination이라고 할 수 있음.</p>
+<p data-ke-size="size18">즉, x0이랑 엡실론을 알면 xt를 구할 수 있고, xt랑 엡실론을 알면 x0을 구할수 있고,,,</p>
+<p data-ke-size="size18">그래서 원래 디퓨전 모델에서 하려고 했던거는 xt와 엡실론을 이용해서 x0을 구하자! 였는데, DDPM에서는 x0이랑 xt를 통해서 엡실론을 학습시켜보자! 로 바뀐거.(x0을 바로 구해도 되는데 이렇게 했을때 성능이 더 잘나왔다고 함..)</p>
+<p data-ke-size="size18">즉 이미지의 확률분포를 예측하는게 아니라 엡실론(노이즈)의 분포를 예측하는거</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1340" data-origin-height="589" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/psk7N/btsIyzerm4T/AAAAAAAAAAAAAAAAAAAAAHlTxryeOuCcg5vDMrrkwyJhdf_BLscq_F-1o0dKFyiC/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=UZ%2FOp9yc3jtpcCtqUgrEi5Hx%2B%2Fo%3D" data-phocus="https://blog.kakaocdn.net/dna/psk7N/btsIyzerm4T/AAAAAAAAAAAAAAAAAAAAAHlTxryeOuCcg5vDMrrkwyJhdf_BLscq_F-1o0dKFyiC/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=UZ%2FOp9yc3jtpcCtqUgrEi5Hx%2B%2Fo%3D"><img src="https://blog.kakaocdn.net/dna/psk7N/btsIyzerm4T/AAAAAAAAAAAAAAAAAAAAAHlTxryeOuCcg5vDMrrkwyJhdf_BLscq_F-1o0dKFyiC/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=UZ%2FOp9yc3jtpcCtqUgrEi5Hx%2B%2Fo%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2Fpsk7N%2FbtsIyzerm4T%2FAAAAAAAAAAAAAAAAAAAAAHlTxryeOuCcg5vDMrrkwyJhdf_BLscq_F-1o0dKFyiC%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DUZ%252FOp9yc3jtpcCtqUgrEi5Hx%252B%252Fo%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1340" height="589" data-origin-width="1340" data-origin-height="589" data-phocus-index="9"></span></figure>
+<p></p>
+<p data-ke-size="size18">xt 시점에서 x0으로 가는 노이즈를 예측하고, 그걸 통해 xt-1을 구하고, xt-1에서 x0으로 가는 노이즈 예측하고 그걸 통해서 xt-3 구하고~~ 계속 반복</p>
+<p data-ke-size="size18">Loss function 은 다음과 같다</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1340" data-origin-height="260" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/q3PSI/btsIy3lQlAU/AAAAAAAAAAAAAAAAAAAAABhgUtKGIGQCwRZPIZXr0IWEet0hyswB7dLf9zq0rkcE/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=VC6YQxNcH6NhD1gU%2BIxMP2NFm%2Bc%3D" data-phocus="https://blog.kakaocdn.net/dna/q3PSI/btsIy3lQlAU/AAAAAAAAAAAAAAAAAAAAABhgUtKGIGQCwRZPIZXr0IWEet0hyswB7dLf9zq0rkcE/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=VC6YQxNcH6NhD1gU%2BIxMP2NFm%2Bc%3D"><img src="https://blog.kakaocdn.net/dna/q3PSI/btsIy3lQlAU/AAAAAAAAAAAAAAAAAAAAABhgUtKGIGQCwRZPIZXr0IWEet0hyswB7dLf9zq0rkcE/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=VC6YQxNcH6NhD1gU%2BIxMP2NFm%2Bc%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2Fq3PSI%2FbtsIy3lQlAU%2FAAAAAAAAAAAAAAAAAAAAABhgUtKGIGQCwRZPIZXr0IWEet0hyswB7dLf9zq0rkcE%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DVC6YQxNcH6NhD1gU%252BIxMP2NFm%252Bc%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1340" height="260" data-origin-width="1340" data-origin-height="260" data-phocus-index="10"></span></figure>
+<p></p>
+<p data-ke-size="size18">KL divergence를 썼던 diffusion 초기 모델이랑 달리, t시점과 x0 시점으로 가는 노이즈를 예측한거랑, ground truth 노이즈의 차이를 최소화하는게 DDPM의 loss function</p>
+<p data-ke-size="size18">DDPM의 문제점?</p>
+<p data-ke-size="size18">너무 느리다..</p>
+<p data-ke-size="size18">x0시점을 바로 예측을 했지만, 결국 보면 t시점에서 x0을 예측해서 t-1 시점으로 가고, 예측해서 t-1시점으로 가고 … timestep 별로 하나하나 다 해줘야 하는것.</p>
+<p data-ke-size="size18">그러면 solution으로 t를 띄엄띄엄 해주면 안되나? —&gt; timestep이 적어질수록 ddpm의 퀄리티가 심하게 낮아진다는 문제점이 있음</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">기존 DDPM Reverse</p>
+<p data-ke-size="size18"><b>𝑞(𝑥𝑡−1∣𝑥𝑡,𝑥0)</b>=𝑁(𝑥𝑡−1;𝜇~(𝑥𝑡,𝑥0),𝛽~𝑡I)q(xt−1∣xt,x0)</p>
+<p data-ke-size="size18"><b>=N(xt−1;μ~(xt,x0),β~tI)</b></p>
+<p data-ke-size="size18">𝑤ℎ𝑒𝑟𝑒,𝜇~𝑡(𝑥𝑡,𝑥0):=𝛼ˉ𝑡−1𝛽𝑡1−𝛼𝑡ˉ𝑥0&nbsp;+𝛼𝑡(1−𝛼ˉ𝑡−1)1−𝛼ˉ𝑡𝑥𝑡,&nbsp;𝛽𝑡~:=(1−𝛼ˉ𝑡−1)1−𝛼ˉ𝑡𝛽𝑡where,μ~t(xt,x0):=1−αtˉαˉt−1βtx0&nbsp;+1−αˉtαt(1−αˉt−1)xt,&nbsp;βt~:=1−αˉt(1−αˉt−1)βt</p>
+<p data-ke-size="size18">이거를 좀 더 generalized 형태인 다음과 같은 수식으로 바꿈</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1340" data-origin-height="100" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/TSd0X/btsIy1hwY3p/AAAAAAAAAAAAAAAAAAAAAMkkuewx-D51vnVeZOFLnK1VFXWdTdjsmY6evrVQrjmH/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=tsEitsy3Y3MI2cfWAt9R2hrGOQk%3D" data-phocus="https://blog.kakaocdn.net/dna/TSd0X/btsIy1hwY3p/AAAAAAAAAAAAAAAAAAAAAMkkuewx-D51vnVeZOFLnK1VFXWdTdjsmY6evrVQrjmH/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=tsEitsy3Y3MI2cfWAt9R2hrGOQk%3D"><img src="https://blog.kakaocdn.net/dna/TSd0X/btsIy1hwY3p/AAAAAAAAAAAAAAAAAAAAAMkkuewx-D51vnVeZOFLnK1VFXWdTdjsmY6evrVQrjmH/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=tsEitsy3Y3MI2cfWAt9R2hrGOQk%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FTSd0X%2FbtsIy1hwY3p%2FAAAAAAAAAAAAAAAAAAAAAMkkuewx-D51vnVeZOFLnK1VFXWdTdjsmY6evrVQrjmH%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DtsEitsy3Y3MI2cfWAt9R2hrGOQk%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1340" height="100" data-origin-width="1340" data-origin-height="100" data-phocus-index="11"></span></figure>
+<p></p>
+<p data-ke-size="size18">이 식이 나오게 된게, 밑에 식은 DDPM에서도 언급되었던 식인데, 밑에 식의 조건이 만족되도록 설계한것.</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1340" data-origin-height="142" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/cpj1o7/btsIxZdFh4Q/AAAAAAAAAAAAAAAAAAAAAHvwm95CLikFRxWYP9I_V4wAWsfJLLWmYi6weu0DqKev/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=Xfi1Ov0ukr9GSA8QIUTW5qSO7qM%3D" data-phocus="https://blog.kakaocdn.net/dna/cpj1o7/btsIxZdFh4Q/AAAAAAAAAAAAAAAAAAAAAHvwm95CLikFRxWYP9I_V4wAWsfJLLWmYi6weu0DqKev/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=Xfi1Ov0ukr9GSA8QIUTW5qSO7qM%3D"><img src="https://blog.kakaocdn.net/dna/cpj1o7/btsIxZdFh4Q/AAAAAAAAAAAAAAAAAAAAAHvwm95CLikFRxWYP9I_V4wAWsfJLLWmYi6weu0DqKev/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=Xfi1Ov0ukr9GSA8QIUTW5qSO7qM%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2Fcpj1o7%2FbtsIxZdFh4Q%2FAAAAAAAAAAAAAAAAAAAAAHvwm95CLikFRxWYP9I_V4wAWsfJLLWmYi6weu0DqKev%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DXfi1Ov0ukr9GSA8QIUTW5qSO7qM%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1340" height="142" data-origin-width="1340" data-origin-height="142" data-phocus-index="12"></span></figure>
+<p></p>
+<p data-ke-size="size18">(25) 번 식을 잘 보면 시그마 t는 우리가 정할 수 있는 값인데, 이 시그마 t를 다음과 같이 대입하면 DDPM이랑 똑같아지고</p>
+<p data-ke-size="size18">시그마 t를 0으로 두게 된다면, covariance가 0이 되어버리니까 deterministic 한 function이 됨.</p>
+<p data-ke-size="size18">이게 DDIM!</p>
+<p data-ke-size="size18">DDPM 에서는 t 에서 t-1로 갈때 어느정도의 stochasticity가 있었다면, DDIM에서는 이걸 아예 0으로 줘서, deterministic하게 딱 정해진 함수로 만든것.</p>
+<p data-ke-size="size18">아까 DDPM에서 timestep을 적게하면 퀄리티가 급격하게 낮아진다고 했었는데, DDIM의 성능을 보면 timestep을 줄여도 성능이 크게 줄어들지는 않는걸 볼수 있음</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1340" data-origin-height="796" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/czE0Xw/btsIyBDmHom/AAAAAAAAAAAAAAAAAAAAACjP_okx2eYH0mnJo3D6Qz759rufczgs60wYERTp6hQT/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=HOzYBAoPOzG7mn5Z6TUhvFpUoH8%3D" data-phocus="https://blog.kakaocdn.net/dna/czE0Xw/btsIyBDmHom/AAAAAAAAAAAAAAAAAAAAACjP_okx2eYH0mnJo3D6Qz759rufczgs60wYERTp6hQT/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=HOzYBAoPOzG7mn5Z6TUhvFpUoH8%3D"><img src="https://blog.kakaocdn.net/dna/czE0Xw/btsIyBDmHom/AAAAAAAAAAAAAAAAAAAAACjP_okx2eYH0mnJo3D6Qz759rufczgs60wYERTp6hQT/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=HOzYBAoPOzG7mn5Z6TUhvFpUoH8%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FczE0Xw%2FbtsIyBDmHom%2FAAAAAAAAAAAAAAAAAAAAACjP_okx2eYH0mnJo3D6Qz759rufczgs60wYERTp6hQT%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DHOzYBAoPOzG7mn5Z6TUhvFpUoH8%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1340" height="796" data-origin-width="1340" data-origin-height="796" data-phocus-index="13"></span></figure>
+<p></p>
+<p data-ke-size="size18">근데 여기서도 좀 재밌는건 step수가 적으면 ddim 이 더 점수가 좋은데 step이 1000으로 가면 DDPM 더 점수가 좋음</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">전체적인 학습 과정</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1340" data-origin-height="784" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/digYuo/btsIye2IsVG/AAAAAAAAAAAAAAAAAAAAACw1CZiBvbcCkFnSNGExmpLhZJ5Hr1R-HA4iiBzB7EAT/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=cbk7cT%2BdDSahK%2Ft0yJwVxmDND2o%3D" data-phocus="https://blog.kakaocdn.net/dna/digYuo/btsIye2IsVG/AAAAAAAAAAAAAAAAAAAAACw1CZiBvbcCkFnSNGExmpLhZJ5Hr1R-HA4iiBzB7EAT/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=cbk7cT%2BdDSahK%2Ft0yJwVxmDND2o%3D"><img src="https://blog.kakaocdn.net/dna/digYuo/btsIye2IsVG/AAAAAAAAAAAAAAAAAAAAACw1CZiBvbcCkFnSNGExmpLhZJ5Hr1R-HA4iiBzB7EAT/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=cbk7cT%2BdDSahK%2Ft0yJwVxmDND2o%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FdigYuo%2FbtsIye2IsVG%2FAAAAAAAAAAAAAAAAAAAAACw1CZiBvbcCkFnSNGExmpLhZJ5Hr1R-HA4iiBzB7EAT%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3Dcbk7cT%252BdDSahK%252Ft0yJwVxmDND2o%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1340" height="784" data-origin-width="1340" data-origin-height="784" data-phocus-index="14"></span></figure>
+<figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1340" data-origin-height="803" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/chBGWj/btsIybE9b6r/AAAAAAAAAAAAAAAAAAAAANp_2RR0uiQcFmVddnoIXTqcJlhQM8_s127rIJEM3Mvm/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=JjWeewt%2FQOptBvbBWPVenPzM9Ro%3D" data-phocus="https://blog.kakaocdn.net/dna/chBGWj/btsIybE9b6r/AAAAAAAAAAAAAAAAAAAAANp_2RR0uiQcFmVddnoIXTqcJlhQM8_s127rIJEM3Mvm/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=JjWeewt%2FQOptBvbBWPVenPzM9Ro%3D"><img src="https://blog.kakaocdn.net/dna/chBGWj/btsIybE9b6r/AAAAAAAAAAAAAAAAAAAAANp_2RR0uiQcFmVddnoIXTqcJlhQM8_s127rIJEM3Mvm/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=JjWeewt%2FQOptBvbBWPVenPzM9Ro%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FchBGWj%2FbtsIybE9b6r%2FAAAAAAAAAAAAAAAAAAAAANp_2RR0uiQcFmVddnoIXTqcJlhQM8_s127rIJEM3Mvm%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DJjWeewt%252FQOptBvbBWPVenPzM9Ro%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1340" height="803" data-origin-width="1340" data-origin-height="803" data-phocus-index="15"></span></figure>
+<p></p>
+<p data-ke-size="size18">여기서 나온 xt 로 xt-1 구하고, xt-1에서 xt-2 구하고 ~~</p>
+    </div>
+    
+    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+        <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    </div>
+</body>
+</html>

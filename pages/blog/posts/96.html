@@ -1,0 +1,152 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visual Autoregressive Modeling: Scalable Image Generation via Next-Scale Prediction — happy8825 - Seohyun Lee Blog</title>
+    <meta name="description" content="
+
+간만에 재밌게 읽었던 논문이었다. 아이디어가 되게 직관적이고 재밌었다.
+&nbsp;
+핵심 아이디어가, auto regressive하게 text generate 하는걸 생각해보면, 보통 next token prediction을 하게된다.
+예를 들어 오늘따라 해피가 너무 보고싶다 라는 ">
+    <link rel="stylesheet" href="../../styles.css">
+    <style>
+        body { 
+            background: #0d0f17; 
+            color: #fff; 
+            font-family: 'Inter', sans-serif; 
+            line-height: 1.6; 
+            margin: 0; 
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .post-header {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 2rem;
+            margin-bottom: 2rem;
+        }
+        .post-meta {
+            color: #888;
+            margin-bottom: 1rem;
+        }
+        .post-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .post-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        .post-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 1rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .post-content p {
+            margin-bottom: 1rem;
+        }
+        .post-content h1, .post-content h2, .post-content h3 {
+            color: #667eea;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .post-content blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 1rem;
+            margin: 1.5rem 0;
+            color: #ccc;
+            font-style: italic;
+        }
+        .post-content code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .post-content pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            color: #667eea;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            background: rgba(102, 126, 234, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    
+    <div class="post-header">
+        <div class="post-meta">
+            <span>📅 2024-09-03</span>
+            <span> | 🏷️ Computer Vision Paper Review</span>
+            <span> | 🔗 <a href="https://happy8825.tistory.com/52" target="_blank">Original Post</a></span>
+            <span> | 📊 5 images</span>
+        </div>
+        <h1 class="post-title">Visual Autoregressive Modeling: Scalable Image Generation via Next-Scale Prediction — happy8825</h1>
+        
+    </div>
+    
+    <div class="post-content">
+        <p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1040" data-origin-height="1040" style="margin-left: 50%; transform: translateX(-50%); width: 1040px; max-width: 1040px;"><span data-url="https://blog.kakaocdn.net/dna/ceqDAo/btsJplmoCWo/AAAAAAAAAAAAAAAAAAAAAIueVa6K7b6LSINEjm9qX8xZw5IIYgfMp9iPFtqI2A9Q/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=WydmVLBcxQWRX6CqvWU4Uyc%2F2g0%3D" data-phocus="https://blog.kakaocdn.net/dna/ceqDAo/btsJplmoCWo/AAAAAAAAAAAAAAAAAAAAAIueVa6K7b6LSINEjm9qX8xZw5IIYgfMp9iPFtqI2A9Q/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=WydmVLBcxQWRX6CqvWU4Uyc%2F2g0%3D"><img src="https://blog.kakaocdn.net/dna/ceqDAo/btsJplmoCWo/AAAAAAAAAAAAAAAAAAAAAIueVa6K7b6LSINEjm9qX8xZw5IIYgfMp9iPFtqI2A9Q/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=WydmVLBcxQWRX6CqvWU4Uyc%2F2g0%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FceqDAo%2FbtsJplmoCWo%2FAAAAAAAAAAAAAAAAAAAAAIueVa6K7b6LSINEjm9qX8xZw5IIYgfMp9iPFtqI2A9Q%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DWydmVLBcxQWRX6CqvWU4Uyc%252F2g0%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1040" height="1040" data-origin-width="1040" data-origin-height="1040" data-phocus-index="0"></span></figure>
+<p></p>
+<p data-ke-size="size18">간만에 재밌게 읽었던 논문이었다. 아이디어가 되게 직관적이고 재밌었다.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">핵심 아이디어가, auto regressive하게 text generate 하는걸 생각해보면, 보통 next token prediction을 하게된다.</p>
+<p data-ke-size="size18">예를 들어 오늘따라 해피가 너무 보고싶다 라는 문장이 있으면</p>
+<p data-ke-size="size18">오늘따라 -&gt; 해피가 -&gt; 너무 이런식으로 이전의 토큰이 다음 토큰을 예측하는, 어느정도의 direction이 있다.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">근데 잘 생각해보면 이미지도 그럴까?</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">이미지를 패치로 나눴다고 생각해보자</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="468" data-origin-height="170" style="margin-left: 50%; transform: translateX(-50%); width: 468px; max-width: 468px;"><span data-url="https://blog.kakaocdn.net/dna/ndvbT/btsJp54e7PU/AAAAAAAAAAAAAAAAAAAAAJP9cKi3wtTOTiHI-OnSe_Fgndean-hEy7aNgY3M6WSi/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=J7eAIWGQ%2FP27jzeVbBuyL8rfQVw%3D" data-phocus="https://blog.kakaocdn.net/dna/ndvbT/btsJp54e7PU/AAAAAAAAAAAAAAAAAAAAAJP9cKi3wtTOTiHI-OnSe_Fgndean-hEy7aNgY3M6WSi/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=J7eAIWGQ%2FP27jzeVbBuyL8rfQVw%3D"><img src="https://blog.kakaocdn.net/dna/ndvbT/btsJp54e7PU/AAAAAAAAAAAAAAAAAAAAAJP9cKi3wtTOTiHI-OnSe_Fgndean-hEy7aNgY3M6WSi/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=J7eAIWGQ%2FP27jzeVbBuyL8rfQVw%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FndvbT%2FbtsJp54e7PU%2FAAAAAAAAAAAAAAAAAAAAAJP9cKi3wtTOTiHI-OnSe_Fgndean-hEy7aNgY3M6WSi%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DJ7eAIWGQ%252FP27jzeVbBuyL8rfQVw%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="468" height="170" data-origin-width="468" data-origin-height="170" data-phocus-index="1"></span></figure>
+<p></p>
+<p data-ke-size="size18">이런식으로 나눠지겠지, 근데 1번 패치가 2번을 생성하는데 , 2번 토큰이 3번을 생성하는데 방향면에서 무슨 의미가 있을까</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">그럼 저런식으로 토큰화하는게 맞는 방법일까?</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">왜냐하면 원래 1이랑 4가 한픽셀 차이라고 해보자 근데 flattening 해버리면 거리가 3이나 더 차이나게 되는거</p>
+<p data-ke-size="size18">그럼 spatial locality의 correlation이 이상해짐</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">그래서 나온 아이디어가, 하나의 패치가 다음 패치를 예측하는데 사용하지말고&nbsp;</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1154" data-origin-height="704" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/lw4cX/btsJpnxJbuz/AAAAAAAAAAAAAAAAAAAAAMPi-7oMRFNFQH2MyBv-UYNA1sZX-6yVROw1s2ItMqvs/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=lgriL5%2FT0F%2F9QIGVYe%2FFmGPD9QA%3D" data-phocus="https://blog.kakaocdn.net/dna/lw4cX/btsJpnxJbuz/AAAAAAAAAAAAAAAAAAAAAMPi-7oMRFNFQH2MyBv-UYNA1sZX-6yVROw1s2ItMqvs/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=lgriL5%2FT0F%2F9QIGVYe%2FFmGPD9QA%3D"><img src="https://blog.kakaocdn.net/dna/lw4cX/btsJpnxJbuz/AAAAAAAAAAAAAAAAAAAAAMPi-7oMRFNFQH2MyBv-UYNA1sZX-6yVROw1s2ItMqvs/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=lgriL5%2FT0F%2F9QIGVYe%2FFmGPD9QA%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2Flw4cX%2FbtsJpnxJbuz%2FAAAAAAAAAAAAAAAAAAAAAMPi-7oMRFNFQH2MyBv-UYNA1sZX-6yVROw1s2ItMqvs%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DlgriL5%252FT0F%252F9QIGVYe%252FFmGPD9QA%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1154" height="704" data-origin-width="1154" data-origin-height="704" data-phocus-index="2"></span></figure>
+<p></p>
+<p data-ke-size="size16">low resolution이 그다음 resolution, 그리고 또 다음 resoultion --&gt; 점점 high resolution을 예측하는데 사용하자가&nbsp;</p>
+<p data-ke-size="size16">핵심 아이디어</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1214" data-origin-height="388" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/bQpECS/btsJoZxoGpW/AAAAAAAAAAAAAAAAAAAAAEvFpSwx-pruDoA0HDG1LEDuHBpOnrNFze48m0Fi0naD/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=wrID37hg%2BwJaLcgCtyCaj6aUxd0%3D" data-phocus="https://blog.kakaocdn.net/dna/bQpECS/btsJoZxoGpW/AAAAAAAAAAAAAAAAAAAAAEvFpSwx-pruDoA0HDG1LEDuHBpOnrNFze48m0Fi0naD/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=wrID37hg%2BwJaLcgCtyCaj6aUxd0%3D"><img src="https://blog.kakaocdn.net/dna/bQpECS/btsJoZxoGpW/AAAAAAAAAAAAAAAAAAAAAEvFpSwx-pruDoA0HDG1LEDuHBpOnrNFze48m0Fi0naD/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=wrID37hg%2BwJaLcgCtyCaj6aUxd0%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FbQpECS%2FbtsJoZxoGpW%2FAAAAAAAAAAAAAAAAAAAAAEvFpSwx-pruDoA0HDG1LEDuHBpOnrNFze48m0Fi0naD%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DwrID37hg%252BwJaLcgCtyCaj6aUxd0%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1214" height="388" data-origin-width="1214" data-origin-height="388" data-phocus-index="3"></span></figure>
+<p></p>
+<p data-ke-size="size16">그래서 이렇게 다양한 scale로 interpolate 해서 큐에다 넣어놓고</p>
+<p data-ke-size="size16">stage 2에서 큐를 사용해서 나온 multi scale token으로 residual하게 adding 해서 image reconstruction을 진행한다.</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1242" data-origin-height="408" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/R6AVx/btsJqQrOBMZ/AAAAAAAAAAAAAAAAAAAAAD76CojKxuwmA-u60GtIFKPEbLTHUYLg9W6Nz7V9oZ1R/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=eyfv0JYislFHvQIqvij45mS0Fkw%3D" data-phocus="https://blog.kakaocdn.net/dna/R6AVx/btsJqQrOBMZ/AAAAAAAAAAAAAAAAAAAAAD76CojKxuwmA-u60GtIFKPEbLTHUYLg9W6Nz7V9oZ1R/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=eyfv0JYislFHvQIqvij45mS0Fkw%3D" data-alt="ㅐ서"><img src="https://blog.kakaocdn.net/dna/R6AVx/btsJqQrOBMZ/AAAAAAAAAAAAAAAAAAAAAD76CojKxuwmA-u60GtIFKPEbLTHUYLg9W6Nz7V9oZ1R/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=eyfv0JYislFHvQIqvij45mS0Fkw%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FR6AVx%2FbtsJqQrOBMZ%2FAAAAAAAAAAAAAAAAAAAAAD76CojKxuwmA-u60GtIFKPEbLTHUYLg9W6Nz7V9oZ1R%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3Deyfv0JYislFHvQIqvij45mS0Fkw%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1242" height="408" data-origin-width="1242" data-origin-height="408" data-phocus-index="4"></span><figcaption>ㅐ서</figcaption>
+</figure>
+<p></p>
+<p data-ke-size="size16">&nbsp;</p>
+    </div>
+    
+    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+        <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    </div>
+</body>
+</html>

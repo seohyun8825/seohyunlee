@@ -1,0 +1,160 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Concept-skill Transferability-based Data Selection for Large Vision-Language Models — happy8825 - Seohyun Lee Blog</title>
+    <meta name="description" content="Intro
+데이터셋이 너무 큰 경우 학습 비용이 너무 많이 든다. 그래서 좋은 데이터만 어떻게 잘 뽑아 쓸까, 에 대한 연구이다.
+핵심 아이디어는 작은 vlm 을 사용해서, 어떤 데이터가 유용할지 골라낸다. 작은 모델의 내부 representation을 이용해서 training 데이터를">
+    <link rel="stylesheet" href="../../styles.css">
+    <style>
+        body { 
+            background: #0d0f17; 
+            color: #fff; 
+            font-family: 'Inter', sans-serif; 
+            line-height: 1.6; 
+            margin: 0; 
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .post-header {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 2rem;
+            margin-bottom: 2rem;
+        }
+        .post-meta {
+            color: #888;
+            margin-bottom: 1rem;
+        }
+        .post-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .post-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        .post-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 1rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .post-content p {
+            margin-bottom: 1rem;
+        }
+        .post-content h1, .post-content h2, .post-content h3 {
+            color: #667eea;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .post-content blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 1rem;
+            margin: 1.5rem 0;
+            color: #ccc;
+            font-style: italic;
+        }
+        .post-content code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .post-content pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            color: #667eea;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            background: rgba(102, 126, 234, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    
+    <div class="post-header">
+        <div class="post-meta">
+            <span>📅 2025-08-16</span>
+            <span> | 🏷️ Computer Vision Paper Review</span>
+            <span> | 🔗 <a href="https://happy8825.tistory.com/118" target="_blank">Original Post</a></span>
+            <span> | 📊 1 images</span>
+        </div>
+        <h1 class="post-title">Concept-skill Transferability-based Data Selection for Large Vision-Language Models — happy8825</h1>
+        
+    </div>
+    
+    <div class="post-content">
+        <p data-ke-size="size16">Intro</p>
+<p data-ke-size="size16">데이터셋이 너무 큰 경우 학습 비용이 너무 많이 든다. 그래서 좋은 데이터만 어떻게 잘 뽑아 쓸까, 에 대한 연구이다.</p>
+<p data-ke-size="size16">핵심 아이디어는 작은 vlm 을 사용해서, 어떤 데이터가 유용할지 골라낸다. 작은 모델의 내부 representation을 이용해서 training 데이터를 클러스터링을 한다. 그래서 데이터 속에서 concept - skill composition을 파악한다. (street sign/OCR) 이런식으로 어떤 컨셉인지, 그리고 이걸 답하기 위해서는 어떤 skill 이 필요한지 이런식으로 조합하는 느낌인거같다. 이렇게 하면 다양한 데이터를 소량만 뽑아도 성능 유지가 가능하다. 그래서 concept-skill composition으로 클러스터링을 해놓고, 각 클러스터에서 density와 transferability 를 기준으로 샘플링을 한다. 여기서 density는 얼마난 대표적인 데이터인지? Transferability 는 다른 concept-skill 클러스터쪽에도 도움이 되는 정보인지?</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">LLaVA 1.5 데이터셋에서, 전체 20프로만 사용해도 full 데이터 학습과 비슷한 성능을 냈다고 한다.</p>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style5">
+<p data-ke-size="size16">Method</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1306" data-origin-height="494" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/b3VWNp/btsPUd9OK8T/AAAAAAAAAAAAAAAAAAAAAATj5-m2TpIiJu-pNVvl87tk5oToBCYeJ7_3wRF0aIUv/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=R%2BtYO%2B9Ox4yHg7wuDZomcYOdAjY%3D" data-phocus="https://blog.kakaocdn.net/dna/b3VWNp/btsPUd9OK8T/AAAAAAAAAAAAAAAAAAAAAATj5-m2TpIiJu-pNVvl87tk5oToBCYeJ7_3wRF0aIUv/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=R%2BtYO%2B9Ox4yHg7wuDZomcYOdAjY%3D"><img src="https://blog.kakaocdn.net/dna/b3VWNp/btsPUd9OK8T/AAAAAAAAAAAAAAAAAAAAAATj5-m2TpIiJu-pNVvl87tk5oToBCYeJ7_3wRF0aIUv/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=R%2BtYO%2B9Ox4yHg7wuDZomcYOdAjY%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2Fb3VWNp%2FbtsPUd9OK8T%2FAAAAAAAAAAAAAAAAAAAAAATj5-m2TpIiJu-pNVvl87tk5oToBCYeJ7_3wRF0aIUv%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DR%252BtYO%252B9Ox4yHg7wuDZomcYOdAjY%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1306" height="494" data-origin-width="1306" data-origin-height="494" data-phocus-index="0"></span></figure>
+<p></p>
+<p data-ke-size="size16">&nbsp;</p>
+<!-- MathJax for LaTeX rendering -->
+
+
+<main class="wrap">
+<section id="overview"></section>
+<section id="pipeline">
+<h2 data-ke-size="size26">&nbsp;</h2>
+<p data-ke-size="size16">COINCIDE는 크게 다섯 단계로 요약된다.</p>
+<ol style="list-style-type: decimal;" data-ke-list-type="decimal">
+<li><b>Representation 만들기 - </b>작은 LVLM의 여러 층 MSA 출력을 모아 tanh, mean-pool, L2 정규화를 거친다.</li>
+<li><b>클러스터링 - </b>이렇게 얻은 벡터들을 spherical k-means로 크게 묶어 mode를 찾는다.</li>
+<li><b>유사도 계산 - </b>&nbsp;각 클러스터의 transferability proxy(다른 클러스터와의 평균 코사인)와 density(군집 내부 유사도)를 구한다.</li>
+<li><b>비중 배분- </b>transferability는 높고 density는 낮은 cluster에 더 많은 할당량을 준다.</li>
+<li><b>대표 샘플 고르기 - </b>&nbsp;각 cluster 안에서는 MMD greedy로 원래 분포를 가장 잘 대표하는 샘플을 뽑는다.</li>
+</ol>
+<div class="note">쉽게 말하면, “많이 배울 수 있고(transferability ↑), 서로 비슷하지 않은(density ↓) cluster 에서 더 뽑되, 다른 cluster 도조금씩 챙겨 다양성을 지킨다.”</div>
+<div class="note">&nbsp;</div>
+<div class="note"><b>그럼 왜 representation을 만들때 MSA를 쓸까</b></div>
+<div class="note">&nbsp;</div>
+<p data-ke-size="size16">Transformer의 각 층은 다른 특징을 잡아낸다. 낮은 층은 색·모양 같은 저수준 패턴에, 중간 층은 객체나 관계에, 높은 층은 의미와 추론에 더 민감하다. 그래서 COINCIDE는 여러 층의 출력을 모두 모아, 한 샘플의 “개념–기술 조합”을 폭넓게 담아낸다.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16"><b>&nbsp;Concept–Skill 조합 찾기</b></p>
+<p data-ke-size="size16">각 층의 출력은 극단값을 줄이기 위해 tanh를 거치고, 토큰 단위 값을 평균(pooling)해 하나의 벡터로 요약한다. 마지막으로 L2 정규화해 길이를 맞춘다. 이렇게 만든 벡터들을 합치면 샘플마다 하나의 긴 멀티모달 벡터가 생긴다.</p>
+<p data-ke-size="size16">이 벡터들을 spherical k-means로 클러스터링하면, 자연스럽게 “도로 표지판+OCR” 같은 mode 단위로 데이터가 나뉜다. K를 크게 잡는 이유는 한 군집이 하나의 mode만 담게 해서 mode purity를 높이기 위함이다.</p>
+<h2 data-ke-size="size26">Transferability proxy</h2>
+<p data-ke-size="size16">transferability란 “이 클러스터에서 배운 게 다른 클러스터 학습에도 도움이 되느냐”이다. 실제로는 클러스터마다 학습-테스트를 다 해봐야 알 수 있지만, 그건 너무 비싸다. 대신 각 클러스터 중심끼리의 코사인 유사도를 평균낸 값을 proxy로 쓴다.</p>
+<p data-ke-size="size16">실험해보니 이 값이 실제 transferability와 꽤 잘 맞는다고한다. 직관적으로도 여러 클러스터와 두루 비슷한 군집일수록, 거기서 배운 게 다른 데에도 쓰이기 좋다.</p>
+<h2 data-ke-size="size26">Density</h2>
+<p data-ke-size="size16">density는 “이 클러스터 안 샘플들이 서로 얼마나 비슷한가”를 뜻한다. Gaussian kernel 평균으로 계산하는데, 값이 크면 비슷한 게 많아 중복이 심하다는 의미다. 이런 군집에서 샘플을 많이 뽑아봤자 같은 데이터만 반복하는 셈이라 효율이 떨어진다.</p>
+<h2 data-ke-size="size26">비중 배분과 샘플링</h2>
+<p data-ke-size="size16">transferability proxy <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="0" style="font-size: 116%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D446 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em; margin-left: -0.032em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>S</mi><mi>i</mi></msub></math></mjx-assistive-mml></mjx-container>와 density <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="1" style="font-size: 116%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D437 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>D</mi><mi>i</mi></msub></math></mjx-assistive-mml></mjx-container>를 조합해 각 군집의 비중 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="2" style="font-size: 116%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D443 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em; margin-left: -0.109em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>P</mi><mi>i</mi></msub></math></mjx-assistive-mml></mjx-container>를 정한다.</p>
+<p data-ke-size="size16"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" display="true" tabindex="0" ctxtmenu_counter="3" style="font-size: 116%; position: relative;"><mjx-math display="true" class="MJX-TEX" aria-hidden="true" style="margin-left: 0px; margin-right: 0px;"><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D443 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em; margin-left: -0.109em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mfrac space="4"><mjx-frac type="d"><mjx-num><mjx-nstrut type="d"></mjx-nstrut><mjx-mrow><mjx-mi class="mjx-n"><mjx-c class="mjx-c65"></mjx-c><mjx-c class="mjx-c78"></mjx-c><mjx-c class="mjx-c70"></mjx-c></mjx-mi><mjx-mstyle style="width: 0px; margin-right: -0.167em;"><mjx-mspace style="margin-right: -0.167em;"></mjx-mspace></mjx-mstyle><mjx-mrow space="2"><mjx-mo class="mjx-lop"><mjx-c class="mjx-c28 TEX-S2"></mjx-c></mjx-mo><mjx-mstyle><mjx-mfrac><mjx-frac><mjx-num><mjx-nstrut></mjx-nstrut><mjx-msub size="s"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D446 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em; margin-left: -0.032em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub></mjx-num><mjx-dbox><mjx-dtable><mjx-line></mjx-line><mjx-row><mjx-den><mjx-dstrut></mjx-dstrut><mjx-mrow size="s"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D70F TEX-I"></mjx-c></mjx-mi><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D437 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub></mjx-mrow></mjx-den></mjx-row></mjx-dtable></mjx-dbox></mjx-frac></mjx-mfrac></mjx-mstyle><mjx-mo class="mjx-lop"><mjx-c class="mjx-c29 TEX-S2"></mjx-c></mjx-mo></mjx-mrow></mjx-mrow></mjx-num><mjx-dbox><mjx-dtable><mjx-line type="d"></mjx-line><mjx-row><mjx-den><mjx-dstrut type="d"></mjx-dstrut><mjx-mrow><mjx-munder limits="false"><mjx-mo class="mjx-sop"><mjx-c class="mjx-c2211 TEX-S1"></mjx-c></mjx-mo><mjx-script style="vertical-align: -0.285em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D458 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-munder><mjx-mi class="mjx-n" space="2"><mjx-c class="mjx-c65"></mjx-c><mjx-c class="mjx-c78"></mjx-c><mjx-c class="mjx-c70"></mjx-c></mjx-mi><mjx-mstyle style="width: 0px; margin-right: -0.167em;"><mjx-mspace style="margin-right: -0.167em;"></mjx-mspace></mjx-mstyle><mjx-mrow space="2"><mjx-mo class="mjx-lop"><mjx-c class="mjx-c28 TEX-S2"></mjx-c></mjx-mo><mjx-mstyle><mjx-mfrac><mjx-frac><mjx-num><mjx-nstrut></mjx-nstrut><mjx-msub size="s"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D446 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em; margin-left: -0.032em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D458 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub></mjx-num><mjx-dbox><mjx-dtable><mjx-line></mjx-line><mjx-row><mjx-den><mjx-dstrut></mjx-dstrut><mjx-mrow size="s"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D70F TEX-I"></mjx-c></mjx-mi><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D437 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D458 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub></mjx-mrow></mjx-den></mjx-row></mjx-dtable></mjx-dbox></mjx-frac></mjx-mfrac></mjx-mstyle><mjx-mo class="mjx-lop"><mjx-c class="mjx-c29 TEX-S2"></mjx-c></mjx-mo></mjx-mrow></mjx-mrow></mjx-den></mjx-row></mjx-dtable></mjx-dbox></mjx-frac></mjx-mfrac></mjx-math><mjx-assistive-mml unselectable="on" display="block"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><msub><mi>P</mi><mi>i</mi></msub><mo>=</mo><mfrac><mrow><mi>exp</mi><mstyle scriptlevel="0"><mspace width="-0.167em"></mspace></mstyle><mrow data-mjx-texclass="INNER"><mo data-mjx-texclass="OPEN">(</mo><mstyle displaystyle="false" scriptlevel="0"><mfrac><msub><mi>S</mi><mi>i</mi></msub><mrow><mi>τ</mi><msub><mi>D</mi><mi>i</mi></msub></mrow></mfrac></mstyle><mo data-mjx-texclass="CLOSE">)</mo></mrow></mrow><mrow><munder><mo data-mjx-texclass="OP">∑</mo><mi>k</mi></munder><mi>exp</mi><mstyle scriptlevel="0"><mspace width="-0.167em"></mspace></mstyle><mrow data-mjx-texclass="INNER"><mo data-mjx-texclass="OPEN">(</mo><mstyle displaystyle="false" scriptlevel="0"><mfrac><msub><mi>S</mi><mi>k</mi></msub><mrow><mi>τ</mi><msub><mi>D</mi><mi>k</mi></msub></mrow></mfrac></mstyle><mo data-mjx-texclass="CLOSE">)</mo></mrow></mrow></mfrac></math></mjx-assistive-mml></mjx-container></p>
+<p data-ke-size="size16">여기서 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="4" style="font-size: 116%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D70F TEX-I"></mjx-c></mjx-mi></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>τ</mi></math></mjx-assistive-mml></mjx-container>는 temperature로, 작게 주면 성능 좋은 군집에 더 몰아주고, 크게 주면 골고루 뽑게 된다.</p>
+<p data-ke-size="size16">그 다음, 각 군집 안에서는 MMD greedy로 샘플을 고른다. 같은 맛의 과자가 가득 있는 상자에서, 같은 맛만 여러 개 집지 않고 여러 맛을 섞어 담는 것과 비슷하다. 이렇게 하면 소수의 샘플만으로도 군집 분포를 잘 대표할 수 있다.</p>
+</section>
+</main>
+    </div>
+    
+    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+        <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    </div>
+</body>
+</html>

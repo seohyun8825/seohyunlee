@@ -1,0 +1,147 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learning Fine-Grained Bimanual Manipulation with Low-Cost Hardware — happy8825 - Seohyun Lee Blog</title>
+    <meta name="description" content="ACT, Architecture of Action Chunking with Transformers
+ACT란, imitation learning 알고리즘으로&nbsp;fine grain하게 로봇을 조종하기 위한 알고리즘이다. 집에 로봇을 조립한 기념으로 읽어봤다. 처음 접하는 분야라 뭐부">
+    <link rel="stylesheet" href="../../styles.css">
+    <style>
+        body { 
+            background: #0d0f17; 
+            color: #fff; 
+            font-family: 'Inter', sans-serif; 
+            line-height: 1.6; 
+            margin: 0; 
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .post-header {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 2rem;
+            margin-bottom: 2rem;
+        }
+        .post-meta {
+            color: #888;
+            margin-bottom: 1rem;
+        }
+        .post-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .post-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        .post-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 1rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .post-content p {
+            margin-bottom: 1rem;
+        }
+        .post-content h1, .post-content h2, .post-content h3 {
+            color: #667eea;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .post-content blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 1rem;
+            margin: 1.5rem 0;
+            color: #ccc;
+            font-style: italic;
+        }
+        .post-content code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .post-content pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            color: #667eea;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            background: rgba(102, 126, 234, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    
+    <div class="post-header">
+        <div class="post-meta">
+            <span>📅 2025-09-15</span>
+            <span> | 🏷️ robot</span>
+            <span> | 🔗 <a href="https://happy8825.tistory.com/119" target="_blank">Original Post</a></span>
+            <span> | 📊 2 images</span>
+        </div>
+        <h1 class="post-title">Learning Fine-Grained Bimanual Manipulation with Low-Cost Hardware — happy8825</h1>
+        
+    </div>
+    
+    <div class="post-content">
+        <p data-ke-size="size16"><b>ACT, Architecture of Action Chunking with Transformers</b></p>
+<p data-ke-size="size16">ACT란<b>, imitation learning 알고리즘</b>으로<span>&nbsp;</span><b>fine grain</b>하게 로봇을 조종하기 위한 알고리즘이다. 집에 로봇을 조립한 기념으로 읽어봤다. 처음 접하는 분야라 뭐부터 읽어야할지 모르겠어서 추천을 받아왔다. 최근까지도 가장 많이 쓰이는 방식이라고한다.</p>
+<figure data-ke-type="video" data-ke-style="alignCenter" data-video-host="kakaotv" data-video-url="https://tv.kakao.com/v/457969696" data-video-thumbnail="https://blog.kakaocdn.net/dna/bW4UaL/hyZISaJZoZ/AAAAAAAAAAAAAAAAAAAAAFo98zL7U71Cx9-bNARHGQYgIoS0eYMEbLRkP84xrbYF/img.jpg?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=zxCP5%2BV0o2xw0I5kUt9gBhFeVzs%3D" data-video-width="500" data-video-height="889" data-video-origin-width="860" data-video-origin-height="1529" data-ke-mobilestyle="widthContent" data-video-play-service="daum_tistory" data-original-url="" data-video-title="" style="width: 500px;"><div class="video-wrap"><iframe src="https://play-tv.kakao.com/embed/player/cliplink/457969696?service=daum_tistory" width="500" height="889" frameborder="0" allowfullscreen="true"></iframe></div>
+<figcaption>참 흥미로운 로봇세상이다 느리지만 RTX 4050에서 vla 학습이랑 inference 다 잘돌아간다</figcaption>
+</figure>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">single step을 predict하는 대신에<b><span>&nbsp;</span>chunks of action을 예측</b>한다는게 핵심 아이디어이다.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">Conditional Variational Autoenncoder ,<b><span>&nbsp;</span>CVAE를 transformer로 만든 구조</b>이다.</p>
+<p data-ke-size="size16">현재 joint state를 cvae의 인코더가 받아서 style vector z를 만든다.&nbsp;</p>
+<p data-ke-size="size16">컵을 올려라 라는 명령에, 사람들마다 컵을 쥐는 방식도 다른고, 올리는 방식도 다르니까, 이런 variability를 capture 하기 위함인거 같다.</p>
+<p data-ke-size="size16">test tiime에는 앞서 만들어진 style vector z랑 ㅇinput image, joint position 등이 들어가서 action chunk를 예측한다. inference time 때 style vector z는 zero mean으로 들어간다.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">구조를 좀더 자세히 보자</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1813" data-origin-height="488" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/czrNtW/btsQhpvkhSU/AAAAAAAAAAAAAAAAAAAAAOWq_9F5ju882BMKN6MpJlOi7sWscGvZou_9ACNURmv3/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=fZfeSdMow2iF%2BgkIHMdwxiDWT6g%3D" data-phocus="https://blog.kakaocdn.net/dna/czrNtW/btsQhpvkhSU/AAAAAAAAAAAAAAAAAAAAAOWq_9F5ju882BMKN6MpJlOi7sWscGvZou_9ACNURmv3/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=fZfeSdMow2iF%2BgkIHMdwxiDWT6g%3D"><img src="https://blog.kakaocdn.net/dna/czrNtW/btsQhpvkhSU/AAAAAAAAAAAAAAAAAAAAAOWq_9F5ju882BMKN6MpJlOi7sWscGvZou_9ACNURmv3/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=fZfeSdMow2iF%2BgkIHMdwxiDWT6g%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FczrNtW%2FbtsQhpvkhSU%2FAAAAAAAAAAAAAAAAAAAAAOWq_9F5ju882BMKN6MpJlOi7sWscGvZou_9ACNURmv3%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DfZfeSdMow2iF%252BgkIHMdwxiDWT6g%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1813" height="488" data-origin-width="1813" data-origin-height="488" data-phocus-index="0"></span></figure>
+<p></p>
+<p data-ke-size="size16">그림이 헷갈리게 되어있지만 왼쪽 transforemer 인코더랑 오른쪽 transformer encoder 는 다른애이다.</p>
+<p data-ke-size="size16">왼쪽이 전체 아키텍쳐에서 Encoder 역할을 하고, 오른쪽 전체가 Decoder 역할을 한다. Inference때는 저 오른쪽 부분만 쓰인다.</p>
+<p data-ke-size="size16">CVAE처럼 작동하는데, 움직임을 하나의 z (style)로 정의하고, 이 움직임에 따라 어떻게 핸들링해야할지를 예측하는거다.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">Encoder 에 들어가는게, joints, 즉 현재 state, 팔 하나당 7자유도씩 있으니까 14 자유도 가 들어가고,&nbsp; action sequence는 각 joint 에 달려있는 모터에 들어가는 제어 input이다. 즉 action sequence가 Ground truth 인거다. 그래서 inference 할떄는 Ground Truth 가 없으니까 이 인코더는 training할때만 쓰이고, inference할때는 안쓰인다.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">오른쪽 transformer 가 만들어내는건<span>&nbsp;</span><b>action sequence로, 액션에 대한 인풋값들의 time series 값</b>들이다.&nbsp; 그래서 학습할떄는 오른쪽 action sequence(predicted)랑, 가장 왼쪽에 있는 action sequence(gt) 값과의 reconstruction loss와, Z의 kl divergnece를 줄이는 방향으로 학습이 된다.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="805" data-origin-height="625" style="margin-left: 50%; transform: translateX(-50%); width: 805px; max-width: 805px;"><span data-url="https://blog.kakaocdn.net/dna/codEgu/btsQhnLbEn4/AAAAAAAAAAAAAAAAAAAAAC5aaYgTv_nzjpOv7c7Lx3zC3lyhMz1R0iXf1NwIlqOT/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=kAzHFijwdnMA11Kop34IHCt%2FcWw%3D" data-phocus="https://blog.kakaocdn.net/dna/codEgu/btsQhnLbEn4/AAAAAAAAAAAAAAAAAAAAAC5aaYgTv_nzjpOv7c7Lx3zC3lyhMz1R0iXf1NwIlqOT/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=kAzHFijwdnMA11Kop34IHCt%2FcWw%3D"><img src="https://blog.kakaocdn.net/dna/codEgu/btsQhnLbEn4/AAAAAAAAAAAAAAAAAAAAAC5aaYgTv_nzjpOv7c7Lx3zC3lyhMz1R0iXf1NwIlqOT/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=kAzHFijwdnMA11Kop34IHCt%2FcWw%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FcodEgu%2FbtsQhnLbEn4%2FAAAAAAAAAAAAAAAAAAAAAC5aaYgTv_nzjpOv7c7Lx3zC3lyhMz1R0iXf1NwIlqOT%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DkAzHFijwdnMA11Kop34IHCt%252FcWw%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="805" height="625" data-origin-width="805" data-origin-height="625" data-phocus-index="1"></span></figure>
+<p></p>
+<p data-ke-size="size16">이떄, transformer decoder 에서 나온 action sequence는 청크의 개수에 따라서 나오게 되는데, 각 프레임별로 각각 청크의 개수만큼이 predict 되어 누적이 될것이다. 이걸 temporal 하게 ensemble해서 평균을 내면 부드러운 로봇 액션을 구현할수있다고 한다. 이때 , weight exponentially를 해서 최근 껀 더 참고를 많이하게 average가 된다.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">&nbsp;</p>
+<figure data-ke-type="video" data-ke-style="alignCenter" data-video-host="kakaotv" data-video-url="https://tv.kakao.com/v/457969659" data-video-thumbnail="https://blog.kakaocdn.net/dna/RoLez/hyZIOTIuXw/AAAAAAAAAAAAAAAAAAAAANWGM319smo5t4iwxNOt0wvBl_KaHLHadBOaTppNqtc4/img.jpg?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=4aBMWNZ9y3wYP7L9gu3BbsaNFng%3D" data-video-width="860" data-video-height="484" data-video-origin-width="860" data-video-origin-height="484" data-ke-mobilestyle="widthContent" data-video-play-service="daum_tistory" data-original-url="" data-video-title="" style="width: 860px;"><div class="video-wrap"><iframe src="https://play-tv.kakao.com/embed/player/cliplink/457969659?service=daum_tistory" width="860" height="484" frameborder="0" allowfullscreen="true"></iframe></div>
+<figcaption style="display: none;"></figcaption>
+</figure>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">빨래개기를 가르쳐주고 싶었는데,, 아무래도 팔 한마리를 더 입양해야할거 같다, 이런 조그만한 팔 가지고는 쓰레기 줍기, 악수하기 이외에 할수있는게 없다..</p>
+    </div>
+    
+    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+        <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    </div>
+</body>
+</html>

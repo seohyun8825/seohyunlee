@@ -1,0 +1,205 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Align and Attend: Multimodal Summarization with Dual Contrastive Losses — happy8825 - Seohyun Lee Blog</title>
+    <meta name="description" content="&lt;요약&gt;
+멀티모달 비디오 summarization에서, 기존 연구에서는 서로 다른 모달리티 간의 시간적인 대응 관계를 잘 활용하지 못하며, 샘플간의 본질적인 상관관계를 무시하고 있다는 한계점이 있었다. 이런 한계점을 해결하기 위해 멀티모달 입력을 효과적으로 align하고 at">
+    <link rel="stylesheet" href="../../styles.css">
+    <style>
+        body { 
+            background: #0d0f17; 
+            color: #fff; 
+            font-family: 'Inter', sans-serif; 
+            line-height: 1.6; 
+            margin: 0; 
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .post-header {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 2rem;
+            margin-bottom: 2rem;
+        }
+        .post-meta {
+            color: #888;
+            margin-bottom: 1rem;
+        }
+        .post-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .post-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        .post-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 1rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .post-content p {
+            margin-bottom: 1rem;
+        }
+        .post-content h1, .post-content h2, .post-content h3 {
+            color: #667eea;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .post-content blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 1rem;
+            margin: 1.5rem 0;
+            color: #ccc;
+            font-style: italic;
+        }
+        .post-content code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .post-content pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            color: #667eea;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            background: rgba(102, 126, 234, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    
+    <div class="post-header">
+        <div class="post-meta">
+            <span>📅 2024-09-24</span>
+            <span> | 🏷️ Computer Vision Paper Review</span>
+            <span> | 🔗 <a href="https://happy8825.tistory.com/55" target="_blank">Original Post</a></span>
+            <span> | 📊 13 images</span>
+        </div>
+        <h1 class="post-title">Align and Attend: Multimodal Summarization with Dual Contrastive Losses — happy8825</h1>
+        
+    </div>
+    
+    <div class="post-content">
+        <p data-ke-size="size18"><b>&lt;요약&gt;</b></p>
+<p data-ke-size="size18">멀티모달 비디오 summarization에서, 기존 연구에서는 서로 다른 모달리티 간의 시간적인 대응 관계를 잘 활용하지 못하며, 샘플간의 본질적인 상관관계를 무시하고 있다는 한계점이 있었다. 이런 한계점을 해결하기 위해 멀티모달 입력을 효과적으로 align하고 attention할 수 있게 통합된 transformer 기반의 Align and Attend Multimodal Summariziation을 소개하는 논문이다. 또한, 샘플간, 샘플 내의 상관관계를 모델링 하기 위한 constrastive loss를 제안한다.</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1074" data-origin-height="586" style="margin-left: 50%; transform: translateX(-50%); width: 1074px; max-width: 1074px;"><span data-url="https://blog.kakaocdn.net/dna/svarC/btsJJXYViuQ/AAAAAAAAAAAAAAAAAAAAAIkNSUxXy9fER4xDwqhqnA9oOIbXsFazNT6KcUkEJOHB/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=O00h8x2NX1jndfPtz6Ya4y09QeY%3D" data-phocus="https://blog.kakaocdn.net/dna/svarC/btsJJXYViuQ/AAAAAAAAAAAAAAAAAAAAAIkNSUxXy9fER4xDwqhqnA9oOIbXsFazNT6KcUkEJOHB/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=O00h8x2NX1jndfPtz6Ya4y09QeY%3D"><img src="https://blog.kakaocdn.net/dna/svarC/btsJJXYViuQ/AAAAAAAAAAAAAAAAAAAAAIkNSUxXy9fER4xDwqhqnA9oOIbXsFazNT6KcUkEJOHB/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=O00h8x2NX1jndfPtz6Ya4y09QeY%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FsvarC%2FbtsJJXYViuQ%2FAAAAAAAAAAAAAAAAAAAAAIkNSUxXy9fER4xDwqhqnA9oOIbXsFazNT6KcUkEJOHB%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DO00h8x2NX1jndfPtz6Ya4y09QeY%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1074" height="586" data-origin-width="1074" data-origin-height="586" data-phocus-index="0"></span></figure>
+<p></p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">Frame(시간별) 비디오랑 text가 인풋으로 들어가서</p>
+<p data-ke-size="size18">아웃풋으로는 summarize된 비디오랑 text가 나오는 모델.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18"><b>&lt;Introduction&gt;</b></p>
+<p data-ke-size="size18">기존 멀티모달 summarization 방법은, 추가적인 modility 정보를 활용은 하지만, 주로 비디오 요약, 또는 텍스트 요약 만 생성하는 방식으로, 모달리티간의 관계를 충분하게 활용하지 못했다. 최근 MSMO 등 멀티모달 출력을 사용하는 멀티모달 summarization이 탐구되고 있지만, 여기도 문제점이 있었음. <b>두 모달리티가 함께 학습된다고 해도, 서로 다른 모달리티간의 대응 관계가 충분히 학습되지 않는다는 점.</b> 예를 들어 비디오랑, 그에 대해 text 가 주어지면, 사람이 annotate 할때 생각해보면 두 모달리티는 시간축을 따라 작성한거이기에 두 모달리티간의 관계가 분명 존재하지만, MSMO 같은 기존 방식에서는 두 모달리티를 별도로 취급한다. 그리고 이렇게 상관관계를 모델링하기 위해 단순히 sequence 모델링이나 attention등을 사용했는데, 이게 annotation이 달린 데이터를 필요로하기에, 이런 데이터가 얻기 어려운 경우가 많다.</p>
+<p data-ke-size="size18">그래서 이 논문에서는, 멀티모달 summarization을 위해 새로운 아키텍처를 제안하는데, 이 모델은 멀<b>티모달 입력 간의 시간적인 상관성을 align하고 통합된 방식</b>으로 처리할 수 있다.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18"><b>&lt;Method&gt;</b></p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1156" data-origin-height="628" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/b3kHBV/btsJJWTeml9/AAAAAAAAAAAAAAAAAAAAAMTussE7ijPCAsADPt3ESSFz04-Z_rEiZYnWxfx3riRV/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=L7D7GcBak544GvjPP9J5gkDIbpY%3D" data-phocus="https://blog.kakaocdn.net/dna/b3kHBV/btsJJWTeml9/AAAAAAAAAAAAAAAAAAAAAMTussE7ijPCAsADPt3ESSFz04-Z_rEiZYnWxfx3riRV/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=L7D7GcBak544GvjPP9J5gkDIbpY%3D"><img src="https://blog.kakaocdn.net/dna/b3kHBV/btsJJWTeml9/AAAAAAAAAAAAAAAAAAAAAMTussE7ijPCAsADPt3ESSFz04-Z_rEiZYnWxfx3riRV/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=L7D7GcBak544GvjPP9J5gkDIbpY%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2Fb3kHBV%2FbtsJJWTeml9%2FAAAAAAAAAAAAAAAAAAAAAMTussE7ijPCAsADPt3ESSFz04-Z_rEiZYnWxfx3riRV%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DL7D7GcBak544GvjPP9J5gkDIbpY%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1156" height="628" data-origin-width="1156" data-origin-height="628" data-phocus-index="1"></span></figure>
+<p></p>
+<p data-ke-size="size18">Overall Framework</p>
+<p data-ke-size="size18">그냥 간단하게 보면, N개의 video frame이랑 M개의 text sequence를 받아서, A2Summ은 중요한 frame이랑 문장을 예측한다.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">이 과정을 하나하나 자세히 보자</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">Input Embedding</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="912" data-origin-height="236" style="margin-left: 50%; transform: translateX(-50%); width: 912px; max-width: 912px;"><span data-url="https://blog.kakaocdn.net/dna/b1m8t4/btsJHUiucZG/AAAAAAAAAAAAAAAAAAAAAAk4CH-LTAwh7myEtNo0XtzVPcZEQznOQpc6ECYki6ti/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=AGHoKRWkKdPhDpRHSbn4Sbf7aDE%3D" data-phocus="https://blog.kakaocdn.net/dna/b1m8t4/btsJHUiucZG/AAAAAAAAAAAAAAAAAAAAAAk4CH-LTAwh7myEtNo0XtzVPcZEQznOQpc6ECYki6ti/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=AGHoKRWkKdPhDpRHSbn4Sbf7aDE%3D"><img src="https://blog.kakaocdn.net/dna/b1m8t4/btsJHUiucZG/AAAAAAAAAAAAAAAAAAAAAAk4CH-LTAwh7myEtNo0XtzVPcZEQznOQpc6ECYki6ti/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=AGHoKRWkKdPhDpRHSbn4Sbf7aDE%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2Fb1m8t4%2FbtsJHUiucZG%2FAAAAAAAAAAAAAAAAAAAAAAk4CH-LTAwh7myEtNo0XtzVPcZEQznOQpc6ECYki6ti%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DAGHoKRWkKdPhDpRHSbn4Sbf7aDE%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="912" height="236" data-origin-width="912" data-origin-height="236" data-phocus-index="2"></span></figure>
+<p></p>
+
+<h2 data-ke-size="size26" id="%C2%A0-1"><a href="#%C2%A0-1">&nbsp;</a></h2>
+<p data-ke-size="size16">우선, N개의 video frame이랑 M개의 text sequence는 GoogleNet이나 RoBERTa 같은 feature 추출 모델 백본을 타고 feature이 추출이 되고, 여기서 나온 feature들은 각각 FC layer를 타고 embedding space로 간다. 그러니까, <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" display="true" tabindex="0" ctxtmenu_counter="0" style="font-size: 116%; position: relative;"><mjx-math display="true" class="MJX-TEX" aria-hidden="true" style="margin-left: 0px; margin-right: 0px;"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D439 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c2208"></mjx-c></mjx-mo><mjx-msup space="4"><mjx-texatom texclass="ORD"><mjx-mi class="mjx-ds mjx-b"><mjx-c class="mjx-c211D TEX-A"></mjx-c></mjx-mi></mjx-texatom><mjx-script style="vertical-align: 0.413em;"><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D441 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-cD7"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D436 TEX-I"></mjx-c></mjx-mi></mjx-texatom></mjx-script></mjx-msup><mjx-mo class="mjx-n"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-mstyle><mjx-mspace style="width: 1em;"></mjx-mspace></mjx-mstyle><mjx-mi class="mjx-i" space="2"><mjx-c class="mjx-c1D446 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c2208"></mjx-c></mjx-mo><mjx-msup space="4"><mjx-texatom texclass="ORD"><mjx-mi class="mjx-ds mjx-b"><mjx-c class="mjx-c211D TEX-A"></mjx-c></mjx-mi></mjx-texatom><mjx-script style="vertical-align: 0.413em;"><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D440 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-cD7"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D436 TEX-I"></mjx-c></mjx-mi></mjx-texatom></mjx-script></mjx-msup></mjx-math><mjx-assistive-mml unselectable="on" display="block"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mi>F</mi><mo>∈</mo><msup><mrow data-mjx-texclass="ORD"><mi mathvariant="double-struck">R</mi></mrow><mrow data-mjx-texclass="ORD"><mi>N</mi><mo>×</mo><mi>C</mi></mrow></msup><mo>,</mo><mstyle scriptlevel="0"><mspace width="1em"></mspace></mstyle><mi>S</mi><mo>∈</mo><msup><mrow data-mjx-texclass="ORD"><mi mathvariant="double-struck">R</mi></mrow><mrow data-mjx-texclass="ORD"><mi>M</mi><mo>×</mo><mi>C</mi></mrow></msup></math></mjx-assistive-mml></mjx-container> 이런식으로 embedding이 될 거고, 각 modality에서의 첫 번째 토큰이 <code>[CLS]</code> 토큰으로, holistic representation이 가능하게 한다. (여기서 <code>[CLSV]</code>는 비디오의 전체적인 정보를 요약, <code>[CLST]</code>는 텍스트 전체의 정보를 요약하는 역할을 한다고 보면 될듯)</p>
+<p data-ke-size="size16">여기에 position embedding을 추가하고, 여기서 좀 특이한 점은 segment embedding도 적용된다는 것이다.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size18"><b>Segment Embedding이란?</b></p>
+<p data-ke-size="size16">이걸 적용한 이유는 <b>비디오 frame과 텍스트 간의 시간적 대응 관계를 반영하기 위해서</b>다. 즉, 각 문장이 언제 시작하고 언제 끝나는지에 대한 timestep 정보 <code>[T_s, T_e]</code>가 주어지면, 이 타임스탬프는 비디오의 어느 구간에 대응되는지를 정의하게 된다.</p>
+<p data-ke-size="size16">그래서,<b> 만약에 비디오의 한 구간이 특정 문장과 연관되어 있다면, 그 구간에 속한 모든 프레임들이 동일한 segment embedding을 사용하여 문장과 연결된다</b>.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16"><b>Multimodal Alignment and Fusion</b></p>
+<p data-ke-size="size16"><b>Alignment guided Self-attention</b></p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="692" data-origin-height="656" style="margin-left: 50%; transform: translateX(-50%); width: 425px; max-width: 425px;"><span data-url="https://blog.kakaocdn.net/dna/ovmKS/btsJKI8DoVc/AAAAAAAAAAAAAAAAAAAAAFyaUS60gyWRFE4lpvkKCQ9XQfThr-rr-744CZftUlQV/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=B4hVIftaVdpL42jFF95udniHQ4A%3D" data-phocus="https://blog.kakaocdn.net/dna/ovmKS/btsJKI8DoVc/AAAAAAAAAAAAAAAAAAAAAFyaUS60gyWRFE4lpvkKCQ9XQfThr-rr-744CZftUlQV/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=B4hVIftaVdpL42jFF95udniHQ4A%3D"><img src="https://blog.kakaocdn.net/dna/ovmKS/btsJKI8DoVc/AAAAAAAAAAAAAAAAAAAAAFyaUS60gyWRFE4lpvkKCQ9XQfThr-rr-744CZftUlQV/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=B4hVIftaVdpL42jFF95udniHQ4A%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FovmKS%2FbtsJKI8DoVc%2FAAAAAAAAAAAAAAAAAAAAAFyaUS60gyWRFE4lpvkKCQ9XQfThr-rr-744CZftUlQV%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DB4hVIftaVdpL42jFF95udniHQ4A%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="425" height="403" data-origin-width="692" data-origin-height="656" data-phocus-index="3"></span></figure>
+<p></p>
+<p data-ke-size="size16">비디오랑 텍스트의 모달리티를 align하기 위해 transformer 기반의 아키텍처를 쓰는데, 바로 global self attention을 하기에는 노이즈가 너무 많이 낀다는 문제가있다. 그래서 이걸 해결하기 위해 위의 그림과 같은 방식을 썼는데, 그림을 보면 바로 이해가 된다.</p>
+<p data-ke-size="size16">우선 비디오 모달리티 내에서, 혹은 text 모달리티 내에서, 각각의 모달리티 안에서는 원래대로 global self attention이 되고,&nbsp;</p>
+<p data-ke-size="size16">위의 예시에서 비디오프레임 5개가 각각 1초 2초 3초 4초 5초에 해당한다고 치자. Text도 3문장이 있는데, 첫번쨰 문장은 1초~2초에 해당하고, 두번째 문장은 3~4초에 해당하고, 세번쨰 문장은 5초에 해당한다고 생각해보자.&nbsp;</p>
+<p data-ke-size="size16">그럼 위와 같이 마스킹을 해주면, 각 초에 해당하는 비디오랑 텍스트끼리만 볼 수 있도록 설정이 된다.&nbsp;</p>
+<p data-ke-size="size16">식으로 보면</p>
+<p data-ke-size="size16">이건 그냥 쿼리 키 벨류 계산이구</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="470" data-origin-height="50" style="margin-left: 50%; transform: translateX(-50%); width: 470px; max-width: 470px;"><span data-url="https://blog.kakaocdn.net/dna/7VAJo/btsJI4Fp39R/AAAAAAAAAAAAAAAAAAAAAD-UM4jyxH3nXG4P7V4IgIqf_MBfBgBjRXaAa-MZTHC1/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=EYKpGJn8%2FUXDRMzxHCgvMFB7qVc%3D" data-phocus="https://blog.kakaocdn.net/dna/7VAJo/btsJI4Fp39R/AAAAAAAAAAAAAAAAAAAAAD-UM4jyxH3nXG4P7V4IgIqf_MBfBgBjRXaAa-MZTHC1/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=EYKpGJn8%2FUXDRMzxHCgvMFB7qVc%3D"><img src="https://blog.kakaocdn.net/dna/7VAJo/btsJI4Fp39R/AAAAAAAAAAAAAAAAAAAAAD-UM4jyxH3nXG4P7V4IgIqf_MBfBgBjRXaAa-MZTHC1/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=EYKpGJn8%2FUXDRMzxHCgvMFB7qVc%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2F7VAJo%2FbtsJI4Fp39R%2FAAAAAAAAAAAAAAAAAAAAAD-UM4jyxH3nXG4P7V4IgIqf_MBfBgBjRXaAa-MZTHC1%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DEYKpGJn8%252FUXDRMzxHCgvMFB7qVc%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="470" height="50" data-origin-width="470" data-origin-height="50" data-phocus-index="4"></span></figure>
+<p></p>
+<p data-ke-size="size16">여기 Ai,j 부분이&nbsp; 위의 마스킹 부분</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="406" data-origin-height="80" style="margin-left: 50%; transform: translateX(-50%); width: 406px; max-width: 406px;"><span data-url="https://blog.kakaocdn.net/dna/leMR6/btsJKGiOc4G/AAAAAAAAAAAAAAAAAAAAAIVvhiKyWx1BD2FXM0b4x_OhSpThw3Z4WsAiBa1hTE2J/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=4pqItvqQarnBqSNlG%2FaXBdnG624%3D" data-phocus="https://blog.kakaocdn.net/dna/leMR6/btsJKGiOc4G/AAAAAAAAAAAAAAAAAAAAAIVvhiKyWx1BD2FXM0b4x_OhSpThw3Z4WsAiBa1hTE2J/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=4pqItvqQarnBqSNlG%2FaXBdnG624%3D"><img src="https://blog.kakaocdn.net/dna/leMR6/btsJKGiOc4G/AAAAAAAAAAAAAAAAAAAAAIVvhiKyWx1BD2FXM0b4x_OhSpThw3Z4WsAiBa1hTE2J/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=4pqItvqQarnBqSNlG%2FaXBdnG624%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FleMR6%2FbtsJKGiOc4G%2FAAAAAAAAAAAAAAAAAAAAAIVvhiKyWx1BD2FXM0b4x_OhSpThw3Z4WsAiBa1hTE2J%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3D4pqItvqQarnBqSNlG%252FaXBdnG624%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="406" height="80" data-origin-width="406" data-origin-height="80" data-phocus-index="5"></span></figure>
+<p></p>
+<p data-ke-size="size16">최종적으로 이렇게 된다~</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="228" data-origin-height="50" style="margin-left: 50%; transform: translateX(-50%); width: 228px; max-width: 228px;"><span data-url="https://blog.kakaocdn.net/dna/bJ4ngU/btsJJLL7IF8/AAAAAAAAAAAAAAAAAAAAAIfTJhqR59u58ZCrP1ORVPTl25s5kY6a0hCQR5I2D4o6/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=DP7%2FBhV4KKBaN1r%2BcVA85u%2F6e74%3D" data-phocus="https://blog.kakaocdn.net/dna/bJ4ngU/btsJJLL7IF8/AAAAAAAAAAAAAAAAAAAAAIfTJhqR59u58ZCrP1ORVPTl25s5kY6a0hCQR5I2D4o6/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=DP7%2FBhV4KKBaN1r%2BcVA85u%2F6e74%3D"><img src="https://blog.kakaocdn.net/dna/bJ4ngU/btsJJLL7IF8/AAAAAAAAAAAAAAAAAAAAAIfTJhqR59u58ZCrP1ORVPTl25s5kY6a0hCQR5I2D4o6/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=DP7%2FBhV4KKBaN1r%2BcVA85u%2F6e74%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FbJ4ngU%2FbtsJJLL7IF8%2FAAAAAAAAAAAAAAAAAAAAAIfTJhqR59u58ZCrP1ORVPTl25s5kY6a0hCQR5I2D4o6%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DDP7%252FBhV4KKBaN1r%252BcVA85u%252F6e74%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="228" height="50" data-origin-width="228" data-origin-height="50" data-phocus-index="6"></span></figure>
+<p></p>
+<p data-ke-size="size16">그래서 이렇게 self attention이 되고 나면</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="810" data-origin-height="152" style="margin-left: 50%; transform: translateX(-50%); width: 810px; max-width: 810px;"><span data-url="https://blog.kakaocdn.net/dna/c2103d/btsJJ9Msumt/AAAAAAAAAAAAAAAAAAAAAN7VjarSurh9Fj-CgnESrfpFafGjO-MiwiMBEGlN_-SH/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=P%2FDrMv50YYCoSPOk68lW%2Fa8NQhw%3D" data-phocus="https://blog.kakaocdn.net/dna/c2103d/btsJJ9Msumt/AAAAAAAAAAAAAAAAAAAAAN7VjarSurh9Fj-CgnESrfpFafGjO-MiwiMBEGlN_-SH/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=P%2FDrMv50YYCoSPOk68lW%2Fa8NQhw%3D"><img src="https://blog.kakaocdn.net/dna/c2103d/btsJJ9Msumt/AAAAAAAAAAAAAAAAAAAAAN7VjarSurh9Fj-CgnESrfpFafGjO-MiwiMBEGlN_-SH/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=P%2FDrMv50YYCoSPOk68lW%2Fa8NQhw%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2Fc2103d%2FbtsJJ9Msumt%2FAAAAAAAAAAAAAAAAAAAAAN7VjarSurh9Fj-CgnESrfpFafGjO-MiwiMBEGlN_-SH%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DP%252FDrMv50YYCoSPOk68lW%252Fa8NQhw%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="810" height="152" data-origin-width="810" data-origin-height="152" data-phocus-index="7"></span></figure>
+<p></p>
+<p data-ke-size="size16">이렇게 Video-FFN, Text-FFN으로 넘어가는데, 이게 뭐냐면 MOE 비슷한거라고 생각하면 된다. 둘중에서 어느게 더 중요한지 해서 가중치를 곱해서 넘어가는듯.&nbsp;</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">그리고 이렇게 나온 거에서 각 frame이랑 문장에 score 이 prediction되어서 assign이 된다.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">Loss Function부분도 좀 재밌는데</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">일단 Classification loss로 Focal loss를 사용한다. 이 Focal loss가 Dense object detection 논문에서 처음 소개가 되었었는데, 이미지 detect를 할때 백그라운드 픽셀이 바운딩박스안에 있는 픽셀보다 더 많은 공간을 차지해서, 학습에 방해가 된다고 한다.</p>
+<p data-ke-size="size16">각 class의 probability를 cross entropy loss에 통과시켰을떄, 확률값이 큰 case는 easy case로 loss를 크게 줄이고, 최종 확률 값이 낮은 case는 hard 케이스로 loss를 조금만 줄이는 방식으로,</p>
+<p data-ke-size="size16">확률이 낮은 케이스에 penalty 만 주는 역할만 하는 Cross entropy loss랑은 차이가 있음.</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1046" data-origin-height="256" style="margin-left: 50%; transform: translateX(-50%); width: 1046px; max-width: 1046px;"><span data-url="https://blog.kakaocdn.net/dna/ddPOoC/btsJKdagUFA/AAAAAAAAAAAAAAAAAAAAAOTq_3oPUSKC6ivlF_EtEOB3tOmyw9jU7DV8yP-isZ5j/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=aafFJ3MK7f9ABmXKB5MJsPav1MA%3D" data-phocus="https://blog.kakaocdn.net/dna/ddPOoC/btsJKdagUFA/AAAAAAAAAAAAAAAAAAAAAOTq_3oPUSKC6ivlF_EtEOB3tOmyw9jU7DV8yP-isZ5j/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=aafFJ3MK7f9ABmXKB5MJsPav1MA%3D"><img src="https://blog.kakaocdn.net/dna/ddPOoC/btsJKdagUFA/AAAAAAAAAAAAAAAAAAAAAOTq_3oPUSKC6ivlF_EtEOB3tOmyw9jU7DV8yP-isZ5j/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=aafFJ3MK7f9ABmXKB5MJsPav1MA%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FddPOoC%2FbtsJKdagUFA%2FAAAAAAAAAAAAAAAAAAAAAOTq_3oPUSKC6ivlF_EtEOB3tOmyw9jU7DV8yP-isZ5j%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DaafFJ3MK7f9ABmXKB5MJsPav1MA%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1046" height="256" data-origin-width="1046" data-origin-height="256" data-phocus-index="8"></span></figure>
+<p></p>
+<p data-ke-size="size16">그래서 각각 비디오랑 text에 대해서 loss를 구해서 더해주는 방식이고</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">여기서부터는 논문에서 새로 제시한 novel 한 loss다.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">Inter-Sample Contrastive Loss</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="674" data-origin-height="464" style="margin-left: 50%; transform: translateX(-50%); width: 674px; max-width: 674px;"><span data-url="https://blog.kakaocdn.net/dna/bhI5fw/btsJKaYVN6I/AAAAAAAAAAAAAAAAAAAAAAdiN1qGndO2TIX5htc-sbdWN6ys3ZA2Oxda04h12m2P/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=CaTYGbnS%2B01%2F3lff79%2FEM5J4uvE%3D" data-phocus="https://blog.kakaocdn.net/dna/bhI5fw/btsJKaYVN6I/AAAAAAAAAAAAAAAAAAAAAAdiN1qGndO2TIX5htc-sbdWN6ys3ZA2Oxda04h12m2P/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=CaTYGbnS%2B01%2F3lff79%2FEM5J4uvE%3D"><img src="https://blog.kakaocdn.net/dna/bhI5fw/btsJKaYVN6I/AAAAAAAAAAAAAAAAAAAAAAdiN1qGndO2TIX5htc-sbdWN6ys3ZA2Oxda04h12m2P/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=CaTYGbnS%2B01%2F3lff79%2FEM5J4uvE%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FbhI5fw%2FbtsJKaYVN6I%2FAAAAAAAAAAAAAAAAAAAAAAdiN1qGndO2TIX5htc-sbdWN6ys3ZA2Oxda04h12m2P%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DCaTYGbnS%252B01%252F3lff79%252FEM5J4uvE%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="674" height="464" data-origin-width="674" data-origin-height="464" data-phocus-index="9"></span></figure>
+<p></p>
+<p data-ke-size="size16">샘플간 텍스트랑 비디오를 매칭 시켜주는 느낌으로, 보라색부분이 정답. 그래서 저 보라색 부분의 cosine similarity는 최대한 높이고, 나머지 부분은 낮추는 방식으로 학습이 된다.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">이거는 sample간 그러니까 하나의 비디오 시퀀스를 통채로, 거기에 해당하는 Text를 통채로 파악하기 위해 holistic representation을 하는 [CLS] 토큰으로 비교한거고.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">비디오 summarization에서는 샘플간 매칭하는것도 중요하지만, 어떤 frame에 어떤 text가 들어갈지도 맞춰야 하니까 또 도입된 loss가 Intra-Sample Constrastive Loss.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">Intra-Sample Contrastive loss는</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1220" data-origin-height="398" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/cwigo2/btsJKh4Cpst/AAAAAAAAAAAAAAAAAAAAAMeGsCAQkCC60KmoiFPzWp9HyGq0hDfjpfSheiALIB_G/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=%2Bnh1n1rY6A3KHM9Qtogu1wJpNO8%3D" data-phocus="https://blog.kakaocdn.net/dna/cwigo2/btsJKh4Cpst/AAAAAAAAAAAAAAAAAAAAAMeGsCAQkCC60KmoiFPzWp9HyGq0hDfjpfSheiALIB_G/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=%2Bnh1n1rY6A3KHM9Qtogu1wJpNO8%3D"><img src="https://blog.kakaocdn.net/dna/cwigo2/btsJKh4Cpst/AAAAAAAAAAAAAAAAAAAAAMeGsCAQkCC60KmoiFPzWp9HyGq0hDfjpfSheiALIB_G/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=%2Bnh1n1rY6A3KHM9Qtogu1wJpNO8%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2Fcwigo2%2FbtsJKh4Cpst%2FAAAAAAAAAAAAAAAAAAAAAMeGsCAQkCC60KmoiFPzWp9HyGq0hDfjpfSheiALIB_G%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3D%252Bnh1n1rY6A3KHM9Qtogu1wJpNO8%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1220" height="398" data-origin-width="1220" data-origin-height="398" data-phocus-index="10"></span></figure>
+<p></p>
+<p data-ke-size="size16">이런식으로 Positive이랑 Hard Negative Frame을 뽑아서, 위와 같은 contrastive loss 로 똑같이 loss함수를 만들어주는데</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">여기서 Hard Negative Frame 이란, 일단 사람이 annotate 한 key frame label 이 ground truth 로 필요하고,</p>
+<p data-ke-size="size16">highe prediction score 을 가지고 있지만, 타임스텝이 잘못 예측된게 hard negative frame이 되는것.</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="586" data-origin-height="222" style="margin-left: 50%; transform: translateX(-50%); width: 586px; max-width: 586px;"><span data-url="https://blog.kakaocdn.net/dna/nqMam/btsJJXFBIzw/AAAAAAAAAAAAAAAAAAAAADiTTRgv34O1yagsgosvlhkNSPoEaZhkr3gomADkKbEc/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=goUOXZeb5m%2FdKTPgqxx%2BY%2FyZaiM%3D" data-phocus="https://blog.kakaocdn.net/dna/nqMam/btsJJXFBIzw/AAAAAAAAAAAAAAAAAAAAADiTTRgv34O1yagsgosvlhkNSPoEaZhkr3gomADkKbEc/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=goUOXZeb5m%2FdKTPgqxx%2BY%2FyZaiM%3D"><img src="https://blog.kakaocdn.net/dna/nqMam/btsJJXFBIzw/AAAAAAAAAAAAAAAAAAAAADiTTRgv34O1yagsgosvlhkNSPoEaZhkr3gomADkKbEc/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=goUOXZeb5m%2FdKTPgqxx%2BY%2FyZaiM%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FnqMam%2FbtsJJXFBIzw%2FAAAAAAAAAAAAAAAAAAAAADiTTRgv34O1yagsgosvlhkNSPoEaZhkr3gomADkKbEc%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DgoUOXZeb5m%252FdKTPgqxx%252BY%252FyZaiM%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="586" height="222" data-origin-width="586" data-origin-height="222" data-phocus-index="11"></span></figure>
+<p></p>
+<p data-ke-size="size16">비디오-text // text-video 따로 설정해서</p>
+<p data-ke-size="size16">두개 loss값 contrastive loss로 구해서&nbsp;</p>
+<p data-ke-size="size16">최종loss 넘겨주는 방식.</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1128" data-origin-height="262" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/QsGLy/btsJK4pVMsC/AAAAAAAAAAAAAAAAAAAAAO6Qquv0mNisbqWLBiD5HcHdg-mSLr6tytPJdmwFUH8w/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=QpliUl%2B1Z1mEmpotLZujoHHCp3U%3D" data-phocus="https://blog.kakaocdn.net/dna/QsGLy/btsJK4pVMsC/AAAAAAAAAAAAAAAAAAAAAO6Qquv0mNisbqWLBiD5HcHdg-mSLr6tytPJdmwFUH8w/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=QpliUl%2B1Z1mEmpotLZujoHHCp3U%3D"><img src="https://blog.kakaocdn.net/dna/QsGLy/btsJK4pVMsC/AAAAAAAAAAAAAAAAAAAAAO6Qquv0mNisbqWLBiD5HcHdg-mSLr6tytPJdmwFUH8w/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=QpliUl%2B1Z1mEmpotLZujoHHCp3U%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FQsGLy%2FbtsJK4pVMsC%2FAAAAAAAAAAAAAAAAAAAAAO6Qquv0mNisbqWLBiD5HcHdg-mSLr6tytPJdmwFUH8w%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DQpliUl%252B1Z1mEmpotLZujoHHCp3U%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1128" height="262" data-origin-width="1128" data-origin-height="262" data-phocus-index="12"></span></figure>
+<p></p>
+    </div>
+    
+    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+        <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    </div>
+</body>
+</html>

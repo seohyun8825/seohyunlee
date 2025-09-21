@@ -1,0 +1,285 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vision-R1: Evolving Human-Free Alignment in Large Vision-Language Models via Vision-Guided Reinforcement Learning — happy8825 - Seohyun Lee Blog</title>
+    <meta name="description" content="이전에 읽었던 Visual-RFT: Visual Reinforcement Fine-Tuning랑 비슷한 논문인거같다. 여기서도 object detection 을 명확한 reward function으로 정의하는걸로 강화학습을 했는데, 전체적인 방향은 비슷한거 같다.&nbsp;&nbsp;
+">
+    <link rel="stylesheet" href="../../styles.css">
+    <style>
+        body { 
+            background: #0d0f17; 
+            color: #fff; 
+            font-family: 'Inter', sans-serif; 
+            line-height: 1.6; 
+            margin: 0; 
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .post-header {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 2rem;
+            margin-bottom: 2rem;
+        }
+        .post-meta {
+            color: #888;
+            margin-bottom: 1rem;
+        }
+        .post-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .post-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        .post-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 1rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .post-content p {
+            margin-bottom: 1rem;
+        }
+        .post-content h1, .post-content h2, .post-content h3 {
+            color: #667eea;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .post-content blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 1rem;
+            margin: 1.5rem 0;
+            color: #ccc;
+            font-style: italic;
+        }
+        .post-content code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .post-content pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            color: #667eea;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            background: rgba(102, 126, 234, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    
+    <div class="post-header">
+        <div class="post-meta">
+            <span>📅 2025-03-27</span>
+            <span> | 🏷️ Computer Vision Paper Review</span>
+            <span> | 🔗 <a href="https://happy8825.tistory.com/103" target="_blank">Original Post</a></span>
+            <span> | 📊 1 images</span>
+        </div>
+        <h1 class="post-title">Vision-R1: Evolving Human-Free Alignment in Large Vision-Language Models via Vision-Guided Reinforcement Learning — happy8825</h1>
+        
+    </div>
+    
+    <div class="post-content">
+        <p data-ke-size="size16">이전에 읽었던 Visual-RFT: Visual Reinforcement Fine-Tuning랑 비슷한 논문인거같다. 여기서도 object detection 을 명확한 reward function으로 정의하는걸로 강화학습을 했는데, 전체적인 방향은 비슷한거 같다.&nbsp;&nbsp;</p>
+<p data-ke-size="size16">object detection은 사실 명확한 답이 있는 task라서 이런 방식이 잘 통하는거 같은데, 다른 task들, qa task 등은 어떻게 reward function을 잘 설계할 수 있을지 고민해봐야할거 같다. 사실 reward function 자체가 한계점인거 같기도..</p>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style5">
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16"><b>배경</b></p>
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li>LVLM 은 이미지나 영상을 텍스트와 함께 이해시키기 위해 pretraining fine tunign 이런것들이 사용이 되는데</li>
+<li>최근에는 Preference Data를 이용해 모델의 답변 품질을 높이는 Preference Optimization을 많이들 쓰고 있으나!
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li>고품질의 인간 주석 데이터를 모으는 데 비용과 시간이 많이 들고,</li>
+<li>이 preference를 제대로 학습할 Reward Model을 만들기도 쉽지 않다.</li>
+</ul>
+</li>
+</ul>
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li>기존 방식(RLHF등등)에서는 사람의 preference 데이터를 직접 만들어 모델이 ‘어떤 답변이 더 좋은가’를 학습한다.</li>
+<li>하지만 vision-language영역에서는 사람에게 이미지를 주고 질문·답변 쌍을 일일이 평가받는 과정이 매우 번거롭고, 시각 정보를 반영해야 하기에 reward 모델이 복잡해진다.</li>
+</ul>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style5">
+<p data-ke-size="size16"><b>Contribution</b></p>
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li>별도의 복잡한 선호 데이터나 보상 모델 없이도, <b>이미 주어진 시각적 피드백</b>을 활용해 모델이 정답을 객관적으로 평가받도록 하는 Vision-R1 을 제안한다.</li>
+<li>구체적으로,
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li><b>Criterion-driven reward</b>:
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li>객체 위치 같은 시각 정보를 수치화해서 모델 답변의 정확도를 평가하고,</li>
+<li>답변이 기준에 부합할수록 더 높은 보상을 제공한다.</li>
+</ul>
+</li>
+<li><b>Progressive rule refinement</b>:
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li>학습 초기에는 완화된 기준을 적용해 모델이 기본 구조를 익히게 하고,</li>
+<li>후반으로 갈수록 기준을 엄격하게 바꿔 모델이 계속 개선되도록 유도한다.</li>
+<li>이렇게 하면 단순한 ‘reward hacking’ 문제를&nbsp; 막고, 모델이 <b>꾸준한 발전</b>을 이루게 된다.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style5">
+<p data-ke-size="size18"><b>Model</b></p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">Vision-R1은 R1 계열 모델의 핵심이었던 <b>규칙 기반 GRPO 알고리즘</b>을 바탕으로 한다.</p>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style3">
+<h4 data-ke-size="size20"><b>GRPO란!</b></h4>
+<p data-ke-size="size16">GRPO는 (1) 여러 개의 답변을 한 그룹으로 생성한 뒤, (2) 각 답변에 대한 보상을 계산하고, (3) 이 그룹 내부에서 상대적 우위를 통해 모델을 업데이트한다.</p>
+<h3 data-ke-size="size23" id="Policy%20Model%20%26%20Reference%20Model-1"><a href="#Policy%20Model%20%26%20Reference%20Model-1">Policy Model &amp; Reference Model</a></h3>
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li><code>π<sub>θ</sub></code>: 학습 대상인 policy 모델</li>
+<li><code>π<sub>ref</sub></code>: 고정된 reference 모델</li>
+<li><code>π<sub>θ<sub>old</sub></sub></code>: 이전 스텝의 policy 모델 (업데이트 전)</li>
+</ul>
+<p data-ke-size="size16">한 샘플 <code>q</code>에 대해, 먼저 <code>π<sub>θ<sub>old</sub></sub></code>가 <code>N</code>개의 답변 <code>{o<sub>1</sub>, o<sub>2</sub>, ... , o<sub>N</sub>}</code>을 생성한다.</p>
+<h3 data-ke-size="size23" id="Reward%20Function-1"><a href="#Reward%20Function-1">Reward Function</a></h3>
+<p data-ke-size="size16">모델의 답변 각각에 대해 <code>r<sub>i</sub></code>라는 reward를 계산한다. 예를 들어, 질문이 “이미지에서 강아지의 위치는 어디인가?”라면, 각 답변의 정확도·적절성 등을 종합하여 <code>r<sub>i</sub></code>를 부여한다. 이를 통해 <code>{r<sub>1</sub>, r<sub>2</sub>, ... , r<sub>N</sub>}</code>이라는 reward들을 얻는다.</p>
+<h3 data-ke-size="size23" id="Advantage%EA%B3%84%EC%82%B0-1"><a href="#Advantage%EA%B3%84%EC%82%B0-1">Advantage계산</a></h3>
+<p data-ke-size="size16">답변 <code>i</code>에 대한 reward<code>r<sub>i</sub></code>가 그룹 내에서 얼마나 좋은지 정량화하기 위해, 다음과 같은 정규화 방식으로 이점을 계산한다:</p>
+<pre class="isbl"><code class="hljs language-isbl"><span class="hljs-variable">Ai</span> = ( <span class="hljs-variable">ri</span> - <span class="hljs-function"><span class="hljs-title">mean</span>({<span class="hljs-variable">rj</span>}<span class="hljs-variable">Nj</span>=<span class="hljs-number">1</span>) )</span>
+                 / <span class="hljs-function"><span class="hljs-title">std</span>({<span class="hljs-variable">rj</span>}<span class="hljs-variable">Nj</span>=<span class="hljs-number">1</span>)</span></code></pre>
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li><code>mean({r<sub>j</sub>})</code>: 그룹 내 reward의 평균</li>
+<li><code>std({r<sub>j</sub>})</code>: 그룹 내 reward의 표준편차</li>
+<li>즉, <code>A<sub>i</sub></code>는 해당 답변이 그룹 평균에 비해 얼마나 우수한지를 보여주는 <i>z-score</i> 형태가 된다.</li>
+</ul>
+<h3 data-ke-size="size23" id="Objective%20Function-1"><a href="#Objective%20Function-1">Objective Function</a></h3>
+<p data-ke-size="size16">레퍼런스 모델 <code>π<sub>ref</sub></code>로부터 각 답변 <code>o<sub>i</sub></code>의 logit을 얻은 뒤, policy 모델 <code>π<sub>θ</sub></code>를 다음 식을 최대화하도록 학습한다:</p>
+<pre class="excel"><code class="hljs language-excel">JGRPO(θ) 
+=  (<span class="hljs-number">1</span> / <span class="hljs-built_in">N</span>) * Σi=<span class="hljs-number">1</span>..<span class="hljs-built_in">N</span> 
+      [ ( (πθ(oi|q) / πθold(oi|q) ) * Ai )
+         - β * KL( πθ(oi|q) || πref(oi|q) ) ]</code></pre>
+<p data-ke-size="size16">즉, 그룹 내에서 상대적으로 reward가 높은 답변(<code>A<sub>i</sub></code>가 큰 답변)의 확률을 높이되, 동시에 레퍼런스 모델과 너무 달라지지 않게 조절하는 것이 목표이다.</p>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style3">
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1297" data-origin-height="716" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/bj1mw7/btsMYIqyC2Y/AAAAAAAAAAAAAAAAAAAAAHyfU2IlO9vlstRUiuFRwTQYnPJC8wY5AqQfPMc1fk6t/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=TpaR5lqrYytHB6TCsEF9HgUeI0o%3D" data-phocus="https://blog.kakaocdn.net/dna/bj1mw7/btsMYIqyC2Y/AAAAAAAAAAAAAAAAAAAAAHyfU2IlO9vlstRUiuFRwTQYnPJC8wY5AqQfPMc1fk6t/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=TpaR5lqrYytHB6TCsEF9HgUeI0o%3D"><img src="https://blog.kakaocdn.net/dna/bj1mw7/btsMYIqyC2Y/AAAAAAAAAAAAAAAAAAAAAHyfU2IlO9vlstRUiuFRwTQYnPJC8wY5AqQfPMc1fk6t/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=TpaR5lqrYytHB6TCsEF9HgUeI0o%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2Fbj1mw7%2FbtsMYIqyC2Y%2FAAAAAAAAAAAAAAAAAAAAAHyfU2IlO9vlstRUiuFRwTQYnPJC8wY5AqQfPMc1fk6t%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DTpaR5lqrYytHB6TCsEF9HgUeI0o%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1297" height="716" data-origin-width="1297" data-origin-height="716" data-phocus-index="0"></span></figure>
+<p></p>
+<h4 data-ke-size="size20">Criteria-Driven Reward Function</h4>
+<p data-ke-size="size16">기존 연구들은 주로 <i>수학·코딩 도메인</i>에 집중하여, <b>구조화된 템플릿</b>에 기반한 답변을 <b>문자나 캐릭터 단위</b>로 매칭해 평가해 왔다. 하지만 vision task는 굳이 문자단위로 평가하는게 불필요하다. 오히려 똑같이 문자단위로 평가하면 강화학습의 장점을 제대로 살릴 수 없다.</p>
+<p data-ke-size="size16">이를 해결하기 위해 <b>객체 위치 파악</b> 작업의 특성과 현재 LVLM이 갖는 한계를 모두 고려하는 reward function을 설계한다. 우선 기존 LVLM들의 한계점은 다음과 같다.</p>
+<ol style="list-style-type: decimal;" data-ke-list-type="decimal">
+<li><b>Formatting Error</b>:<br>Multi instance에 대한 긴 시퀀스 예측을 수행할 때, 모델이 지시에 맞는 포맷을 제대로 따르지 못하는 문제</li>
+<li><b>Insufficient Detection</b>:<br>탐지해야 할 객체가 여러 개일 경우, 모델이 일부 객체를 놓쳐서 유효한 예측을 충분히 내놓지 못한다. 결과적으로 <i>누락된 객체</i>가 존재하게 되어 성능이 떨어지는 문제</li>
+<li><b>Inaccurate:</b><br>작은 물체나 복잡하게 배치된 물체일수록 모델이 좌표나 경계 박스를 잘못 잡을 가능성이 높아지는 문제</li>
+</ol>
+<p data-ke-size="size16">이에 논문에서는 아래 세 가지 요소를 통합한 <b>Criterion-Driven Reward Function</b>을 제안한다:</p>
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li><b>Dual-format Reward</b>: 모델이 출력 형식을 제대로 지켰는지 확인하고, 올바른 포맷을 유지할 경우 추가 보상을 부여한다.</li>
+<li><b>Recall Reward</b>: 요청된 객체들을 누락 없이 모두 찾아냈는지를 평가한다. 더 많이 찾아낼수록 높은 보상을 주어, 불충분한 예측을 줄이도록 유도한다.</li>
+<li><b>Precision Reward</b>: 검출된 객체의 위치(좌표)가 실제와 얼마나 정확히 일치하는지 측정한다. 오차가 작을수록 높은 보상을 제공하여, 부정확한 예측 문제를 완화한다.</li>
+</ul>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style3">
+<h4 data-ke-size="size20">Box-prioritized Prediction Matching</h4>
+<p data-ke-size="size16">object localization할때 LVLM은 bbox 좌표를 <i>텍스트 시퀀스</i>로 출력하는 경향이 있다. 예를 들어, “<code>x1, y1, x2, y2</code>” 같은 문자열로 좌표를 명시한다. 그러나 <b>object detection</b>에서는 복수의 객체에 대해 IoU를 명확히 매칭해야 하므로, 이 텍스트 정보만으로는 <i>체계적인 보상 계산</i>이 어렵다.</p>
+<p data-ke-size="size16">이에 모든 객체 위치 파악 작업을 일반적인 객체 탐지 프레임워크로 통합하고, <b>보상 계산 전에 매칭 절차</b>를 도입하여 예측된 좌표를 다음과 같이 align 한다.</p>
+<div class="equation"><code>
+{ P<sup>i</sup><sub>m</sub> }<sup>M</sup><sub>m=1</sub> = extract_match(o<sub>i</sub>)  <br>
+P<sup>i</sup><sub>m</sub> = { [x1, y1, x2, y2]<sup>i</sup><sub>m</sub>, label<sup>i</sup><sub>m</sub>, IoU<sup>i</sup><sub>m</sub> }
+</code></div>
+<p data-ke-size="size16">LVLM이 생성한 텍스트 응답 <code>o<sub>i</sub></code>는 “<code>x1=35, y1=60, x2=100, y2=150, label=dog, ...</code>”처럼 구조화되어 있을 수 있다. <code>extract_match(o<sub>i</sub>)</code> 함수를 통해, 이 문자열에서 객체별로 <code>[[x1,y1,x2,y2], label, IoU]</code>와 같은 <b>좌표 기반 정보</b>를 추출한다.</p>
+<p data-ke-size="size16">결과적으로 <code>{P<sup>i</sup><sub>m</sub>}</code>는 하나의 응답 <code>o<sub>i</sub></code> 내에 있는 <i>M</i>개의 예측 객체를 의미하며, 각 예측 객체 <code>P<sup>i</sup><sub>m</sub></code>는 다음 요소를 가진다:</p>
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li><b>좌표</b>: <code>[x1, y1, x2, y2]</code></li>
+<li><b>라벨</b>: <code>label<sup>i</sup><sub>m</sub></code></li>
+<li><b>IoU</b>: <code>IoU<sup>i</sup><sub>m</sub></code></li>
+</ul>
+<h4 data-ke-size="size20">Simplified Hungarian match</h4>
+<p data-ke-size="size16">전통적인 디텍션 모델은 <b>class 확률</b>과 <b>바운딩 박스</b>를 매우 정확하게 예측하므로, Hungarian matcher 등의 알고리즘을 사용해 정확한 1:1 매칭(예측 vs. GT)을 한다. 하지만 <i>LVLM은 클래스 확률을 직접 제공하지 않거나</i>, <i>박스 정확도가 상대적으로 낮을</i> 수 있으므로, <b>box-prioritized loss 를 쓴다.</b></p>
+<p data-ke-size="size16">즉, <i>box-based loss를</i> 먼저 고려하여 예측 객체와 실제 객체를 alignment하는 방식. 이를 통해 <i>좌표 정확성</i>이 중요한 객체 위치 파악 과제에 더 적합한 매칭을 수행한다.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">이 과정을 거치고 나면, 각 모델 예측은 <code>P<sup>i</sup><sub>m</sub></code> 형태로 구조화되어 <b>좌표</b>, <b>라벨</b>, <b>IoU</b> 값을 모두 갖게 된다. 그 덕분에 이후 진행되는 <b>강화학습 reward 계산</b>에서 각 객체 예측이 얼마나 정확한지를 효과적으로 평가할 수 있다.</p>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style3">
+<p data-ke-size="size16">&nbsp;</p>
+<h4 data-ke-size="size20">Dual Format Reward</h4>
+<p data-ke-size="size16">템플릿을 잘 시키는지 안지키는지에 대한 reward</p>
+<div class="equation"><code>
+reward<sub>DF</sub>(o<sub>i</sub>) = 
+  { 1, if f<sub>tem</sub> = 1 &amp; f<sub>cont</sub> = 1 
+    0, otherwise
+  }
+</code></div>
+<p data-ke-size="size18">f<sub>tem :&nbsp; </sub>LVLM이 출력한 응답이 미리 지정된 템플릿(예: <code>JSON</code> 구조의 좌표 배열 등)을 정확히 따르는지를 검사한다.&nbsp;</p>
+<p data-ke-size="size18">f<sub>cont : </sub>템플릿 형식이 맞다면, 좌표, 지표 등이 실제 좌표계에서 유효한 범위 내에 있는지와, 소수점이나 정수 형태가 정확한지 등을 검사한다. 예를 들어, 이미지 해상도 범위를 벗어나는 좌표나, 불필요한 문자가 섞인 수치 값은 <code>f<sub>cont</sub> = 0</code>으로 판정.</p>
+<p data-ke-size="size18">그리고,&nbsp; 아래와 같은 규칙으로 reward를 계산한다:</p>
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li>두 검사(<code>f<sub>tem</sub>, f<sub>cont</sub></code>) 모두 만족(<code>1</code>) 시 <b>보상 = 1</b></li>
+<li>하나라도 위배된다면 <b>보상 = 0</b></li>
+</ul>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style3">
+<p data-ke-size="size16">&nbsp;</p>
+<h3 data-ke-size="size23" id="Recall%20Reward-1"><a href="#Recall%20Reward-1">Recall Reward</a></h3>
+<p data-ke-size="size16"><i>많은 객체를 놓치지 않고</i><span style="color: #333333; text-align: start;"><span>&nbsp;</span>찾아냈는가!</span></p>
+<div class="equation"><code>
+reward<sub>recall</sub>(o<sub>i</sub>)
+  = num(Valid Predictions) / num(GT)</code></div>
+<p data-ke-size="size16">- <code>num(Valid Predictions)</code>: <i>IoU</i> ≥ <code>ξ<sub>0</sub></code> 인 예측 객체의 개수 - <code>num(GT)</code>: 실제 GT 객체(검출해야 하는 객체)의 총 개수</p>
+<hr data-ke-style="style1">
+<h3 data-ke-size="size23" id="Precision%20Reward-1"><a href="#Precision%20Reward-1">Precision Reward</a></h3>
+<p data-ke-size="size16"><i>찾아낸 객체의 좌표가 정확</i>한가!</p>
+<div class="equation"><code>
+reward<sub>prec</sub>(o<sub>i</sub>)
+  = ( Σ<sub>m=1..M</sub> [ (IoU<sup>i</sup><sub>m</sub> ≥ ξ<sub>0</sub>) · IoU<sup>i</sup><sub>m</sub> ] ) / M</code></div>
+<p data-ke-size="size16">- <code>M</code>: 예측된 객체의 총 개수 - <code>(IoU<sup>i</sup><sub>m</sub> ≥ ξ<sub>0</sub>)</code>: 유효 예측 여부에 따라 <i>1 또는 0</i>이 됨 - <code>IoU<sup>i</sup><sub>m</sub></code>: <i>m</i>번 객체 예측의 IoU 값</p>
+<hr data-ke-style="style1">
+<h3 data-ke-size="size23" id="%EC%B5%9C%EC%A2%85%20reward%20function-1"><a href="#%EC%B5%9C%EC%A2%85%20reward%20function-1">최종 reward function</a></h3>
+<p data-ke-size="size16"><i>Dual Format Reward</i>(<code>reward<sub>DF</sub></code>), <i>Recall Reward</i>(<code>reward<sub>recall</sub></code>), <i>Precision Reward</i>(<code>reward<sub>prec</sub></code>) 세 가지 reward을 합산하여, 최종적으로 각 응답 <code>o<sub>i</sub></code>에 대한 <b>reward를</b> 만든다</p>
+<div class="equation"><code>
+reward = reward<sub>DF</sub> + reward<sub>recall</sub> + reward<sub>prec</sub>
+</code>
+<p style="text-align: right;" data-ke-size="size16">(식 7)</p>
+</div>
+<p data-ke-size="size16">이렇게 하면 모델이 (1) 출력 형식을 정확히 지키고 (Format), (2) 가능한 모든 타깃을 놓치지 않으며 (Recall), (3) 각각의 위치를 최대한 정확하게 (Precision) 예측하도록 유도할 수 있다.</p>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style5">
+<h3 data-ke-size="size23" id="Progressive%20Rule%20Refinement%20Strategy-1"><a href="#Progressive%20Rule%20Refinement%20Strategy-1">Progressive Rule Refinement Strategy</a></h3>
+<p data-ke-size="size16"><b>Localization</b>에서 <b>IoU</b>가 높은 바운딩 박스를 예측하는 것은 특히 복잡한 장면에서 매우 어려운 task 이다. 그래서, 동일 그룹 내 여러 예측이 reward 측면에서 큰 차이가 없어져 모델 최적화에 제약이 생길 수 있다.</p>
+<p data-ke-size="size16">이를 해결하기 위해 <b>Curriculum Learning</b>과 인간 학습 과정에서 착안한 <i>Progressive Rule Refinement Strategy</i>을 제안된다. reward 계산 기준을 dynamic하게 조정함으로써 <span style="white-space: nowrap;">LVLM</span>이 <b>지속적인 성능 향상</b>을 이루도록 유도한다.&nbsp; <i>Recall Reward</i>와 <i>Precision Reward</i> 모두에 적용되어, 최종적인 <code>A<sub>i</sub></code> 계산 전에 보상을 정교화한다. 주요 구성 요소는 <b>Differentiation policy</b>과 <b>Staged Progression policy</b> 두 가지로 나뉘는데 하나씩 보자</p>
+<hr data-ke-style="style1">
+<h2 data-ke-size="size26" id="Differentiation-1"><a href="#Differentiation-1">Differentiation</a></h2>
+<p data-ke-size="size16"><b>Differentiaiton 은 예측 결과</b>와 <b>실제 보상</b> 간의 매핑에서 contrast를 높이는 데 중점을 둔다. 기존의 linear 매핑 대신, <i>Recall</i>과 <i>평균 IoU</i>가 낮은 예측은 더욱 강하게 패널티를 주고, 상대적으로 높은 예측에는 <i>full reward</i>을 주어 <b>현재 모델 능력 내에서</b> 최대한 좋은 응답을 내게 한다</p>
+<p data-ke-size="size16">이를 위해 <code>ξ<sub>1</sub></code>과 <code>ξ<sub>2</sub></code>라는 두 threshold를 둔다. 하나는 패널티 기준(낮은 예측), 다른 하나는 full reweard기준(높은 예측)이다.&nbsp;</p>
+<div class="equation"><code>
+f(x) =
+  {  1,    if x ≥ ξ<sub>2</sub><br>
+     0,    elif x &lt; ξ<sub>1</sub><br>
+     x,    otherwise
+  }
+</code>
+<p style="text-align: right;" data-ke-size="size16">&nbsp;</p>
+</div>
+<p data-ke-size="size16">그러니까! (1) <code>x</code>값이 <code>ξ<sub>2</sub></code> 이상이면 <b>보상 = 1</b>, (2) <code>x</code>값이 <code>ξ<sub>1</sub></code> 미만이면 <b>보상 = 0</b>, (3) 그 사이 구간은 <code>x</code> 그대로의 값으로 설정한다.</p>
+<hr data-ke-style="style1">
+<h2 data-ke-size="size26" id="Staged%20Progression-1"><a href="#Staged%20Progression-1">Staged Progression</a></h2>
+<p data-ke-size="size16">학습 초기에는 <b>달성하기 쉬운 기준</b>을 제시하고, 모델 역량이 향상됨에 따라 <b>점진적으로 난이도를 높이는</b> 전략을 쓴다. 여기서도 <i>Initial Learning</i>과 <i>Advanced Learning </i>두 단계로 나눈다. 각 단계는 Training STEP에 따라 구분되며, 단계가 바뀔 때마다 <i>Threshold를</i> 점점 많이 조정한다. 이러한 방식은 <b>지속적인 성능 개선</b>을 유도할 뿐 아니라, <i>Reward Hacking</i>을 방지하는 효과도 있다.</p>
+<p data-ke-size="size16">&nbsp;</p>
+    </div>
+    
+    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+        <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,167 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conditional Expectation — happy8825 - Seohyun Lee Blog</title>
+    <meta name="description" content="&nbsp;
+
+
+Conditional Expectation
+Discrete하고 Continuous한 경우 다음과 같은 식으로 써줄 수 있다.&nbsp;
+
+
+예시를 몇개 보자
+&nbsp;
+X, Y가 iid이고 포아송 분포를 따를경우
+linearity에 의해 다음과 같이 써줄 수 있다.
+
+">
+    <link rel="stylesheet" href="../../styles.css">
+    <style>
+        body { 
+            background: #0d0f17; 
+            color: #fff; 
+            font-family: 'Inter', sans-serif; 
+            line-height: 1.6; 
+            margin: 0; 
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .post-header {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 2rem;
+            margin-bottom: 2rem;
+        }
+        .post-meta {
+            color: #888;
+            margin-bottom: 1rem;
+        }
+        .post-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .post-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        .post-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 1rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .post-content p {
+            margin-bottom: 1rem;
+        }
+        .post-content h1, .post-content h2, .post-content h3 {
+            color: #667eea;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .post-content blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 1rem;
+            margin: 1.5rem 0;
+            color: #ccc;
+            font-style: italic;
+        }
+        .post-content code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .post-content pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            color: #667eea;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            background: rgba(102, 126, 234, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    
+    <div class="post-header">
+        <div class="post-meta">
+            <span>📅 2024-11-24</span>
+            <span> | 🏷️ Statistics</span>
+            <span> | 🔗 <a href="https://happy8825.tistory.com/77" target="_blank">Original Post</a></span>
+            <span> | 📊 6 images</span>
+        </div>
+        <h1 class="post-title">Conditional Expectation — happy8825</h1>
+        
+    </div>
+    
+    <div class="post-content">
+        <p data-ke-size="size16">&nbsp;</p>
+
+
+<h1>Conditional Expectation</h1>
+<p data-ke-size="size16">Discrete하고 Continuous한 경우 다음과 같은 식으로 써줄 수 있다.&nbsp;</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1399" data-origin-height="692" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/8UNoQ/btsKTxlPo3q/AAAAAAAAAAAAAAAAAAAAAFI7oNQzlPIXCNwIqk40zkBm6xwytTh2Lb70NlIB0XwL/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=qLWCDLz0J2Mt1VadvQ4oqUcWGaQ%3D" data-phocus="https://blog.kakaocdn.net/dna/8UNoQ/btsKTxlPo3q/AAAAAAAAAAAAAAAAAAAAAFI7oNQzlPIXCNwIqk40zkBm6xwytTh2Lb70NlIB0XwL/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=qLWCDLz0J2Mt1VadvQ4oqUcWGaQ%3D"><img src="https://blog.kakaocdn.net/dna/8UNoQ/btsKTxlPo3q/AAAAAAAAAAAAAAAAAAAAAFI7oNQzlPIXCNwIqk40zkBm6xwytTh2Lb70NlIB0XwL/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=qLWCDLz0J2Mt1VadvQ4oqUcWGaQ%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2F8UNoQ%2FbtsKTxlPo3q%2FAAAAAAAAAAAAAAAAAAAAAFI7oNQzlPIXCNwIqk40zkBm6xwytTh2Lb70NlIB0XwL%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DqLWCDLz0J2Mt1VadvQ4oqUcWGaQ%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1399" height="692" data-origin-width="1399" data-origin-height="692" data-phocus-index="0"></span></figure>
+<p></p>
+<p data-ke-size="size16">예시를 몇개 보자</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">X, Y가 iid이고 포아송 분포를 따를경우</p>
+<p data-ke-size="size16">linearity에 의해 다음과 같이 써줄 수 있다.</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1440" data-origin-height="302" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/lDHZy/btsKTrlB7KQ/AAAAAAAAAAAAAAAAAAAAAAM31aafnoOzusGNZtibeKRBuz4Godn2Ac1xJZ2mWw6r/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=1qpmaD7V%2F4dNT7iysu2qJRJQWzM%3D" data-phocus="https://blog.kakaocdn.net/dna/lDHZy/btsKTrlB7KQ/AAAAAAAAAAAAAAAAAAAAAAM31aafnoOzusGNZtibeKRBuz4Godn2Ac1xJZ2mWw6r/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=1qpmaD7V%2F4dNT7iysu2qJRJQWzM%3D"><img src="https://blog.kakaocdn.net/dna/lDHZy/btsKTrlB7KQ/AAAAAAAAAAAAAAAAAAAAAAM31aafnoOzusGNZtibeKRBuz4Godn2Ac1xJZ2mWw6r/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=1qpmaD7V%2F4dNT7iysu2qJRJQWzM%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FlDHZy%2FbtsKTrlB7KQ%2FAAAAAAAAAAAAAAAAAAAAAAM31aafnoOzusGNZtibeKRBuz4Godn2Ac1xJZ2mWw6r%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3D1qpmaD7V%252F4dNT7iysu2qJRJQWzM%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1440" height="302" data-origin-width="1440" data-origin-height="302" data-phocus-index="1"></span></figure>
+<p></p>
+<p data-ke-size="size16">그럼 E(X|X+Y)는 어떻게 구할까</p>
+<p data-ke-size="size16">X+Y를 T라고 놓고 식을 쭉 전개해보자</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1440" data-origin-height="1021" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/cOCbob/btsKUhpfCB7/AAAAAAAAAAAAAAAAAAAAADrMzqRfgZp-O9IoyZ9i4IWHkEGsu_JuTGn_8j1FyA-B/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=hSQ2ksd4lyi0NyaRZHxGzbCdI4E%3D" data-phocus="https://blog.kakaocdn.net/dna/cOCbob/btsKUhpfCB7/AAAAAAAAAAAAAAAAAAAAADrMzqRfgZp-O9IoyZ9i4IWHkEGsu_JuTGn_8j1FyA-B/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=hSQ2ksd4lyi0NyaRZHxGzbCdI4E%3D"><img src="https://blog.kakaocdn.net/dna/cOCbob/btsKUhpfCB7/AAAAAAAAAAAAAAAAAAAAADrMzqRfgZp-O9IoyZ9i4IWHkEGsu_JuTGn_8j1FyA-B/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=hSQ2ksd4lyi0NyaRZHxGzbCdI4E%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FcOCbob%2FbtsKUhpfCB7%2FAAAAAAAAAAAAAAAAAAAAADrMzqRfgZp-O9IoyZ9i4IWHkEGsu_JuTGn_8j1FyA-B%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DhSQ2ksd4lyi0NyaRZHxGzbCdI4E%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1440" height="1021" data-origin-width="1440" data-origin-height="1021" data-phocus-index="2"></span></figure>
+<p></p>
+<p data-ke-size="size16">그러면 X|T가 binary 분포를 따름을 확인할 수 있기에, E(X|T)도 쉽게 구할 수 있다.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">이거를 symmetric 한 성질을 이용해서 더 쉽게 구할 수 있다. 밑에 식 참고:)</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1440" data-origin-height="257" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/bSwSyl/btsKT6A8maB/AAAAAAAAAAAAAAAAAAAAAFrMwjYF_dXPVojbWKsL0A1YR2XE5p46q1xq6oP7UAhU/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=R3BDx9Z3S3TU1fvaYUFJQRkl%2FYg%3D" data-phocus="https://blog.kakaocdn.net/dna/bSwSyl/btsKT6A8maB/AAAAAAAAAAAAAAAAAAAAAFrMwjYF_dXPVojbWKsL0A1YR2XE5p46q1xq6oP7UAhU/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=R3BDx9Z3S3TU1fvaYUFJQRkl%2FYg%3D"><img src="https://blog.kakaocdn.net/dna/bSwSyl/btsKT6A8maB/AAAAAAAAAAAAAAAAAAAAAFrMwjYF_dXPVojbWKsL0A1YR2XE5p46q1xq6oP7UAhU/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=R3BDx9Z3S3TU1fvaYUFJQRkl%2FYg%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FbSwSyl%2FbtsKT6A8maB%2FAAAAAAAAAAAAAAAAAAAAAFrMwjYF_dXPVojbWKsL0A1YR2XE5p46q1xq6oP7UAhU%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DR3BDx9Z3S3TU1fvaYUFJQRkl%252FYg%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1440" height="257" data-origin-width="1440" data-origin-height="257" data-phocus-index="3"></span></figure>
+<p></p>
+
+
+<h3 data-ke-size="size23" id="Properties-1"><a href="#Properties-1">Properties</a></h3>
+<p data-ke-size="size18">(1) <code>E(h(X)Y | X) = h(X)E(Y | X)</code></p>
+<p data-ke-size="size18">&nbsp;<code>h(X)</code>가 이미 <code>X</code>에 대해 알려진 값이기 때문에 밖으로 뺴낼 수 잇음</p>
+<p data-ke-size="size18">(2) <code>E(Y | X) = E(Y)</code>&nbsp;</p>
+<p data-ke-size="size18">만약 <code>X</code>와 <code>Y</code>가 독립이라면, 조건부 기대값은 단순히 전체 기대값 <code>E(Y)</code>와 동일하다</p>
+<p data-ke-size="size18">(3) <code>E(E(Y | X)) = E(Y)</code> (Iterated Expectation, Adam's Law)</p>
+<p data-ke-size="size18">증명:</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1440" data-origin-height="1018" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/66PGc/btsKVBtFQ8M/AAAAAAAAAAAAAAAAAAAAAHKYWBEVVYrjWmTa-nDEePUp3WE6AeGcg7bT6lT-tYiB/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=hCQxJ22NZmDdfyPPlVsImRzC7oI%3D" data-phocus="https://blog.kakaocdn.net/dna/66PGc/btsKVBtFQ8M/AAAAAAAAAAAAAAAAAAAAAHKYWBEVVYrjWmTa-nDEePUp3WE6AeGcg7bT6lT-tYiB/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=hCQxJ22NZmDdfyPPlVsImRzC7oI%3D"><img src="https://blog.kakaocdn.net/dna/66PGc/btsKVBtFQ8M/AAAAAAAAAAAAAAAAAAAAAHKYWBEVVYrjWmTa-nDEePUp3WE6AeGcg7bT6lT-tYiB/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=hCQxJ22NZmDdfyPPlVsImRzC7oI%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2F66PGc%2FbtsKVBtFQ8M%2FAAAAAAAAAAAAAAAAAAAAAHKYWBEVVYrjWmTa-nDEePUp3WE6AeGcg7bT6lT-tYiB%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DhCQxJ22NZmDdfyPPlVsImRzC7oI%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1440" height="1018" data-origin-width="1440" data-origin-height="1018" data-phocus-index="4"></span></figure>
+<p></p>
+<p data-ke-size="size16">&nbsp;</p>
+
+
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">(4)<code> E((Y - E(Y|X))h(X)) = 0</code></p>
+<p data-ke-size="size16">이 식은 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="0" style="font-size: 116%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D44C TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n" space="3"><mjx-c class="mjx-c2212"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="3"><mjx-c class="mjx-c1D438 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D44C TEX-I"></mjx-c></mjx-mi><mjx-texatom texclass="ORD"><mjx-mo class="mjx-n"><mjx-c class="mjx-c7C"></mjx-c></mjx-mo></mjx-texatom><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D44B TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>Y</mi><mo>−</mo><mi>E</mi><mo stretchy="false">(</mo><mi>Y</mi><mrow data-mjx-texclass="ORD"><mo stretchy="false">|</mo></mrow><mi>X</mi><mo stretchy="false">)</mo></math></mjx-assistive-mml></mjx-container>로 표현되는 residual이 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="1" style="font-size: 116%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D44B TEX-I"></mjx-c></mjx-mi></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>X</mi></math></mjx-assistive-mml></mjx-container>의 어떤 함수 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="2" style="font-size: 116%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c210E TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D44B TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>h</mi><mo stretchy="false">(</mo><mi>X</mi><mo stretchy="false">)</mo></math></mjx-assistive-mml></mjx-container>와 uncorrelated되어있음을 의미한다.</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1387" data-origin-height="425" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/JfoPA/btsKUkNruR6/AAAAAAAAAAAAAAAAAAAAAEolVLRqE1mKfIZOX-Xm_e3ojbsWtFEenQuQZg25kRok/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=ua8vseAlY91JvKsUD8ZXbTm4%2BQ0%3D" data-phocus="https://blog.kakaocdn.net/dna/JfoPA/btsKUkNruR6/AAAAAAAAAAAAAAAAAAAAAEolVLRqE1mKfIZOX-Xm_e3ojbsWtFEenQuQZg25kRok/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=ua8vseAlY91JvKsUD8ZXbTm4%2BQ0%3D"><img src="https://blog.kakaocdn.net/dna/JfoPA/btsKUkNruR6/AAAAAAAAAAAAAAAAAAAAAEolVLRqE1mKfIZOX-Xm_e3ojbsWtFEenQuQZg25kRok/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=ua8vseAlY91JvKsUD8ZXbTm4%2BQ0%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FJfoPA%2FbtsKUkNruR6%2FAAAAAAAAAAAAAAAAAAAAAEolVLRqE1mKfIZOX-Xm_e3ojbsWtFEenQuQZg25kRok%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3Dua8vseAlY91JvKsUD8ZXbTm4%252BQ0%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1387" height="425" data-origin-width="1387" data-origin-height="425" data-phocus-index="5"></span></figure>
+<p></p>
+<p data-ke-size="size16">(5) <code>&nbsp;Var(Y) = E(Var(Y|X)) + Var(E(Y|X))</code></p>
+<p data-ke-size="size16">Eves' law라고도 불리는 식이다. 직관적으로 생각해보면, 집단 내에서의 분포의 variance의&nbsp; 평균 + 분포끼리의 variance라고 생각하면 됨.</p>
+    </div>
+    
+    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+        <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    </div>
+</body>
+</html>

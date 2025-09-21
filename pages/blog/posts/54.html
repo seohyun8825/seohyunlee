@@ -1,0 +1,142 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guiding Instruction-Based Image Editing Via Multimodal Large Language Models — happy8825 - Seohyun Lee Blog</title>
+    <meta name="description" content="MLLM을 활용해서 이미지 editing 을 어떻게 효과적으로 할 수 있을까 에 대한 논문이다. 아이디어의 핵심은, 사람이 주는 짧고 간단한 명령을 인공지능이 이해하고, 그에 맞춰 이미지를 수정하는 것이다.&nbsp; 기존 이미지 편집 방법에서는 구체적인 설명이나 마스크가 필요했다면, ">
+    <link rel="stylesheet" href="../../styles.css">
+    <style>
+        body { 
+            background: #0d0f17; 
+            color: #fff; 
+            font-family: 'Inter', sans-serif; 
+            line-height: 1.6; 
+            margin: 0; 
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .post-header {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 2rem;
+            margin-bottom: 2rem;
+        }
+        .post-meta {
+            color: #888;
+            margin-bottom: 1rem;
+        }
+        .post-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .post-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        .post-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 1rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .post-content p {
+            margin-bottom: 1rem;
+        }
+        .post-content h1, .post-content h2, .post-content h3 {
+            color: #667eea;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .post-content blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 1rem;
+            margin: 1.5rem 0;
+            color: #ccc;
+            font-style: italic;
+        }
+        .post-content code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .post-content pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            color: #667eea;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            background: rgba(102, 126, 234, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    
+    <div class="post-header">
+        <div class="post-meta">
+            <span>📅 2024-09-02</span>
+            <span> | 🏷️ Computer Vision Paper Review</span>
+            <span> | 🔗 <a href="https://happy8825.tistory.com/44" target="_blank">Original Post</a></span>
+            <span> | 📊 5 images</span>
+        </div>
+        <h1 class="post-title">Guiding Instruction-Based Image Editing Via Multimodal Large Language Models — happy8825</h1>
+        
+    </div>
+    
+    <div class="post-content">
+        <p data-ke-size="size18">MLLM을 활용해서 이미지 editing 을 어떻게 효과적으로 할 수 있을까 에 대한 논문이다. 아이디어의 핵심은, 사람이 주는 짧고 간단한 명령을 인공지능이 이해하고, 그에 맞춰 이미지를 수정하는 것이다.&nbsp; 기존 이미지 편집 방법에서는 구체적인 설명이나 마스크가 필요했다면, MGIE는 instruction 만으로 이미지를 효과적으로 수정가능하다.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">기존 instruction based 이미지 editing에서의 한계점이, instruction 이랑 visual 사이에서의 gap 이 크다는것이다.</p>
+<p data-ke-size="size18">기존 MLLM은 또, redundant한 resoponse를 한다는 한계점이 있었다.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">그래서 이걸 해결하기 위한 방안을 제안했고, 파이프라인 자체는 되게 직관적이다.</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1150" data-origin-height="602" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/dbpOQQ/btsJnrGvMgW/AAAAAAAAAAAAAAAAAAAAAK0vnRpe4YrAlqM4IwTQgvB2hH6Y1fPceOQsVA6Tiqpu/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=4E1hGVrRo21z58Q2uFCiQ0xZC94%3D" data-phocus="https://blog.kakaocdn.net/dna/dbpOQQ/btsJnrGvMgW/AAAAAAAAAAAAAAAAAAAAAK0vnRpe4YrAlqM4IwTQgvB2hH6Y1fPceOQsVA6Tiqpu/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=4E1hGVrRo21z58Q2uFCiQ0xZC94%3D"><img src="https://blog.kakaocdn.net/dna/dbpOQQ/btsJnrGvMgW/AAAAAAAAAAAAAAAAAAAAAK0vnRpe4YrAlqM4IwTQgvB2hH6Y1fPceOQsVA6Tiqpu/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=4E1hGVrRo21z58Q2uFCiQ0xZC94%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FdbpOQQ%2FbtsJnrGvMgW%2FAAAAAAAAAAAAAAAAAAAAAK0vnRpe4YrAlqM4IwTQgvB2hH6Y1fPceOQsVA6Tiqpu%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3D4E1hGVrRo21z58Q2uFCiQ0xZC94%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1150" height="602" data-origin-width="1150" data-origin-height="602" data-phocus-index="0"></span></figure>
+<p></p>
+<p data-ke-size="size18">일단 맨 왼쪽부터 process가 시작하는데, instruction이랑 image가 MLLM을 타고 들어가면 엄청 redundant 한 문장이 나온다. 그럼 summary 모델을 한번더 돌려서 간단하게 만들고, 이거를 오른쪽 그림의 LM Head 에서 나온 output의 ground truth 로 사용한다.&nbsp;</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">그래서 지금 초록색 MLLM이 output하는게, summarize 모델에서 나온 ground truth expressive instruction이랑 <span style="text-align: start;">&nbsp;Cross entropy Loss를 줄이는 방향으로 학습이 된다.</span></p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18"><span style="text-align: start;">이렇게 하면, 간결한 expressive instruction을 추출하는게 가능하지만, language modality에 제한되어있음. 이 language 랑 visual gap 을 채우기 위해 N개의 비쥬얼토큰도 함께 넣어준다. 이 embedding들은trainable 하고, LM head는 이걸 통해&nbsp; generate 하는걸 학습함.&nbsp;&nbsp;</span></p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18"><span style="text-align: start;">그리고 실제 visual guidance는, 이 이미지 토큰을 edit head를 통해 transform해서 얻어낼 수 있음. 이 edit head는 seq-seq모델로, visual token을 sementically meaningful한 latent 랑 매핑하는 역할을 함.</span></p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="558" data-origin-height="44" style="margin-left: 50%; transform: translateX(-50%); width: 558px; max-width: 558px;"><span data-url="https://blog.kakaocdn.net/dna/KQP5s/btsJnn5cM42/AAAAAAAAAAAAAAAAAAAAAGTd9taWFhcYprrZEUsdaZIwHdQfwMG6yHe7lr_GzGqR/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=1KkGz9vDUQnzY3jl9TDhuw88Tec%3D" data-phocus="https://blog.kakaocdn.net/dna/KQP5s/btsJnn5cM42/AAAAAAAAAAAAAAAAAAAAAGTd9taWFhcYprrZEUsdaZIwHdQfwMG6yHe7lr_GzGqR/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=1KkGz9vDUQnzY3jl9TDhuw88Tec%3D"><img src="https://blog.kakaocdn.net/dna/KQP5s/btsJnn5cM42/AAAAAAAAAAAAAAAAAAAAAGTd9taWFhcYprrZEUsdaZIwHdQfwMG6yHe7lr_GzGqR/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=1KkGz9vDUQnzY3jl9TDhuw88Tec%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FKQP5s%2FbtsJnn5cM42%2FAAAAAAAAAAAAAAAAAAAAAGTd9taWFhcYprrZEUsdaZIwHdQfwMG6yHe7lr_GzGqR%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3D1KkGz9vDUQnzY3jl9TDhuw88Tec%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="558" height="44" data-origin-width="558" data-origin-height="44" data-phocus-index="1"></span></figure>
+<p></p>
+<p data-ke-size="size18">여기서 e는 word embedding이고, h는 MLLM마지막 layer 에서 나온 hidden state. 즉, e는 visual modality 에서 general한 representation이라고 생각하면 되고, h는 편집 의도를 위해 instance 를 인식할 수 있는 visual imagination이라고 생각하면 된다.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">그리고 이제 디퓨전 단계로 넘어가서 , 최종 목표는 input V의 latent 를 보존하면서, editing guidance u를 따르는 latent 를 만들어내는게 목표. Q , K, V는 되게 일반적인형태 다음과 같음</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="680" data-origin-height="70" style="margin-left: 50%; transform: translateX(-50%); width: 680px; max-width: 680px;"><span data-url="https://blog.kakaocdn.net/dna/bmUdC3/btsJoEkG35D/AAAAAAAAAAAAAAAAAAAAAKqYiq6Z8n2m60I_GAjuVSXwjNsWcHwkCMDVEb4Ko3it/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=Kov23WUjDnaE5SqyFndrbFqwtYk%3D" data-phocus="https://blog.kakaocdn.net/dna/bmUdC3/btsJoEkG35D/AAAAAAAAAAAAAAAAAAAAAKqYiq6Z8n2m60I_GAjuVSXwjNsWcHwkCMDVEb4Ko3it/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=Kov23WUjDnaE5SqyFndrbFqwtYk%3D"><img src="https://blog.kakaocdn.net/dna/bmUdC3/btsJoEkG35D/AAAAAAAAAAAAAAAAAAAAAKqYiq6Z8n2m60I_GAjuVSXwjNsWcHwkCMDVEb4Ko3it/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=Kov23WUjDnaE5SqyFndrbFqwtYk%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FbmUdC3%2FbtsJoEkG35D%2FAAAAAAAAAAAAAAAAAAAAAKqYiq6Z8n2m60I_GAjuVSXwjNsWcHwkCMDVEb4Ko3it%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DKov23WUjDnaE5SqyFndrbFqwtYk%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="680" height="70" data-origin-width="680" data-origin-height="70" data-phocus-index="2"></span></figure>
+<p></p>
+<p data-ke-size="size18">그리고 이런 classifier free guidance식을 통해 학습된다. ∅ 이거는 랜덤하게 특정 컨디션을 비우는거</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="844" data-origin-height="190" style="margin-left: 50%; transform: translateX(-50%); width: 844px; max-width: 844px;"><span data-url="https://blog.kakaocdn.net/dna/c6Avnm/btsJoqNJKrj/AAAAAAAAAAAAAAAAAAAAAEhW-zu3_d_HWe8J5zgIroLK1SMz0y7tiFBjCMtz8uE2/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=aoB%2BSH%2FvEZLZjAUfSRWZRmEOnI4%3D" data-phocus="https://blog.kakaocdn.net/dna/c6Avnm/btsJoqNJKrj/AAAAAAAAAAAAAAAAAAAAAEhW-zu3_d_HWe8J5zgIroLK1SMz0y7tiFBjCMtz8uE2/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=aoB%2BSH%2FvEZLZjAUfSRWZRmEOnI4%3D"><img src="https://blog.kakaocdn.net/dna/c6Avnm/btsJoqNJKrj/AAAAAAAAAAAAAAAAAAAAAEhW-zu3_d_HWe8J5zgIroLK1SMz0y7tiFBjCMtz8uE2/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=aoB%2BSH%2FvEZLZjAUfSRWZRmEOnI4%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2Fc6Avnm%2FbtsJoqNJKrj%2FAAAAAAAAAAAAAAAAAAAAAEhW-zu3_d_HWe8J5zgIroLK1SMz0y7tiFBjCMtz8uE2%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DaoB%252BSH%252FvEZLZjAUfSRWZRmEOnI4%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="844" height="190" data-origin-width="844" data-origin-height="190" data-phocus-index="3"></span></figure>
+<p></p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">알고리즘 , 위에 파이프라인에 대한 알고리즘이다</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="554" data-origin-height="376" style="margin-left: 50%; transform: translateX(-50%); width: 554px; max-width: 554px;"><span data-url="https://blog.kakaocdn.net/dna/cOLLN7/btsJn6BRi33/AAAAAAAAAAAAAAAAAAAAAIAFGJ1YkdRcJtrbfXmaTjibsVGWLMh_dhZczKUrqCTm/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=MTbX0i3NN4RaELluNlgTl2h2eFY%3D" data-phocus="https://blog.kakaocdn.net/dna/cOLLN7/btsJn6BRi33/AAAAAAAAAAAAAAAAAAAAAIAFGJ1YkdRcJtrbfXmaTjibsVGWLMh_dhZczKUrqCTm/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=MTbX0i3NN4RaELluNlgTl2h2eFY%3D"><img src="https://blog.kakaocdn.net/dna/cOLLN7/btsJn6BRi33/AAAAAAAAAAAAAAAAAAAAAIAFGJ1YkdRcJtrbfXmaTjibsVGWLMh_dhZczKUrqCTm/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=MTbX0i3NN4RaELluNlgTl2h2eFY%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FcOLLN7%2FbtsJn6BRi33%2FAAAAAAAAAAAAAAAAAAAAAIAFGJ1YkdRcJtrbfXmaTjibsVGWLMh_dhZczKUrqCTm%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DMTbX0i3NN4RaELluNlgTl2h2eFY%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="554" height="376" data-origin-width="554" data-origin-height="376" data-phocus-index="4"></span></figure>
+<p></p>
+    </div>
+    
+    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+        <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    </div>
+</body>
+</html>

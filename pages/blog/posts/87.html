@@ -1,0 +1,239 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Representation_1 — happy8825 - Seohyun Lee Blog</title>
+    <meta name="description" content="&nbsp;
+&nbsp;
+
+
+
+
+&nbsp;
+&nbsp;
+자연어 문장을 숫자로 표현?
+자연어 문장을 표현하려면 단어를 숫자로 표현할 수 있어야함. 그러려면 문장을 단어로 쪼개고, 그 단어를 숫자와 맵핑해야 함
+ex)
+오늘따라 해피가 너무 보고싶다
+얘가 해피ㅎㅎ
+
+
+단어별로 쪼개기
+문장을">
+    <link rel="stylesheet" href="../../styles.css">
+    <style>
+        body { 
+            background: #0d0f17; 
+            color: #fff; 
+            font-family: 'Inter', sans-serif; 
+            line-height: 1.6; 
+            margin: 0; 
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .post-header {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 2rem;
+            margin-bottom: 2rem;
+        }
+        .post-meta {
+            color: #888;
+            margin-bottom: 1rem;
+        }
+        .post-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .post-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        .post-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 1rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .post-content p {
+            margin-bottom: 1rem;
+        }
+        .post-content h1, .post-content h2, .post-content h3 {
+            color: #667eea;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .post-content blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 1rem;
+            margin: 1.5rem 0;
+            color: #ccc;
+            font-style: italic;
+        }
+        .post-content code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .post-content pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            color: #667eea;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            background: rgba(102, 126, 234, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    
+    <div class="post-header">
+        <div class="post-meta">
+            <span>📅 2024-06-30</span>
+            <span> | 🏷️ NLP</span>
+            <span> | 🔗 <a href="https://happy8825.tistory.com/10" target="_blank">Original Post</a></span>
+            <span> | 📊 3 images</span>
+        </div>
+        <h1 class="post-title">Text Representation_1 — happy8825</h1>
+        
+    </div>
+    
+    <div class="post-content">
+        <p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">
+
+
+</p>
+<p data-ke-size="size16">&nbsp;</p>
+<h1>&nbsp;</h1>
+<h2 data-ke-size="size26" id="%EC%9E%90%EC%97%B0%EC%96%B4%20%EB%AC%B8%EC%9E%A5%EC%9D%84%20%EC%88%AB%EC%9E%90%EB%A1%9C%20%ED%91%9C%ED%98%84%3F-1"><a href="#%EC%9E%90%EC%97%B0%EC%96%B4%20%EB%AC%B8%EC%9E%A5%EC%9D%84%20%EC%88%AB%EC%9E%90%EB%A1%9C%20%ED%91%9C%ED%98%84%3F-1">자연어 문장을 숫자로 표현?</a></h2>
+<p data-ke-size="size16">자연어 문장을 표현하려면 단어를 숫자로 표현할 수 있어야함. 그러려면 문장을 단어로 쪼개고, 그 단어를 숫자와 맵핑해야 함</p>
+<h3 data-ke-size="size23" id="ex)-1"><a href="#ex)-1">ex)</a></h3>
+<p data-ke-size="size16">오늘따라 해피가 너무 보고싶다</p>
+<p></p><figure class="imageblock alignLeft" data-ke-mobilestyle="widthOrigin" data-origin-width="1411" data-origin-height="1058" style="width: 324px; max-width: 324px;"><span data-url="https://blog.kakaocdn.net/dna/esVxjh/btsIhS6rvun/AAAAAAAAAAAAAAAAAAAAAItP185PpDa4Z7oWaW4p2PbRXseAYycHKLmoAwOPJ0SU/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=IsMPT%2Br4JRW2d4Sr6%2FC%2Bg%2FqUZ4M%3D" data-phocus="https://blog.kakaocdn.net/dna/esVxjh/btsIhS6rvun/AAAAAAAAAAAAAAAAAAAAAItP185PpDa4Z7oWaW4p2PbRXseAYycHKLmoAwOPJ0SU/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=IsMPT%2Br4JRW2d4Sr6%2FC%2Bg%2FqUZ4M%3D" data-alt="얘가 해피ㅎㅎ"><img src="https://blog.kakaocdn.net/dna/esVxjh/btsIhS6rvun/AAAAAAAAAAAAAAAAAAAAAItP185PpDa4Z7oWaW4p2PbRXseAYycHKLmoAwOPJ0SU/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=IsMPT%2Br4JRW2d4Sr6%2FC%2Bg%2FqUZ4M%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FesVxjh%2FbtsIhS6rvun%2FAAAAAAAAAAAAAAAAAAAAAItP185PpDa4Z7oWaW4p2PbRXseAYycHKLmoAwOPJ0SU%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DIsMPT%252Br4JRW2d4Sr6%252FC%252Bg%252FqUZ4M%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="324" height="243" data-origin-width="1411" data-origin-height="1058" data-phocus-index="0"></span><figcaption>얘가 해피ㅎㅎ</figcaption>
+</figure>
+<p></p>
+<h3 data-ke-size="size23" id="%EB%8B%A8%EC%96%B4%EB%B3%84%EB%A1%9C%20%EC%AA%BC%EA%B0%9C%EA%B8%B0-1"><a href="#%EB%8B%A8%EC%96%B4%EB%B3%84%EB%A1%9C%20%EC%AA%BC%EA%B0%9C%EA%B8%B0-1">단어별로 쪼개기</a></h3>
+<p data-ke-size="size16">문장을 단어 단위로 쪼개는 방법은 여러 가지가 있는데. 예를 들어, 형태소 분석기를 이용해 토큰화하거나, 간단하게 공백 단위로 토큰화할 수 있음</p>
+<h3 data-ke-size="size23" id="Tokenization-1"><a href="#Tokenization-1">Tokenization</a></h3>
+<p data-ke-size="size16">예를 들어, 형태소 분석기를 이용해 토큰화하게 된다면 단어 단위로 쪼갤 수 있고, 간단하게 공백 단위로 토큰화할 수 있음</p>
+<p data-ke-size="size16">적절한 토큰을 나누고 각 토큰에 대해 숫자를 부여해 dictionary 형태로 놔두면 문장들은 숫자의 나열로 표현할 수 있음</p>
+<h3 data-ke-size="size23" id="EX-1"><a href="#EX-1">EX</a></h3>
+<div style="border: 1px solid #ccc; padding: 10px; margin: 20px;">
+<p data-ke-size="size16"><b>원본 문장:</b> 오늘따라 해피가 너무 보고싶다</p>
+<p data-ke-size="size16"><b>Tokenization:</b></p>
+<p data-ke-size="size16">오늘따라, 해피가, 너무, 보고싶다</p>
+<p data-ke-size="size16"><b>Index Mapping:</b></p>
+<p data-ke-size="size16">오늘따라: 1, 해피가: 2, 너무: 3, 보고싶다: 4</p>
+<p data-ke-size="size16"><b>숫자로 표현된 문장:</b> [1, 2, 3, 4]</p>
+</div>
+<p style="color: #000000; text-align: start;" data-ke-size="size14">근데 인덱스로 매핑하다보면 문제가 있음. 인덱스의 순서가 상관이 없다보니, 인덱스의 거리랑 토큰의 의미적 거리와 상관이 없다는 문제점이 있음. 그래서 나오게 된게 one hot encoding</p>
+<h2 style="color: #000000; text-align: start;" data-ke-size="size26" id="One%20hot%20encoding-1"><a href="#One%20hot%20encoding-1">One hot encoding</a></h2>
+<p data-ke-size="size16">&nbsp;각 토큰을 독립적인 차원에 대응시키며, 해당 토큰만 1이고 나머지는 모두 0인 벡터로 표현</p>
+<div style="border: 1px solid #ccc; padding: 10px; margin: 20px;">
+<p data-ke-size="size16"><b>원-핫 인코딩 예:</b></p>
+<p data-ke-size="size16">오늘따라: [1, 0, 0, 0]</p>
+<p data-ke-size="size16">해피가: [0, 1, 0, 0]</p>
+<p data-ke-size="size16">너무: [0, 0, 1, 0]</p>
+<p data-ke-size="size16">보고싶다: [0, 0, 0, 1]</p>
+</div>
+<p data-ke-size="size14">그럼 이렇게 표현된 걸 어떻게 다시 문장으로?</p>
+<h2 data-ke-size="size26" id="Bag%20of%20Words-1"><a href="#Bag%20of%20Words-1">Bag of Words</a></h2>
+<p data-ke-size="size16">원-핫 인코딩된 벡터들을 합하여 'Bag of Words' 모델을 생성할 수 있음. 이 방법은 단어의 등장 빈도만을 고려하며, 단어의 순서는 무시됨.</p>
+<div style="border: 1px solid #ccc; padding: 10px; margin: 20px;">
+<p data-ke-size="size16"><b>Bag of Words 예:</b></p>
+<p data-ke-size="size16">해피가 [0, 1, 0, 0] +</p>
+<p data-ke-size="size16">너무 [0, 0, 1, 0] +</p>
+<p data-ke-size="size16">너무 [0, 0, 1, 0] +</p>
+<p data-ke-size="size16">보고싶다 [0, 0, 0, 1]</p>
+<p data-ke-size="size16">결과: 해피가 너무 너무 보고싶다 -&gt; [0, 1, 2, 1]</p>
+</div>
+<p data-ke-size="size14">순서를 무시하다보니까 이것도 문제점이 있음. 그럼 순서가 중요한 애들은 토큰을 묶어버리면 되지않을까? 해서 나온게 n-gram</p>
+<h2 data-ke-size="size26" id="n-gram-1"><a href="#n-gram-1">n-gram</a></h2>
+<p data-ke-size="size16">토큰의 순서를 고려하여 정보를 포착하고자 할 때 'n-gram' 모델을 사용함. 이 방법은 인접한 n개의 토큰을 하나의 뭉치로 묶어 처리함.</p>
+<div style="border: 1px solid #ccc; padding: 10px; margin: 20px;">
+<p data-ke-size="size16"><b>n-gram 예:</b></p>
+<p data-ke-size="size16">문장: "해피가 너무 너무 보고싶다"</p>
+<p data-ke-size="size16">2-gram: ["해피가 너무", "너무 너무", "너무 보고싶다"]</p>
+<p data-ke-size="size16">3-gram: ["해피가 너무 너무", "너무 너무 보고싶다"]</p>
+</div>
+<p data-ke-size="size16">그럼 여기서 생각해봐야 하는 건 몇 개의 토큰을 묶을지(즉 n을 무엇으로 설정할지) 왜냐면 n이 너무 크면 사전이 너무 커져버리니까</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">그리고! 중요한 토큰이 아닌데 빈도수가 높은 경우도 문제.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">예를 들어, 조사처럼 의미는 없지만 많이 쓰이는 단어들(영어에서 'a', 'the')등등. 빈도수가 높다고 해서 중요한 것이 아니므로 빈도수 외에 중요도를 고려해야함. 그렇게 해서 나오게 된게 TF-IDF</p>
+<h2 data-ke-size="size26" id="TF-IDF%20(Term%20Frequency-Inverse%20Document%20Frequency)-1"><a href="#TF-IDF%20(Term%20Frequency-Inverse%20Document%20Frequency)-1">TF-IDF (Term Frequency-Inverse Document Frequency)</a></h2>
+<p data-ke-size="size16">TF-IDF는 단어의 중요도를 평가하는 데 사용되는 통계적 수치.</p>
+<p data-ke-size="size16">단순히 단어의 빈도수 뿐만 아니라, 단어가 얼마나 중요한지를 고려하는 것.</p>
+<p style="text-align: left;" data-ke-size="size18"><b>TFIDF:</b></p>
+<div style="border: 1px solid #ccc; padding: 10px; margin: 20px;">
+<p data-ke-size="size16"><b>tf(t, d):</b> term frequency, 문장 d에 토큰 t가 나온 횟수</p>
+<p data-ke-size="size16"><b>df(t):</b> document frequency, 토큰 t가 나온 문장 수 횟수</p>
+<p data-ke-size="size16"><b>idf:</b> inverse document frequency, <span style="color: #333333; text-align: start;"><span>&nbsp;</span>단어가 전체 문서 집합에서 얼마나 자주 등장하는지를 반영. </span>흔하면 작은 값, 희소한 토큰이면 큰 값</p>
+<p data-ke-size="size16"><b>N_D:</b> 총 문장 수</p>
+<figure class="imageblock alignLeft" data-ke-mobilestyle="widthOrigin" data-origin-width="556" data-origin-height="186" style="width: 368px; max-width: 368px;"><span data-url="https://blog.kakaocdn.net/dna/cnPTHZ/btsIjcpmwjB/AAAAAAAAAAAAAAAAAAAAALVs9EGM-LbMnZjNfqeX4MMBfiefDigNJMS_NlMR2F5V/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=9sDYObjibmFUvxeJI5KMeYjQH2M%3D" data-phocus="https://blog.kakaocdn.net/dna/cnPTHZ/btsIjcpmwjB/AAAAAAAAAAAAAAAAAAAAALVs9EGM-LbMnZjNfqeX4MMBfiefDigNJMS_NlMR2F5V/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=9sDYObjibmFUvxeJI5KMeYjQH2M%3D"><img src="https://blog.kakaocdn.net/dna/cnPTHZ/btsIjcpmwjB/AAAAAAAAAAAAAAAAAAAAALVs9EGM-LbMnZjNfqeX4MMBfiefDigNJMS_NlMR2F5V/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=9sDYObjibmFUvxeJI5KMeYjQH2M%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FcnPTHZ%2FbtsIjcpmwjB%2FAAAAAAAAAAAAAAAAAAAAALVs9EGM-LbMnZjNfqeX4MMBfiefDigNJMS_NlMR2F5V%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3D9sDYObjibmFUvxeJI5KMeYjQH2M%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="368" height="123" data-origin-width="556" data-origin-height="186" data-phocus-index="1"></span></figure>
+
+<p data-ke-size="size16">&nbsp;</p>
+</div>
+<p data-ke-size="size16">&nbsp;</p>
+<h3 data-ke-size="size23" id="TF-IDF%20%EA%B3%84%EC%82%B0%20%EA%B3%BC%EC%A0%95-1"><a href="#TF-IDF%20%EA%B3%84%EC%82%B0%20%EA%B3%BC%EC%A0%95-1">TF-IDF 계산 과정</a></h3>
+<ol style="list-style-type: decimal;" data-ke-list-type="decimal">
+<li><b>TF 계산:</b> 각 단어의 빈도수를 계산</li>
+<li><b>IDF 계산:</b> 단어가 등장한 문서의 수를 반영하여 IDF를 계산</li>
+<li><b>TF-IDF 계산:</b> TF 값과 IDF 값을 곱하여 각 단어의 TF-IDF 값을 계산</li>
+</ol>
+<p data-ke-size="size16">다음과 같은 문서가 있다고 해보자</p>
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li>문서1: "오늘따라 해피가 너무 보고싶다"</li>
+<li>문서2: "오늘은 정말 해피한 날이다"</li>
+<li>문서3: "보고싶은 해피가 너무 멀리 있다"</li>
+</ul>
+<p data-ke-size="size16">각 단어에 대한 TF-IDF 계산:</p>
+<pre class="angelscript"><code class="hljs language-angelscript">
+TF(오늘따라, 문서<span class="hljs-number">1</span>) = <span class="hljs-number">1</span>
+TF(해피가, 문서<span class="hljs-number">1</span>) = <span class="hljs-number">1</span>
+TF(너무, 문서<span class="hljs-number">1</span>) = <span class="hljs-number">1</span>
+TF(보고싶다, 문서<span class="hljs-number">1</span>) = <span class="hljs-number">1</span>
+
+IDF(오늘따라) = log(<span class="hljs-number">3</span>/<span class="hljs-number">1</span>)
+IDF(해피가) = log(<span class="hljs-number">3</span>/<span class="hljs-number">2</span>)
+IDF(너무) = log(<span class="hljs-number">3</span>/<span class="hljs-number">2</span>)
+IDF(보고싶다) = log(<span class="hljs-number">3</span>/<span class="hljs-number">1</span>)
+
+TF-IDF(오늘따라, 문서<span class="hljs-number">1</span>) = TF * IDF = <span class="hljs-number">1</span> * log(<span class="hljs-number">3</span>/<span class="hljs-number">1</span>)
+TF-IDF(해피가, 문서<span class="hljs-number">1</span>) = <span class="hljs-number">1</span> * log(<span class="hljs-number">3</span>/<span class="hljs-number">2</span>)
+TF-IDF(너무, 문서<span class="hljs-number">1</span>) = <span class="hljs-number">1</span> * log(<span class="hljs-number">3</span>/<span class="hljs-number">2</span>)
+TF-IDF(보고싶다, 문서<span class="hljs-number">1</span>) = <span class="hljs-number">1</span> * log(<span class="hljs-number">3</span>/<span class="hljs-number">1</span>)
+</code></pre>
+<p></p><figure class="imageblock alignLeft" data-ke-mobilestyle="widthOrigin" data-origin-width="790" data-origin-height="756" style="width: 450px; max-width: 450px;"><span data-url="https://blog.kakaocdn.net/dna/bemMzX/btsIg2WkQ7X/AAAAAAAAAAAAAAAAAAAAALNemBalYQ03G9OJEcjneyR5IiTIq7WDxBNZhbo_UX9H/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=3d57VbwA9w7uQWaRAXIjeocpeRE%3D" data-phocus="https://blog.kakaocdn.net/dna/bemMzX/btsIg2WkQ7X/AAAAAAAAAAAAAAAAAAAAALNemBalYQ03G9OJEcjneyR5IiTIq7WDxBNZhbo_UX9H/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=3d57VbwA9w7uQWaRAXIjeocpeRE%3D" data-alt="멍멍"><img src="https://blog.kakaocdn.net/dna/bemMzX/btsIg2WkQ7X/AAAAAAAAAAAAAAAAAAAAALNemBalYQ03G9OJEcjneyR5IiTIq7WDxBNZhbo_UX9H/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=3d57VbwA9w7uQWaRAXIjeocpeRE%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FbemMzX%2FbtsIg2WkQ7X%2FAAAAAAAAAAAAAAAAAAAAALNemBalYQ03G9OJEcjneyR5IiTIq7WDxBNZhbo_UX9H%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3D3d57VbwA9w7uQWaRAXIjeocpeRE%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="450" height="756" data-origin-width="790" data-origin-height="756" data-phocus-index="2"></span><figcaption>멍멍</figcaption>
+</figure>
+<p></p>
+<p data-ke-size="size16">&nbsp;</p>
+    </div>
+    
+    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+        <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    </div>
+</body>
+</html>

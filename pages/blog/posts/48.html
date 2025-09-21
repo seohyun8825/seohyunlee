@@ -1,0 +1,229 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attention map 디코더 visualize — happy8825 - Seohyun Lee Blog</title>
+    <meta name="description" content="Test10 (output)
+&nbsp;
+I'm making virtual try-on model, but the result from the model wasn’t as desired. So to understand where the model could be improved, I d">
+    <link rel="stylesheet" href="../../styles.css">
+    <style>
+        body { 
+            background: #0d0f17; 
+            color: #fff; 
+            font-family: 'Inter', sans-serif; 
+            line-height: 1.6; 
+            margin: 0; 
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .post-header {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 2rem;
+            margin-bottom: 2rem;
+        }
+        .post-meta {
+            color: #888;
+            margin-bottom: 1rem;
+        }
+        .post-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .post-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        .post-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 1rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .post-content p {
+            margin-bottom: 1rem;
+        }
+        .post-content h1, .post-content h2, .post-content h3 {
+            color: #667eea;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .post-content blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 1rem;
+            margin: 1.5rem 0;
+            color: #ccc;
+            font-style: italic;
+        }
+        .post-content code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .post-content pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            color: #667eea;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            background: rgba(102, 126, 234, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    
+    <div class="post-header">
+        <div class="post-meta">
+            <span>📅 2024-09-28</span>
+            <span> | 🏷️ 개발</span>
+            <span> | 🔗 <a href="https://happy8825.tistory.com/57" target="_blank">Original Post</a></span>
+            <span> | 📊 1 images</span>
+        </div>
+        <h1 class="post-title">Attention map 디코더 visualize — happy8825</h1>
+        
+    </div>
+    
+    <div class="post-content">
+        <p data-ke-size="size16">Test10 (output)</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">I'm making virtual try-on model, but the result from the model wasn’t as desired. So to understand where the model could be improved, I decided to visualize the decoder’s attention map.</p>
+<h2 data-ke-size="size26" id="Modules%20Used-1"><a href="#Modules%20Used-1">Modules Used</a></h2>
+<p data-ke-size="size16">To build the virtual try-on model, I used the <span class="highlight">BasicTransformerBlock</span> from the Hugging Face <code>diffusers.models.attention</code> library. The decoder consists of multiple <span class="highlight">CrossAttnFirstTransformerBlock</span> layers, each performing two types of attention mechanisms:</p>
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li><b>Self-Attention (attn1)</b>: The query, key, and value are all derived from the same input (pose features).</li>
+<li><b>Cross-Attention (attn2)</b>: The query is from pose features, but the key and value come from garment features.</li>
+</ul>
+<p data-ke-size="size16">The challenge here is that the <span class="highlight">BasicTransformerBlock</span> module computes attention internally and returns only the output without exposing the actual <b>attention scores</b>. These scores are critical for understanding which parts of the input the model is focusing on. Without access to the attention scores, I had to compute them manually using the queries and keys extracted from the attention layers.</p>
+<h3 data-ke-size="size23" id="Step%201%3A%20Computing%20Attention%20Scores-1"><a href="#Step%201%3A%20Computing%20Attention%20Scores-1">Step 1: Computing Attention Scores</a></h3>
+<p data-ke-size="size16">To compute the attention scores, I performed the following steps:</p>
+<ol style="list-style-type: decimal;" data-ke-list-type="decimal">
+<li><b>Dot product between query and key:</b> This gives us the raw attention scores.</li>
+<li><b>Scaling by the square root of the head dimension:</b> This is done to normalize the scores.</li>
+<li><b>Softmax:</b> This converts the scores into probabilities or weights.</li>
+</ol>
+<p data-ke-size="size16">Here’s the code to compute attention scores:</p>
+<pre class="maxima"><code class="hljs language-maxima">import torch
+import torch.nn.functional as F
+
+def compute_attention_scores(query, <span class="hljs-built_in">key</span>, attention_module):
+    num_heads = attention_module.heads
+    batch_size, seq_length, <span class="hljs-built_in">dim</span> = query.size()
+
+    # Reshape <span class="hljs-keyword">for</span> multi-head attention
+    query = query.<span class="hljs-built_in">view</span>(batch_size, seq_length, num_heads, <span class="hljs-built_in">dim</span> // num_heads).permute(<span class="hljs-number">0</span>, <span class="hljs-number">2</span>, <span class="hljs-number">1</span>, <span class="hljs-number">3</span>)
+    <span class="hljs-built_in">key</span> = <span class="hljs-built_in">key</span>.<span class="hljs-built_in">view</span>(batch_size, seq_length, num_heads, <span class="hljs-built_in">dim</span> // num_heads).permute(<span class="hljs-number">0</span>, <span class="hljs-number">2</span>, <span class="hljs-number">1</span>, <span class="hljs-number">3</span>)
+    
+    # Transpose <span class="hljs-built_in">key</span> <span class="hljs-keyword">for</span> dot <span class="hljs-built_in">product</span>
+    <span class="hljs-built_in">key</span> = <span class="hljs-built_in">key</span>.permute(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">3</span>, <span class="hljs-number">2</span>)
+
+    # Compute dot <span class="hljs-built_in">product</span> attention scores
+    attention_scores = torch.matmul(query, <span class="hljs-built_in">key</span>)
+    attention_scores = attention_scores / torch.<span class="hljs-built_in">sqrt</span>(torch.tensor(query.size(-<span class="hljs-number">1</span>), dtype=torch.float32))
+
+    # Apply softmax to <span class="hljs-built_in">get</span> attention weights
+    attention_weights = F.softmax(attention_scores, <span class="hljs-built_in">dim</span>=-<span class="hljs-number">1</span>)
+    
+    <span class="hljs-built_in">return</span> attention_weights
+</code></pre>
+<h3 data-ke-size="size23" id="Step%202%3A%20Using%20the%20Function%20in%20Self%20and%20Cross-Attention-1"><a href="#Step%202%3A%20Using%20the%20Function%20in%20Self%20and%20Cross-Attention-1">Step 2: Using the Function in Self and Cross-Attention</a></h3>
+<p data-ke-size="size16">I reused the same function for both <b>attn1</b> (self-attention) and <b>attn2</b> (cross-attention) layers.&nbsp;</p>
+<pre class="reasonml"><code class="hljs language-reasonml"># Self-Attention
+attn_weights_1 = compute<span class="hljs-constructor">_attention_scores(<span class="hljs-params">self</span>.<span class="hljs-params">attn1</span>.<span class="hljs-params">to_q</span>(<span class="hljs-params">norm_hidden_states</span>)</span>, self.attn1.<span class="hljs-keyword">to</span><span class="hljs-constructor">_k(<span class="hljs-params">norm_hidden_states</span>)</span>, self.attn1)
+
+# Cross-Attention
+attn_weights_2 = compute<span class="hljs-constructor">_attention_scores(<span class="hljs-params">self</span>.<span class="hljs-params">attn2</span>.<span class="hljs-params">to_q</span>(<span class="hljs-params">norm_hidden_states</span>)</span>, self.attn2.<span class="hljs-keyword">to</span><span class="hljs-constructor">_k(<span class="hljs-params">garment_features</span>)</span>, self.attn2)
+</code></pre>
+<h3 data-ke-size="size23" id="Step%203%3A%20Visualizing%20the%20Attention%20Map-1"><a href="#Step%203%3A%20Visualizing%20the%20Attention%20Map-1">Step 3: Visualizing the Attention Map</a></h3>
+<p data-ke-size="size16">After computing the attention weights, I visualized the attention map using the following code:</p>
+<pre class="reasonml"><code class="hljs language-reasonml">import matplotlib.pyplot <span class="hljs-keyword">as</span> plt
+import seaborn <span class="hljs-keyword">as</span> sns
+
+def visualize<span class="hljs-constructor">_attention(<span class="hljs-params">attn_weights</span>, <span class="hljs-params">title</span>, <span class="hljs-params">seq_length_query</span>, <span class="hljs-params">seq_length_key</span>, <span class="hljs-params">head</span>=None)</span>:
+    <span class="hljs-keyword">if</span> head is not None:
+        attn_weights_head = attn_weights<span class="hljs-literal">[:, <span class="hljs-identifier">head</span>]</span>
+    <span class="hljs-keyword">else</span>:
+        attn_weights_head = attn_weights.mean(dim=<span class="hljs-number">1</span>)
+
+    batch_index = <span class="hljs-number">0</span>
+    plt.figure(figsize=(<span class="hljs-number">10</span>, <span class="hljs-number">8</span>))
+    sns.heatmap(attn_weights_head<span class="hljs-literal">[<span class="hljs-identifier">batch_index</span>]</span>.detach<span class="hljs-literal">()</span>.cpu<span class="hljs-literal">()</span>.numpy<span class="hljs-literal">()</span>, cmap=<span class="hljs-string">"viridis"</span>)
+    plt.title(title)
+    plt.xlabel(<span class="hljs-string">"Key Tokens"</span>)
+    plt.ylabel(<span class="hljs-string">"Query Tokens"</span>)
+    plt.show<span class="hljs-literal">()</span>
+
+# Example: Visualizing Self-Attention
+visualize<span class="hljs-constructor">_attention(<span class="hljs-params">attn_weights_1</span>, <span class="hljs-string">"Self-Attention: Pose to Pose"</span>, <span class="hljs-params">query</span>.<span class="hljs-params">shape</span>[1], <span class="hljs-params">key</span>.<span class="hljs-params">shape</span>[1])</span>
+
+# Example: Visualizing Cross-Attention
+visualize<span class="hljs-constructor">_attention(<span class="hljs-params">attn_weights_2</span>, <span class="hljs-string">"Cross-Attention: Pose to Garment"</span>, <span class="hljs-params">query</span>.<span class="hljs-params">shape</span>[1], <span class="hljs-params">key</span>.<span class="hljs-params">shape</span>[1])</span>
+</code></pre>
+<h2 data-ke-size="size26" id="Handling%20Mismatched%20Attention%20Map%20Sizes-1"><a href="#Handling%20Mismatched%20Attention%20Map%20Sizes-1">Handling Mismatched Attention Map Sizes</a></h2>
+<p data-ke-size="size16">The attention map had a shape of <span class="highlight">(16, 64)</span>, while my input images were <span class="highlight">256x256</span>. Directly visualizing the attention map without scaling would not align with the input image’s spatial dimensions. Therefore, I used <b>bilinear interpolation</b> to upsample the attention map to match the input size.</p>
+<pre class="angelscript"><code class="hljs language-angelscript">upsampled_attn_map = F.<span class="hljs-built_in">int</span>erpolate(attn_weights.mean(dim=<span class="hljs-number">1</span>).unsqueeze(<span class="hljs-number">0</span>).unsqueeze(<span class="hljs-number">0</span>), size=(<span class="hljs-number">256</span>, <span class="hljs-number">256</span>), mode=<span class="hljs-string">'bilinear'</span>, align_corners=False)
+upsampled_attn_map = upsampled_attn_map.squeeze(<span class="hljs-number">0</span>).squeeze(<span class="hljs-number">0</span>)
+</code></pre>
+<h3 data-ke-size="size23" id="Reshaping%20Attention%20Weights%20to%20Spatial%20Form-1"><a href="#Reshaping%20Attention%20Weights%20to%20Spatial%20Form-1">Reshaping Attention Weights to Spatial Form</a></h3>
+<p data-ke-size="size16">To make the attention weights spatially comparable, I converted the <b>[query_length, key_length]</b> format into a form of <b>[H_query, W_query, H_key, W_key]</b> using this code:</p>
+<pre class="lsl"><code class="hljs language-lsl">H_query, W_query = <span class="hljs-number">4</span>, <span class="hljs-number">4</span>  # <span class="hljs-number">16</span> query length corresponds to a <span class="hljs-number">4</span>x4 grid
+H_key, W_key = <span class="hljs-number">8</span>, <span class="hljs-number">8</span>      # <span class="hljs-number">64</span> <span class="hljs-type">key</span> length corresponds to an <span class="hljs-number">8</span>x8 grid
+
+attn_weights_reshaped = attn_weights.view(batch_size, num_heads, H_query, W_query, H_key, W_key)
+</code></pre>
+<h2 data-ke-size="size26" id="Saving%20the%20Attention%20Map-1"><a href="#Saving%20the%20Attention%20Map-1">Saving the Attention Map</a></h2>
+<p data-ke-size="size16">Finally, I created a function to save the attention map during inference in the current directory. This function reshapes, upsamples, and saves the attention map:</p>
+<pre class="routeros"><code class="hljs language-routeros">import os
+
+def save_attention_map(attn_weights, query_shape, key_shape, input_img_size, <span class="hljs-attribute">file_name</span>=<span class="hljs-string">"attention_map.png"</span>):
+    H_query, W_query = query_shape
+    H_key, W_key = key_shape
+    H_img, W_img = input_img_size
+
+    attn_weights_reshaped = attn_weights.view(batch_size, num_heads, H_query, W_query, H_key, W_key)
+    attn_weights_avg = attn_weights_reshaped.mean(<span class="hljs-attribute">dim</span>=1)
+
+    upsampled_attn_map = F.interpolate(attn_weights_avg, size=(H_img, W_img, H_img, W_img), <span class="hljs-attribute">mode</span>=<span class="hljs-string">'bilinear'</span>, <span class="hljs-attribute">align_corners</span>=<span class="hljs-literal">False</span>)
+
+    plt.figure(figsize=(10, 8))
+    sns.heatmap(upsampled_attn_map[0, :, :, 0, 0].detach().cpu().numpy(), <span class="hljs-attribute">cmap</span>=<span class="hljs-string">"viridis"</span>)
+    plt.savefig(os.path.join(os.getcwd(), file_name))
+    plt.close()
+
+    <span class="hljs-built_in">print</span>(f<span class="hljs-string">"Attention map saved as {file_name}"</span>)
+</code></pre>
+<h3 data-ke-size="size23" id="Usage%20Example-1"><a href="#Usage%20Example-1">Usage Example</a></h3>
+<pre class="lsl"><code class="hljs language-lsl">save_attention_map(attn_weights_1, (<span class="hljs-number">4</span>, <span class="hljs-number">4</span>), (<span class="hljs-number">8</span>, <span class="hljs-number">8</span>), (<span class="hljs-number">256</span>, <span class="hljs-number">256</span>), <span class="hljs-string">"attn1_map.png"</span>)
+save_attention_map(attn_weights_2, (<span class="hljs-number">4</span>, <span class="hljs-number">4</span>), (<span class="hljs-number">8</span>, <span class="hljs-number">8</span>), (<span class="hljs-number">256</span>, <span class="hljs-number">256</span>), <span class="hljs-string">"attn2_map.png"</span>)
+</code></pre>
+<h2 data-ke-size="size26" id="Conclusion-1"><a href="#Conclusion-1">Conclusion</a></h2>
+<p data-ke-size="size16">By following these steps, I was able to compute, visualize, and save the attention maps from my virtual try-on model.&nbsp;</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="2482" data-origin-height="1166" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/cBbBij/btsJQVGpfHZ/AAAAAAAAAAAAAAAAAAAAAPYkK-pt7OvBPMdnQ_iuMwoXdfCgQLyex0FUr9hvIO42/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=96shsVy14vYRq2vEIhSXIM3cdsE%3D" data-phocus="https://blog.kakaocdn.net/dna/cBbBij/btsJQVGpfHZ/AAAAAAAAAAAAAAAAAAAAAPYkK-pt7OvBPMdnQ_iuMwoXdfCgQLyex0FUr9hvIO42/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=96shsVy14vYRq2vEIhSXIM3cdsE%3D"><img src="https://blog.kakaocdn.net/dna/cBbBij/btsJQVGpfHZ/AAAAAAAAAAAAAAAAAAAAAPYkK-pt7OvBPMdnQ_iuMwoXdfCgQLyex0FUr9hvIO42/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=96shsVy14vYRq2vEIhSXIM3cdsE%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FcBbBij%2FbtsJQVGpfHZ%2FAAAAAAAAAAAAAAAAAAAAAPYkK-pt7OvBPMdnQ_iuMwoXdfCgQLyex0FUr9hvIO42%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3D96shsVy14vYRq2vEIhSXIM3cdsE%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="2482" height="1166" data-origin-width="2482" data-origin-height="1166" data-phocus-index="0"></span></figure>
+<p></p>
+    </div>
+    
+    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+        <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,174 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Diffusion Model is Secretly a Zero-Shot Classifier — happy8825 - Seohyun Lee Blog</title>
+    <meta name="description" content="디퓨전 모델을 통해 추가적인 학습 없이 zero shot classification 을 수행할 수 있는 Diffusion Classifier 라는 방법을 제안한 논문이다.
+&nbsp;
+Generative Model vs Discriminative Model
+
+
+우선 discriminat">
+    <link rel="stylesheet" href="../../styles.css">
+    <style>
+        body { 
+            background: #0d0f17; 
+            color: #fff; 
+            font-family: 'Inter', sans-serif; 
+            line-height: 1.6; 
+            margin: 0; 
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .post-header {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 2rem;
+            margin-bottom: 2rem;
+        }
+        .post-meta {
+            color: #888;
+            margin-bottom: 1rem;
+        }
+        .post-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .post-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        .post-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 1rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .post-content p {
+            margin-bottom: 1rem;
+        }
+        .post-content h1, .post-content h2, .post-content h3 {
+            color: #667eea;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .post-content blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 1rem;
+            margin: 1.5rem 0;
+            color: #ccc;
+            font-style: italic;
+        }
+        .post-content code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .post-content pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            color: #667eea;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            background: rgba(102, 126, 234, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    
+    <div class="post-header">
+        <div class="post-meta">
+            <span>📅 2024-09-01</span>
+            <span> | 🏷️ Computer Vision Paper Review</span>
+            <span> | 🔗 <a href="https://happy8825.tistory.com/43" target="_blank">Original Post</a></span>
+            <span> | 📊 8 images</span>
+        </div>
+        <h1 class="post-title">Your Diffusion Model is Secretly a Zero-Shot Classifier — happy8825</h1>
+        
+    </div>
+    
+    <div class="post-content">
+        <p data-ke-size="size18">디퓨전 모델을 통해 추가적인 학습 없이 zero shot classification 을 수행할 수 있는 Diffusion Classifier 라는 방법을 제안한 논문이다.</p>
+<h4 data-ke-size="size20">&nbsp;</h4>
+<h4 style="text-align: left;" data-ke-size="size20"><b>Generative Model vs Discriminative Model</b></h4>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="500" data-origin-height="322" style="margin-left: 50%; transform: translateX(-50%); width: 500px; max-width: 500px;"><span data-url="https://blog.kakaocdn.net/dna/bNOpSA/btsJm5DMxAS/AAAAAAAAAAAAAAAAAAAAAOGSwq6YX4y-ZX85tyVAqb5E8ZlJnNTuYw3_ymEeeYFM/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=UXShKMvUnrekHZ7KCb7Im8BTw6Y%3D" data-phocus="https://blog.kakaocdn.net/dna/bNOpSA/btsJm5DMxAS/AAAAAAAAAAAAAAAAAAAAAOGSwq6YX4y-ZX85tyVAqb5E8ZlJnNTuYw3_ymEeeYFM/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=UXShKMvUnrekHZ7KCb7Im8BTw6Y%3D"><img src="https://blog.kakaocdn.net/dna/bNOpSA/btsJm5DMxAS/AAAAAAAAAAAAAAAAAAAAAOGSwq6YX4y-ZX85tyVAqb5E8ZlJnNTuYw3_ymEeeYFM/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=UXShKMvUnrekHZ7KCb7Im8BTw6Y%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FbNOpSA%2FbtsJm5DMxAS%2FAAAAAAAAAAAAAAAAAAAAAOGSwq6YX4y-ZX85tyVAqb5E8ZlJnNTuYw3_ymEeeYFM%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DUXShKMvUnrekHZ7KCb7Im8BTw6Y%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="500" height="322" data-origin-width="500" data-origin-height="322" data-phocus-index="0"></span></figure>
+<p></p>
+<p data-ke-size="size18">우선 discriminative 모델이랑, generative 모델의 차이부터 알아야하는데,</p>
+<p data-ke-size="size18"><b>Discriminative 모델</b>은 <b>직접적으로 P(y|x)를 예측</b>한다. 즉 데이터들이 주어지면, <b>이걸 나누는 decision boundary를 학습</b>한다.</p>
+<p data-ke-size="size18">반면 <b>Generative model은 P(x|y)를 예측, 즉 데이터 분포 자체</b>를 배운다.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">그래서 이 논문의 아이디어는, 생성모델이 단순히 데이터를 생성하는것에 그치지 않고 classify 작업에도 활용될 수 있다는 것. 사실 이게 의미가 있을까 싶기도 하지만,, 그냥 classify 하는게 더 간단할텐데?</p>
+<p data-ke-size="size18">근데 디퓨전 학습 과정에서 복잡한 데이터분포를 잘 학습하기에, 정확도가 더 올라간다고 한다.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<h4 data-ke-size="size20">&nbsp;</h4>
+<h4 data-ke-size="size20"><b>Clasification with diffusion models?</b></h4>
+<p data-ke-size="size18">일단 베이즈에서 시작, 근데 p(ci)가 계산하기 어려우니까 이걸 uniform 하다고 가정하면, 식에서 저렇게 없애줄 수 있다.</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1182" data-origin-height="288" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/bsQu1b/btsJn9d7uRb/AAAAAAAAAAAAAAAAAAAAAGrZ3W93RlFzGXSIKdt76nYL5z2aEMtSZMXPMBDkG_0f/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=hb8Sj89XMu7LPzHZd%2Fzf4ZAyr%2BI%3D" data-phocus="https://blog.kakaocdn.net/dna/bsQu1b/btsJn9d7uRb/AAAAAAAAAAAAAAAAAAAAAGrZ3W93RlFzGXSIKdt76nYL5z2aEMtSZMXPMBDkG_0f/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=hb8Sj89XMu7LPzHZd%2Fzf4ZAyr%2BI%3D"><img src="https://blog.kakaocdn.net/dna/bsQu1b/btsJn9d7uRb/AAAAAAAAAAAAAAAAAAAAAGrZ3W93RlFzGXSIKdt76nYL5z2aEMtSZMXPMBDkG_0f/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=hb8Sj89XMu7LPzHZd%2Fzf4ZAyr%2BI%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FbsQu1b%2FbtsJn9d7uRb%2FAAAAAAAAAAAAAAAAAAAAAGrZ3W93RlFzGXSIKdt76nYL5z2aEMtSZMXPMBDkG_0f%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3Dhb8Sj89XMu7LPzHZd%252Fzf4ZAyr%252BI%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1182" height="288" data-origin-width="1182" data-origin-height="288" data-phocus-index="1"></span></figure>
+<p></p>
+<p data-ke-size="size18">그리고 디퓨전에서 p(x|c)는 intractable 하기에 ELBO를 사용해서 replace 해주면</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="462" data-origin-height="76" style="margin-left: 50%; transform: translateX(-50%); width: 462px; max-width: 462px;"><span data-url="https://blog.kakaocdn.net/dna/beiG0T/btsJnju0uSc/AAAAAAAAAAAAAAAAAAAAALkyB2Hew35qStDL87gHY023zm_BJSLIuHCMcTL1OP4U/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=ZOSCZiJLXRj2oePMgBlo%2FUehDbI%3D" data-phocus="https://blog.kakaocdn.net/dna/beiG0T/btsJnju0uSc/AAAAAAAAAAAAAAAAAAAAALkyB2Hew35qStDL87gHY023zm_BJSLIuHCMcTL1OP4U/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=ZOSCZiJLXRj2oePMgBlo%2FUehDbI%3D"><img src="https://blog.kakaocdn.net/dna/beiG0T/btsJnju0uSc/AAAAAAAAAAAAAAAAAAAAALkyB2Hew35qStDL87gHY023zm_BJSLIuHCMcTL1OP4U/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=ZOSCZiJLXRj2oePMgBlo%2FUehDbI%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FbeiG0T%2FbtsJnju0uSc%2FAAAAAAAAAAAAAAAAAAAAALkyB2Hew35qStDL87gHY023zm_BJSLIuHCMcTL1OP4U%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DZOSCZiJLXRj2oePMgBlo%252FUehDbI%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="462" height="76" data-origin-width="462" data-origin-height="76" data-phocus-index="2"></span></figure>
+<p></p>
+<p data-ke-size="size18">이런 식이 나온다</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">이 식을 직관적으로 해석해보자면, 딱 맞는 class가 같이 들어가면 노이즈 prediction의 에러가 작아지겠고,</p>
+<p data-ke-size="size18">맞지 않는 class가 들어가면 에러가 커질것이다.</p>
+<p data-ke-size="size18">여기서</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="410" data-origin-height="56" style="margin-left: 50%; transform: translateX(-50%); width: 410px; max-width: 410px;"><span data-url="https://blog.kakaocdn.net/dna/bctSNp/btsJl4sbH4m/AAAAAAAAAAAAAAAAAAAAACmkbVGipxP1_Je7InQ3rTOnASj9nbPBo5V889ALKADv/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=AR5X40lSwpNUM7ZOlOAhw8y6HSg%3D" data-phocus="https://blog.kakaocdn.net/dna/bctSNp/btsJl4sbH4m/AAAAAAAAAAAAAAAAAAAAACmkbVGipxP1_Je7InQ3rTOnASj9nbPBo5V889ALKADv/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=AR5X40lSwpNUM7ZOlOAhw8y6HSg%3D"><img src="https://blog.kakaocdn.net/dna/bctSNp/btsJl4sbH4m/AAAAAAAAAAAAAAAAAAAAACmkbVGipxP1_Je7InQ3rTOnASj9nbPBo5V889ALKADv/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=AR5X40lSwpNUM7ZOlOAhw8y6HSg%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FbctSNp%2FbtsJl4sbH4m%2FAAAAAAAAAAAAAAAAAAAAACmkbVGipxP1_Je7InQ3rTOnASj9nbPBo5V889ALKADv%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DAR5X40lSwpNUM7ZOlOAhw8y6HSg%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="410" height="56" data-origin-width="410" data-origin-height="56" data-phocus-index="3"></span></figure>
+<p></p>
+<p data-ke-size="size18">이부분은 다음과 같은 식으로 계산되어 들어간다</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="420" data-origin-height="90" style="margin-left: 50%; transform: translateX(-50%); width: 420px; max-width: 420px;"><span data-url="https://blog.kakaocdn.net/dna/bhUYYi/btsJl8utq8O/AAAAAAAAAAAAAAAAAAAAAIlRtUIcm5aqSV8wwcM_EJ2I_fiDcJMc1cwEFzY-vbwa/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=EOHlZdGCyf%2F%2Fy4xY%2FUAaaISPw34%3D" data-phocus="https://blog.kakaocdn.net/dna/bhUYYi/btsJl8utq8O/AAAAAAAAAAAAAAAAAAAAAIlRtUIcm5aqSV8wwcM_EJ2I_fiDcJMc1cwEFzY-vbwa/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=EOHlZdGCyf%2F%2Fy4xY%2FUAaaISPw34%3D"><img src="https://blog.kakaocdn.net/dna/bhUYYi/btsJl8utq8O/AAAAAAAAAAAAAAAAAAAAAIlRtUIcm5aqSV8wwcM_EJ2I_fiDcJMc1cwEFzY-vbwa/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=EOHlZdGCyf%2F%2Fy4xY%2FUAaaISPw34%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FbhUYYi%2FbtsJl8utq8O%2FAAAAAAAAAAAAAAAAAAAAAIlRtUIcm5aqSV8wwcM_EJ2I_fiDcJMc1cwEFzY-vbwa%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DEOHlZdGCyf%252F%252Fy4xY%252FUAaaISPw34%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="420" height="90" data-origin-width="420" data-origin-height="90" data-phocus-index="4"></span></figure>
+<p></p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">그러면 바로 method 로 넘어가보자.</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1126" data-origin-height="466" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/bZmOz6/btsJnpBPCJj/AAAAAAAAAAAAAAAAAAAAABBr3QmGL200PcSxZMPwy8llSsrVs-xyMqF-HAE_pS3k/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=LFvDS2r%2B4w6ZJQL9AKC4nlAipPE%3D" data-phocus="https://blog.kakaocdn.net/dna/bZmOz6/btsJnpBPCJj/AAAAAAAAAAAAAAAAAAAAABBr3QmGL200PcSxZMPwy8llSsrVs-xyMqF-HAE_pS3k/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=LFvDS2r%2B4w6ZJQL9AKC4nlAipPE%3D"><img src="https://blog.kakaocdn.net/dna/bZmOz6/btsJnpBPCJj/AAAAAAAAAAAAAAAAAAAAABBr3QmGL200PcSxZMPwy8llSsrVs-xyMqF-HAE_pS3k/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=LFvDS2r%2B4w6ZJQL9AKC4nlAipPE%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FbZmOz6%2FbtsJnpBPCJj%2FAAAAAAAAAAAAAAAAAAAAABBr3QmGL200PcSxZMPwy8llSsrVs-xyMqF-HAE_pS3k%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DLFvDS2r%252B4w6ZJQL9AKC4nlAipPE%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1126" height="466" data-origin-width="1126" data-origin-height="466" data-phocus-index="5"></span></figure>
+<p></p>
+<p data-ke-size="size16">복잡해보이겠지만, 결국 입력이미지에 추가된 노이즈를 가장 잘 예측하는 조건 c를&nbsp; 선택하는 느낌.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">This is 알고리즘</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1076" data-origin-height="722" style="margin-left: 50%; transform: translateX(-50%); width: 1076px; max-width: 1076px;"><span data-url="https://blog.kakaocdn.net/dna/q88zD/btsJmasrGS6/AAAAAAAAAAAAAAAAAAAAANx1YNXC7vl42pK9hGhCH5pM9f5KMzMtixpaCzMqG1Wf/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=OjvcV574TSsqDuaxTxL67UKDt0I%3D" data-phocus="https://blog.kakaocdn.net/dna/q88zD/btsJmasrGS6/AAAAAAAAAAAAAAAAAAAAANx1YNXC7vl42pK9hGhCH5pM9f5KMzMtixpaCzMqG1Wf/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=OjvcV574TSsqDuaxTxL67UKDt0I%3D"><img src="https://blog.kakaocdn.net/dna/q88zD/btsJmasrGS6/AAAAAAAAAAAAAAAAAAAAANx1YNXC7vl42pK9hGhCH5pM9f5KMzMtixpaCzMqG1Wf/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=OjvcV574TSsqDuaxTxL67UKDt0I%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2Fq88zD%2FbtsJmasrGS6%2FAAAAAAAAAAAAAAAAAAAAANx1YNXC7vl42pK9hGhCH5pM9f5KMzMtixpaCzMqG1Wf%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DOjvcV574TSsqDuaxTxL67UKDt0I%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1076" height="722" data-origin-width="1076" data-origin-height="722" data-phocus-index="6"></span></figure>
+<p></p>
+<p data-ke-size="size16">Test 이미지 x랑, 조건&nbsp; <span><span aria-hidden="true"><span><span>{</span><span><span>c</span><span><span><span><span><span><span><span>i</span></span></span></span><span>​</span></span><span><span></span></span></span></span></span><span><span>}, 그리고 시도 횟수 T를 입력으로 어주면</span></span></span></span></span></p>
+<p data-ke-size="size16">T번의 시도를 수행하는데,</p>
+<p data-ke-size="size16">이떄, 1~1000 timestep중에서 t랑, 정규분포에서 e가 샘플링 되어서 xt(노이즈낀이미지)가 계산되고</p>
+<p data-ke-size="size16">조건c에 대해 예측된 노이즈랑 실제 노이즈 e 차이를 계산해서 리스트에 추가된다</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">그리고 평균 오류가 가장 작은 c가 반환된다</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">근데 여기서의 문제점이 이 노이즈를 정확하게 예측하려면 아주아주 많은 sample 이 필요할테고,&nbsp; monte carlo방식으로 하기에도 몇천개의 샘플 그 이상이 필요할텐데,,</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">그래서 여기서 발견했던 아이디어가, 컨디션마다 다 다른 e 를 샘플링하지말고 e는 고정시켜놓자 가 아이디어. 실제로 실험을 했을 떄 밑에 그래프에서도 볼수 있듯이</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="996" data-origin-height="792" style="margin-left: 50%; transform: translateX(-50%); width: 996px; max-width: 996px;"><span data-url="https://blog.kakaocdn.net/dna/E54Nk/btsJnZCKgJI/AAAAAAAAAAAAAAAAAAAAAOnIFtDDlzk-ovV4B5IsPpKMODaIXgeioAFtPgwz25J0/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=X211Ddpkrys%2FGFW52xmYtLB8RXU%3D" data-phocus="https://blog.kakaocdn.net/dna/E54Nk/btsJnZCKgJI/AAAAAAAAAAAAAAAAAAAAAOnIFtDDlzk-ovV4B5IsPpKMODaIXgeioAFtPgwz25J0/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=X211Ddpkrys%2FGFW52xmYtLB8RXU%3D"><img src="https://blog.kakaocdn.net/dna/E54Nk/btsJnZCKgJI/AAAAAAAAAAAAAAAAAAAAAOnIFtDDlzk-ovV4B5IsPpKMODaIXgeioAFtPgwz25J0/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=X211Ddpkrys%2FGFW52xmYtLB8RXU%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FE54Nk%2FbtsJnZCKgJI%2FAAAAAAAAAAAAAAAAAAAAAOnIFtDDlzk-ovV4B5IsPpKMODaIXgeioAFtPgwz25J0%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DX211Ddpkrys%252FGFW52xmYtLB8RXU%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="996" height="792" data-origin-width="996" data-origin-height="792" data-phocus-index="7"></span></figure>
+<p></p>
+<p data-ke-size="size16">e의 값에 따라 예측 오류 자체는 크게 변할 수 있지만, 각 프롬프트 간의 오류차이는 일정하게 유지됨으로, 더 신뢰성있는 비교가 가능함.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">&nbsp;</p>
+    </div>
+    
+    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+        <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    </div>
+</body>
+</html>

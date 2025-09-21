@@ -1,0 +1,261 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unified Multimodal Chain-of-Thought Reward Model through Reinforcement Fine-Tuning — happy8825 - Seohyun Lee Blog</title>
+    <meta name="description" content="
+
+&nbsp;
+
+강화학습은 인간 선호도를 반영하는 데 매우 유용하지만, 단순히 “최종 점수만 주는 보상 모델”은 부정확한 신호를 줄 수 있다. 왜냐하면 추론 과정이&nbsp;얕거나 불투명하기 쉽기 때문이다.
+이 문제를 해결하기 위해, 논문에서는&nbsp;긴 Chain-of-Though">
+    <link rel="stylesheet" href="../../styles.css">
+    <style>
+        body { 
+            background: #0d0f17; 
+            color: #fff; 
+            font-family: 'Inter', sans-serif; 
+            line-height: 1.6; 
+            margin: 0; 
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .post-header {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 2rem;
+            margin-bottom: 2rem;
+        }
+        .post-meta {
+            color: #888;
+            margin-bottom: 1rem;
+        }
+        .post-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .post-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        .post-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 1rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .post-content p {
+            margin-bottom: 1rem;
+        }
+        .post-content h1, .post-content h2, .post-content h3 {
+            color: #667eea;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .post-content blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 1rem;
+            margin: 1.5rem 0;
+            color: #ccc;
+            font-style: italic;
+        }
+        .post-content code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .post-content pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            color: #667eea;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            background: rgba(102, 126, 234, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    
+    <div class="post-header">
+        <div class="post-meta">
+            <span>📅 2025-05-08</span>
+            <span> | 🏷️ Computer Vision Paper Review</span>
+            <span> | 🔗 <a href="https://happy8825.tistory.com/108" target="_blank">Original Post</a></span>
+            <span> | 📊 3 images</span>
+        </div>
+        <h1 class="post-title">Unified Multimodal Chain-of-Thought Reward Model through Reinforcement Fine-Tuning — happy8825</h1>
+        
+    </div>
+    
+    <div class="post-content">
+        
+
+<p data-ke-size="size18">&nbsp;</p>
+<!-- 1. Method --><hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style5">
+<p style=" text-align: start;" data-ke-size="size18"><b>강화학습</b>은 인간 선호도를 반영하는 데 매우 유용하지만, 단순히 “최종 점수만 주는 보상 모델”은 <i>부정확한 신호</i>를 줄 수 있다. 왜냐하면 추론 과정이<span>&nbsp;</span><i>얕거나 불투명</i>하기 쉽기 때문이다.</p>
+<p style="\text-align: start;" data-ke-size="size18">이 문제를 해결하기 위해, 논문에서는<span>&nbsp;</span><b>긴 Chain-of-Thought(CoT) 기반 보상 모델</b>을 제안한다. 주요 가정은 다음과 같다:</p>
+<ol style="list-style-type: decimal;text-align: start;" data-ke-list-type="decimal">
+<li>CoT를 통해 다단계 추론을 하면, 보상 신호의<span>&nbsp;</span><i>정확도</i>와<span>&nbsp;</span><i>신뢰도</i>가 크게 높아진다.</li>
+<li>모델이 충분히 CoT를 학습하면, “암묵적 추론”만으로도 상당한 성능을 낼 수 있다.</li>
+</ol>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style5">
+<p data-ke-size="size18">이 논문에서는&nbsp;<b>멀티모달 Reward Model</b>에 <i>긴 CoT 추론</i>을 더해서, 복잡한 비전 task에서 <b>신뢰도 높은 보상 신호</b>를 제공하도록 만든다. 이를 위해,<b>exploration-driven reinforcement fine-tuning</b>이 제안되었다.</p>
+<p data-ke-size="size18">아래 그림을 보면, 전체 학습 프로세스는 크게 세 단계로 구성된다:</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="870" data-origin-height="631" style="margin-left: 50%; transform: translateX(-50%); width: 870px; max-width: 870px;"><span data-url="https://blog.kakaocdn.net/dna/vnyiw/btsNPbAgq7W/AAAAAAAAAAAAAAAAAAAAAEf1VgKVf8PjXUTdI2tU4YD25QBv0rF0zqvWiHD6QfBI/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=L0xTNtmWrJh01VbCfti%2BeBk1dAc%3D" data-phocus="https://blog.kakaocdn.net/dna/vnyiw/btsNPbAgq7W/AAAAAAAAAAAAAAAAAAAAAEf1VgKVf8PjXUTdI2tU4YD25QBv0rF0zqvWiHD6QfBI/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=L0xTNtmWrJh01VbCfti%2BeBk1dAc%3D"><img src="https://blog.kakaocdn.net/dna/vnyiw/btsNPbAgq7W/AAAAAAAAAAAAAAAAAAAAAEf1VgKVf8PjXUTdI2tU4YD25QBv0rF0zqvWiHD6QfBI/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=L0xTNtmWrJh01VbCfti%2BeBk1dAc%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2Fvnyiw%2FbtsNPbAgq7W%2FAAAAAAAAAAAAAAAAAAAAAEf1VgKVf8PjXUTdI2tU4YD25QBv0rF0zqvWiHD6QfBI%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DL0xTNtmWrJh01VbCfti%252BeBk1dAc%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="870" height="631" data-origin-width="870" data-origin-height="631" data-phocus-index="0"></span></figure>
+<p></p>
+<ol style="list-style-type: decimal;" data-ke-list-type="decimal">
+<li><b>Cold Start</b>: 제한된 양의 “CoT 보상 데이터”로부터 모델이 단계적 추론 포맷을 학습하도록 초기화한다.</li>
+<li><b>Rejection Sampling</b>: 대규모 멀티모달 preference 데이터를 투입하여, 모델이 CoT 추론을 수행하게 하고, 올바른 추론만 선별하여 재학습한다.</li>
+<li><b>Group Relative Policy Optimization </b>: 이전 단계에서 놓친(잘못된) 예측들을 활용해, <i>verifiable reward를</i> 기준으로 강화학습을 진행한다</li>
+</ol>
+<p data-ke-size="size18">이 과정을 통해 모델은 단순히 최종 점수만 맞추는 것이 아니라, 내부적으로 <i>COT를 학습해서 더 정확하게 강화학습</i>을 할수 있다</p>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style5">
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size18"><!-- 1.1 Cold Start --></p>
+<h3 data-ke-size="size23" id="Cold%20Start%3A%20Learning%20CoT%20Reward%20Format%3A-1"><a href="#Cold%20Start%3A%20Learning%20CoT%20Reward%20Format%3A-1">Cold Start: Learning CoT Reward Format:</a></h3>
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li>VLM은 이미 <i>복잡한 추론</i>을 할 잠재력을 갖고 있으나, “보상 모델”로서 훈련된 적이 없어 구체적인 추론 포맷이 잡혀 있지 않다.</li>
+<li>그 결과, 모델이 추론을 시도하더라도 <i>형식이 산만하거나 얕은</i> 내용을 뱉을 수 있다.</li>
+</ul>
+<p data-ke-size="size18">따라서~</p>
+<ol style="list-style-type: decimal;" data-ke-list-type="decimal">
+<li><b>소량의 CoT 데이터 준비</b>:
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li>예: 이미지 생성 선호도 데이터(“이미지A vs. 이미지B, 어느 쪽이 낫나?” 등)를 GPT-4o에 입력하여, <i>긴 CoT 추론 과정</i> 및 <i>최종 답변</i>을 얻는다.</li>
+<li>이 중, 최종 답변이 정확하게 나온 샘플만 <i>distill</i> 하여 (x, y) 형태의 학습 데이터로 사용한다.</li>
+</ul>
+</li>
+<li><b>Objective Function</b>:이 단계에서는 <i>negative log-likelihood loss를</i>&nbsp;사용하여, 모델이 “여러 단계로 이어지는 추론 시퀀스”를 잘 학습하도록 만든다:
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="0" style="font-size: 116%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D447 TEX-I"></mjx-c></mjx-mi></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>T</mi></math></mjx-assistive-mml></mjx-container>: 전체 토큰(단어) 길이</li>
+<li><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="1" style="font-size: 116%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D466 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>y</mi><mi>i</mi></msub></math></mjx-assistive-mml></mjx-container>: 현재 토큰, <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="2" style="font-size: 116%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D466 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-texatom size="s" texclass="ORD"><mjx-mo class="mjx-n"><mjx-c class="mjx-c3C"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi></mjx-texatom></mjx-script></mjx-msub></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>y</mi><mrow data-mjx-texclass="ORD"><mo>&lt;</mo><mi>i</mi></mrow></msub></math></mjx-assistive-mml></mjx-container>: 이전까지의 토큰, <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="3" style="font-size: 116%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>x</mi></math></mjx-assistive-mml></mjx-container>: 입력(이미지·프롬프트 등)</li>
+</ul>
+</li>
+<li style="text-align: center;"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" display="true" tabindex="0" ctxtmenu_counter="4" style="font-size: 116%; position: relative;"><mjx-math display="true" class="MJX-TEX" aria-hidden="true" style="margin-left: 0px; margin-right: 0px;"><mjx-msub><mjx-texatom texclass="ORD"><mjx-mi class="mjx-cal mjx-i"><mjx-c class="mjx-c4C TEX-C"></mjx-c></mjx-mi></mjx-texatom><mjx-script style="vertical-align: -0.15em;"><mjx-texatom size="s" texclass="ORD"><mjx-texatom texclass="ORD"><mjx-mi class="mjx-n"><mjx-c class="mjx-c63"></mjx-c><mjx-c class="mjx-c6F"></mjx-c><mjx-c class="mjx-c6C"></mjx-c><mjx-c class="mjx-c64"></mjx-c></mjx-mi><mjx-mi class="mjx-n"><mjx-c class="mjx-c5F"></mjx-c></mjx-mi><mjx-mi class="mjx-n"><mjx-c class="mjx-c73"></mjx-c><mjx-c class="mjx-c74"></mjx-c><mjx-c class="mjx-c61"></mjx-c><mjx-c class="mjx-c72"></mjx-c><mjx-c class="mjx-c74"></mjx-c></mjx-mi></mjx-texatom></mjx-texatom></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D703 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c2212"></mjx-c></mjx-mo><mjx-munderover space="2"><mjx-over style="padding-bottom: 0.2em; padding-left: 0.473em;"><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D447 TEX-I"></mjx-c></mjx-mi></mjx-texatom></mjx-over><mjx-box><mjx-munder><mjx-row><mjx-base><mjx-mo class="mjx-lop"><mjx-c class="mjx-c2211 TEX-S2"></mjx-c></mjx-mo></mjx-base></mjx-row><mjx-row><mjx-under style="padding-top: 0.167em; padding-left: 0.148em;"><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mn class="mjx-n"><mjx-c class="mjx-c31"></mjx-c></mjx-mn></mjx-texatom></mjx-under></mjx-row></mjx-munder></mjx-box></mjx-munderover><mjx-mi class="mjx-n" space="2"><mjx-c class="mjx-c6C"></mjx-c><mjx-c class="mjx-c6F"></mjx-c><mjx-c class="mjx-c67"></mjx-c></mjx-mi><mjx-mstyle><mjx-mspace style="width: 0.278em;"></mjx-mspace></mjx-mstyle><mjx-mi class="mjx-i" space="2"><mjx-c class="mjx-c1D45D TEX-I"></mjx-c></mjx-mi><mjx-texatom texclass="OPEN"><mjx-mo class="mjx-sop"><mjx-c class="mjx-c28 TEX-S1"></mjx-c></mjx-mo></mjx-texatom><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D466 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c2223"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="4"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-mstyle><mjx-mspace style="width: 0.278em;"></mjx-mspace></mjx-mstyle><mjx-msub space="2"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D466 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-texatom size="s" texclass="ORD"><mjx-mo class="mjx-n"><mjx-c class="mjx-c3C"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi></mjx-texatom></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c3B"></mjx-c></mjx-mo><mjx-mstyle><mjx-mspace style="width: 0.278em;"></mjx-mspace></mjx-mstyle><mjx-mi class="mjx-i" space="2"><mjx-c class="mjx-c1D703 TEX-I"></mjx-c></mjx-mi><mjx-texatom texclass="CLOSE"><mjx-mo class="mjx-sop"><mjx-c class="mjx-c29 TEX-S1"></mjx-c></mjx-mo></mjx-texatom><mjx-mo class="mjx-n"><mjx-c class="mjx-c2E"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="block"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><msub><mrow data-mjx-texclass="ORD"><mi data-mjx-variant="-tex-calligraphic" mathvariant="script">L</mi></mrow><mrow data-mjx-texclass="ORD"><mrow data-mjx-texclass="ORD"><mi data-mjx-auto-op="false">cold</mi><mi mathvariant="normal">_</mi><mi data-mjx-auto-op="false">start</mi></mrow></mrow></msub><mo stretchy="false">(</mo><mi>θ</mi><mo stretchy="false">)</mo><mo>=</mo><mo>−</mo><munderover><mo data-mjx-texclass="OP">∑</mo><mrow data-mjx-texclass="ORD"><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mrow data-mjx-texclass="ORD"><mi>T</mi></mrow></munderover><mi>log</mi><mstyle scriptlevel="0"><mspace width="0.278em"></mspace></mstyle><mi>p</mi><mrow data-mjx-texclass="OPEN"><mo minsize="1.2em" maxsize="1.2em">(</mo></mrow><msub><mi>y</mi><mi>i</mi></msub><mo>∣</mo><mi>x</mi><mo>,</mo><mstyle scriptlevel="0"><mspace width="0.278em"></mspace></mstyle><msub><mi>y</mi><mrow data-mjx-texclass="ORD"><mo>&lt;</mo><mi>i</mi></mrow></msub><mo>;</mo><mstyle scriptlevel="0"><mspace width="0.278em"></mspace></mstyle><mi>θ</mi><mrow data-mjx-texclass="CLOSE"><mo minsize="1.2em" maxsize="1.2em">)</mo></mrow><mo>.</mo></math></mjx-assistive-mml></mjx-container></li>
+</ol>
+<p data-ke-size="size18"><b>결과적으로</b>, Cold Start 단계에서는 모델이 <i>“긴 단계적 추론 포맷을 어떻게 표현해야 하는지”</i>를 배운다. 이렇게 초기화된 모델은 이후에 <b>Rejection Sampling</b>과 <b>GRPO</b>를 거치게된다.</p>
+<hr data-ke-style="style1">
+<h3 data-ke-size="size23" id="-1"><a href="#-1"></a></h3>
+<h3 data-ke-size="size23" id="%C2%A0Rejection%20Sampling%3A%20Unified%20CoT%20Reward%20Generalization%20Fine-Tuning-1"><a href="#%C2%A0Rejection%20Sampling%3A%20Unified%20CoT%20Reward%20Generalization%20Fine-Tuning-1">&nbsp;Rejection Sampling: Unified CoT Reward Generalization Fine-Tuning</a></h3>
+<p data-ke-size="size18">Cold Start를 통해 모델이 CoT 형식을 인지했어도, 아직&nbsp;충분한 일반화 능력을 얻지는 못했을 수 있다. 여기서 <b>Rejection Sampling</b>을 통해, “올바른 추론”만을 남겨 모델 학습을 계속한다.</p>
+<ol style="list-style-type: decimal;" data-ke-list-type="decimal">
+<li><b>대규모 멀티모달 데이터 활용</b>:
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li>생성 task : 텍스트 프롬프트(명령 + 캡션) + 이미지/영상 쌍</li>
+<li>undrestanding task: 텍스트 프롬프트(명령 + 질의) + 이미지/영상</li>
+</ul>
+모델에 이들을 입력해, CoT 기반의 추론과 최종 답변을 생성하게 한다.</li>
+<li><b>올바른 결과만 선별</b>:
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li>정답과 일치하는 최종 답변을 낸 경우만 남기고, 잘못된 응답은 <i>Rejection</i>&nbsp;처리하여 이후 학습에서 제외한다.</li>
+<li>이렇게 걸러진 (x′, y′) 샘플들에 대해, Cold Start 때와 같은 방식으로 모델을 다시 학습한다.</li>
+</ul>
+</li>
+<li><b>효과</b>:
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li>학습 분포가 <i>정확한 추론 패턴</i> 주변으로 집중되며, 모델이 보다 <b>견고한 일반화</b> 능력을 획득한다.</li>
+<li>아직 완벽히 해결되지 않은 <i>복잡한 샘플</i>들은 다음 단계인 <b>GRPO</b>를 통해 처리한다.</li>
+</ul>
+</li>
+</ol>
+<hr data-ke-style="style1">
+<p data-ke-size="size18"><!-- 1.3 GRPO --></p>
+<h3 data-ke-size="size23" id="GRPO%3A%20Unified%20CoT%20Reward%20Reinforcement%20Fine-Tuning-1"><a href="#GRPO%3A%20Unified%20CoT%20Reward%20Reinforcement%20Fine-Tuning-1">GRPO: Unified CoT Reward Reinforcement Fine-Tuning</a></h3>
+<p data-ke-size="size18">Rejection Sampling에서 <i>맞는 답</i>을 한 번 걸러냈더라도, 여전히 <i>복잡한 추론 패턴</i>을 가진 어려운 케이스는 남아 있을 수 있다. 이를 <b>GRPO </b>강화학습으로 마저 해결한다.</p>
+<p data-ke-size="size18"><u><b>&nbsp;Verifiable Reward</b></u></p>
+<p data-ke-size="size18">GRPO를 적용하려면, 모델이 생성한 여러 후보 응답들을 <i>정량적 보상</i>으로 평가할 수 있어야 한다. 여기서는 두 가지 보상 요소를 사용한다:</p>
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li><b>Format Reward (<mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="5" style="font-size: 116%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D45F TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-texatom size="s" texclass="ORD"><mjx-texatom texclass="ORD"><mjx-mi class="mjx-n"><mjx-c class="mjx-c66"></mjx-c><mjx-c class="mjx-c6D"></mjx-c><mjx-c class="mjx-c74"></mjx-c></mjx-mi></mjx-texatom></mjx-texatom></mjx-script></mjx-msub></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>r</mi><mrow data-mjx-texclass="ORD"><mrow data-mjx-texclass="ORD"><mi data-mjx-auto-op="false">fmt</mi></mrow></mrow></msub></math></mjx-assistive-mml></mjx-container>)</b>:
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li><code>&lt;think&gt;</code>, <code>&lt;answer&gt;</code> 태그가 올바른 구조로 포함되어야만 1점을 준다.</li>
+<li>이를 통해 모델이 체계적인 CoT 추론과 명확한 최종 답변을 구분하도록 유도한다.</li>
+</ul>
+</li>
+<li><b>Accuracy Reward (<mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="6" style="font-size: 116%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D45F TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-texatom size="s" texclass="ORD"><mjx-texatom texclass="ORD"><mjx-mi class="mjx-n"><mjx-c class="mjx-c61"></mjx-c><mjx-c class="mjx-c63"></mjx-c><mjx-c class="mjx-c63"></mjx-c></mjx-mi></mjx-texatom></mjx-texatom></mjx-script></mjx-msub></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>r</mi><mrow data-mjx-texclass="ORD"><mrow data-mjx-texclass="ORD"><mi data-mjx-auto-op="false">acc</mi></mrow></mrow></msub></math></mjx-assistive-mml></mjx-container>)</b>:
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li>최종 답변(즉, <code>&lt;answer&gt;</code> 태그 안의 내용)이 정답과 일치하면 1점, 아니면 0점으로 준다.</li>
+<li>모델이 실제로 “정확한” 결론에 도달하도록 장려한다.</li>
+</ul>
+</li>
+</ul>
+<p data-ke-size="size18">최종 보상 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="7" style="font-size: 115.9%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D45F TEX-I"></mjx-c></mjx-mi></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>r</mi></math></mjx-assistive-mml></mjx-container>는 다음과 같이 합산 형태로 정의한다:</p>
+<p style="text-align: center;" data-ke-size="size18"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" display="true" tabindex="0" ctxtmenu_counter="8" style="font-size: 115.9%; position: relative;"><mjx-math display="true" class="MJX-TEX" aria-hidden="true" style="margin-left: 0px; margin-right: 0px;"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D45F TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-msub space="4"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D45F TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-texatom size="s" texclass="ORD"><mjx-texatom texclass="ORD"><mjx-mi class="mjx-n"><mjx-c class="mjx-c66"></mjx-c><mjx-c class="mjx-c6D"></mjx-c><mjx-c class="mjx-c74"></mjx-c></mjx-mi></mjx-texatom></mjx-texatom></mjx-script></mjx-msub><mjx-mo class="mjx-n" space="3"><mjx-c class="mjx-c2B"></mjx-c></mjx-mo><mjx-msub space="3"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D45F TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-texatom size="s" texclass="ORD"><mjx-texatom texclass="ORD"><mjx-mi class="mjx-n"><mjx-c class="mjx-c61"></mjx-c><mjx-c class="mjx-c63"></mjx-c><mjx-c class="mjx-c63"></mjx-c></mjx-mi></mjx-texatom></mjx-texatom></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c2E"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="block"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mi>r</mi><mo>=</mo><msub><mi>r</mi><mrow data-mjx-texclass="ORD"><mrow data-mjx-texclass="ORD"><mi data-mjx-auto-op="false">fmt</mi></mrow></mrow></msub><mo>+</mo><msub><mi>r</mi><mrow data-mjx-texclass="ORD"><mrow data-mjx-texclass="ORD"><mi data-mjx-auto-op="false">acc</mi></mrow></mrow></msub><mo>.</mo></math></mjx-assistive-mml></mjx-container></p>
+<p data-ke-size="size18">즉, 모델은 <i>올바른 형식</i>과 <i>정답 일치</i> 두 가지를 모두 만족해야만 높은 보상을 얻을 수 있다.</p>
+<p data-ke-size="size18"><u><b>Reinforcement Fine-Tuning</b></u></p>
+<p data-ke-size="size18">이제 GRPO의 policy 업데이트 과정을 간략히 살펴보자.</p>
+<ol style="list-style-type: decimal;" data-ke-list-type="decimal">
+<li><b>후보 응답 샘플링</b>:
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li>이전 정책 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="9" style="font-size: 116%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D70B TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-texatom size="s" texclass="ORD"><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D703 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-texatom size="s" texclass="ORD"><mjx-mtext class="mjx-n"><mjx-c class="mjx-c6F"></mjx-c><mjx-c class="mjx-c6C"></mjx-c><mjx-c class="mjx-c64"></mjx-c></mjx-mtext></mjx-texatom></mjx-script></mjx-msub></mjx-texatom></mjx-script></mjx-msub></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>π</mi><mrow data-mjx-texclass="ORD"><msub><mi>θ</mi><mrow data-mjx-texclass="ORD"><mtext>old</mtext></mrow></msub></mrow></msub></math></mjx-assistive-mml></mjx-container>로부터 입력 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="10" style="font-size: 116%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>x</mi></math></mjx-assistive-mml></mjx-container>에 대해 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="11" style="font-size: 116%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D441 TEX-I"></mjx-c></mjx-mi></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>N</mi></math></mjx-assistive-mml></mjx-container>개의 후보 응답 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="12" style="font-size: 116%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mo class="mjx-n"><mjx-c class="mjx-c7B"></mjx-c></mjx-mo><mjx-msup><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D45C TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: 0.363em;"><mjx-texatom size="s" texclass="ORD"><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mn class="mjx-n"><mjx-c class="mjx-c31"></mjx-c></mjx-mn><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-texatom></mjx-script></mjx-msup><mjx-mo class="mjx-n"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="2"><mjx-c class="mjx-c2026"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="2"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-msup space="2"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D45C TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: 0.363em;"><mjx-texatom size="s" texclass="ORD"><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D441 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-texatom></mjx-script></mjx-msup><mjx-mo class="mjx-n"><mjx-c class="mjx-c7D"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mo fence="false" stretchy="false">{</mo><msup><mi>o</mi><mrow data-mjx-texclass="ORD"><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></msup><mo>,</mo><mo>…</mo><mo>,</mo><msup><mi>o</mi><mrow data-mjx-texclass="ORD"><mo stretchy="false">(</mo><mi>N</mi><mo stretchy="false">)</mo></mrow></msup><mo fence="false" stretchy="false">}</mo></math></mjx-assistive-mml></mjx-container>을 생성한다.</li>
+</ul>
+</li>
+<li><b>보상 평가</b>:
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li>각 응답에 대해 Format Reward, Accuracy Reward를 계산해, <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="13" style="font-size: 116%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-msup><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D45F TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: 0.363em;"><mjx-texatom size="s" texclass="ORD"><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-texatom></mjx-script></mjx-msup></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><msup><mi>r</mi><mrow data-mjx-texclass="ORD"><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup></math></mjx-assistive-mml></mjx-container>들을 얻는다.</li>
+<li>동일 그룹 내 보상의 평균, 표준편차를 이용해 Advantage <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="14" style="font-size: 116%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-msup><mjx-texatom texclass="ORD"><mjx-mover><mjx-over style="padding-bottom: 0.105em; padding-left: 0.514em; margin-bottom: -0.531em;"><mjx-mo class="mjx-n" style="width: 0px; margin-left: -0.25em;"><mjx-c class="mjx-c5E"></mjx-c></mjx-mo></mjx-over><mjx-base><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D434 TEX-I"></mjx-c></mjx-mi></mjx-base></mjx-mover></mjx-texatom><mjx-script style="vertical-align: 0.363em;"><mjx-texatom size="s" texclass="ORD"><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-texatom></mjx-script></mjx-msup></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><msup><mrow data-mjx-texclass="ORD"><mover><mi>A</mi><mo stretchy="false">^</mo></mover></mrow><mrow data-mjx-texclass="ORD"><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup></math></mjx-assistive-mml></mjx-container>를 정규화한다.</li>
+</ul>
+</li>
+<li><b>polciy update</b>:
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li>새 policy <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="15" style="font-size: 116%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D70B TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-texatom size="s" texclass="ORD"><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D703 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-texatom size="s" texclass="ORD"><mjx-mtext class="mjx-n"><mjx-c class="mjx-c6E"></mjx-c><mjx-c class="mjx-c65"></mjx-c><mjx-c class="mjx-c77"></mjx-c></mjx-mtext></mjx-texatom></mjx-script></mjx-msub></mjx-texatom></mjx-script></mjx-msub></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>π</mi><mrow data-mjx-texclass="ORD"><msub><mi>θ</mi><mrow data-mjx-texclass="ORD"><mtext>new</mtext></mrow></msub></mrow></msub></math></mjx-assistive-mml></mjx-container>와 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="16" style="font-size: 116%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D70B TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-texatom size="s" texclass="ORD"><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D703 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-texatom size="s" texclass="ORD"><mjx-mtext class="mjx-n"><mjx-c class="mjx-c6F"></mjx-c><mjx-c class="mjx-c6C"></mjx-c><mjx-c class="mjx-c64"></mjx-c></mjx-mtext></mjx-texatom></mjx-script></mjx-msub></mjx-texatom></mjx-script></mjx-msub></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>π</mi><mrow data-mjx-texclass="ORD"><msub><mi>θ</mi><mrow data-mjx-texclass="ORD"><mtext>old</mtext></mrow></msub></mrow></msub></math></mjx-assistive-mml></mjx-container>의 확률 비 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="17" style="font-size: 116%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-msup><mjx-mtext class="mjx-n"><mjx-c class="mjx-c72"></mjx-c><mjx-c class="mjx-c61"></mjx-c><mjx-c class="mjx-c74"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c6F"></mjx-c></mjx-mtext><mjx-script style="vertical-align: 0.396em;"><mjx-texatom size="s" texclass="ORD"><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-texatom></mjx-script></mjx-msup></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><msup><mtext>ratio</mtext><mrow data-mjx-texclass="ORD"><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup></math></mjx-assistive-mml></mjx-container>를 계산한다: <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" display="true" tabindex="0" ctxtmenu_counter="18" style="font-size: 116%; position: relative;"><mjx-math display="true" class="MJX-TEX" aria-hidden="true" style="margin-left: 0px; margin-right: 0px;"><mjx-msup><mjx-mtext class="mjx-n"><mjx-c class="mjx-c72"></mjx-c><mjx-c class="mjx-c61"></mjx-c><mjx-c class="mjx-c74"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c6F"></mjx-c></mjx-mtext><mjx-script style="vertical-align: 0.413em;"><mjx-texatom size="s" texclass="ORD"><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-texatom></mjx-script></mjx-msup><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mfrac space="4"><mjx-frac type="d"><mjx-num><mjx-nstrut type="d"></mjx-nstrut><mjx-mrow><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D70B TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-texatom size="s" texclass="ORD"><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D703 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-texatom size="s" texclass="ORD"><mjx-mtext class="mjx-n"><mjx-c class="mjx-c6E"></mjx-c><mjx-c class="mjx-c65"></mjx-c><mjx-c class="mjx-c77"></mjx-c></mjx-mtext></mjx-texatom></mjx-script></mjx-msub></mjx-texatom></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-msup><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D45C TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: 0.363em;"><mjx-texatom size="s" texclass="ORD"><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-texatom></mjx-script></mjx-msup><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c2223"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="4"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-mrow></mjx-num><mjx-dbox><mjx-dtable><mjx-line type="d"></mjx-line><mjx-row><mjx-den><mjx-dstrut type="d"></mjx-dstrut><mjx-mrow><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D70B TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-texatom size="s" texclass="ORD"><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D703 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-texatom size="s" texclass="ORD"><mjx-mtext class="mjx-n"><mjx-c class="mjx-c6F"></mjx-c><mjx-c class="mjx-c6C"></mjx-c><mjx-c class="mjx-c64"></mjx-c></mjx-mtext></mjx-texatom></mjx-script></mjx-msub></mjx-texatom></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-msup><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D45C TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: 0.289em;"><mjx-texatom size="s" texclass="ORD"><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-texatom></mjx-script></mjx-msup><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c2223"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="4"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-mrow></mjx-den></mjx-row></mjx-dtable></mjx-dbox></mjx-frac></mjx-mfrac><mjx-mo class="mjx-n"><mjx-c class="mjx-c2E"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="block"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><msup><mtext>ratio</mtext><mrow data-mjx-texclass="ORD"><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo>=</mo><mfrac><mrow><msub><mi>π</mi><mrow data-mjx-texclass="ORD"><msub><mi>θ</mi><mrow data-mjx-texclass="ORD"><mtext>new</mtext></mrow></msub></mrow></msub><mo stretchy="false">(</mo><msup><mi>o</mi><mrow data-mjx-texclass="ORD"><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo>∣</mo><mi>x</mi><mo stretchy="false">)</mo></mrow><mrow><msub><mi>π</mi><mrow data-mjx-texclass="ORD"><msub><mi>θ</mi><mrow data-mjx-texclass="ORD"><mtext>old</mtext></mrow></msub></mrow></msub><mo stretchy="false">(</mo><msup><mi>o</mi><mrow data-mjx-texclass="ORD"><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo>∣</mo><mi>x</mi><mo stretchy="false">)</mo></mrow></mfrac><mo>.</mo></math></mjx-assistive-mml></mjx-container></li>
+<li>이 값을 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="19" style="font-size: 116%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mo class="mjx-n"><mjx-c class="mjx-c5B"></mjx-c></mjx-mo><mjx-mn class="mjx-n"><mjx-c class="mjx-c31"></mjx-c></mjx-mn><mjx-mo class="mjx-n" space="3"><mjx-c class="mjx-c2212"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="3"><mjx-c class="mjx-c1D6FF TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-mstyle><mjx-mspace style="width: 0.167em;"></mjx-mspace></mjx-mstyle><mjx-mn class="mjx-n" space="2"><mjx-c class="mjx-c31"></mjx-c></mjx-mn><mjx-mo class="mjx-n" space="3"><mjx-c class="mjx-c2B"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="3"><mjx-c class="mjx-c1D6FF TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c5D"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mo stretchy="false">[</mo><mn>1</mn><mo>−</mo><mi>δ</mi><mo>,</mo><mstyle scriptlevel="0"><mspace width="0.167em"></mspace></mstyle><mn>1</mn><mo>+</mo><mi>δ</mi><mo stretchy="false">]</mo></math></mjx-assistive-mml></mjx-container> 구간으로 클리핑하여 학습 폭주를 방지하고, 참조 모델 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="20" style="font-size: 116%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D70B TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-texatom size="s" texclass="ORD"><mjx-mtext class="mjx-n"><mjx-c class="mjx-c72"></mjx-c><mjx-c class="mjx-c65"></mjx-c><mjx-c class="mjx-c66"></mjx-c></mjx-mtext></mjx-texatom></mjx-script></mjx-msub></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>π</mi><mrow data-mjx-texclass="ORD"><mtext>ref</mtext></mrow></msub></math></mjx-assistive-mml></mjx-container>와의 KL 발산을 추가 페널티로 주어 과도한 편차를 억제한다.</li>
+<li>최종 손실함수는 다음과 같이 쓸 수 있다:<mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" display="true" tabindex="0" ctxtmenu_counter="21" style="font-size: 116%; position: relative;"><mjx-math display="true" class="MJX-TEX" aria-hidden="true" style="margin-left: 0px; margin-right: 0px;"><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D43F TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-texatom size="s" texclass="ORD"><mjx-texatom texclass="ORD"><mjx-mi class="mjx-n"><mjx-c class="mjx-c67"></mjx-c><mjx-c class="mjx-c72"></mjx-c><mjx-c class="mjx-c70"></mjx-c><mjx-c class="mjx-c6F"></mjx-c></mjx-mi></mjx-texatom></mjx-texatom></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D703 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-texatom space="4" texclass="ORD"><mjx-mi class="mjx-ds mjx-b"><mjx-c class="mjx-c1D53C TEX-A"></mjx-c></mjx-mi></mjx-texatom><mjx-texatom texclass="OPEN"><mjx-mo class="mjx-lop"><mjx-c class="mjx-c5B TEX-S2"></mjx-c></mjx-mo></mjx-texatom><mjx-mo class="mjx-n"><mjx-c class="mjx-c6D"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c6E"></mjx-c></mjx-mo><mjx-texatom texclass="OPEN"><mjx-mo class="mjx-sop"><mjx-c class="mjx-c28 TEX-S1"></mjx-c></mjx-mo></mjx-texatom><mjx-msup><mjx-mtext class="mjx-n"><mjx-c class="mjx-c72"></mjx-c><mjx-c class="mjx-c61"></mjx-c><mjx-c class="mjx-c74"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c6F"></mjx-c></mjx-mtext><mjx-script style="vertical-align: 0.413em;"><mjx-texatom size="s" texclass="ORD"><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-texatom></mjx-script></mjx-msup><mjx-mo class="mjx-n"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-mtext class="mjx-n" space="2"><mjx-c class="mjx-c63"></mjx-c><mjx-c class="mjx-c6C"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c70"></mjx-c></mjx-mtext><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-msup><mjx-mtext class="mjx-n"><mjx-c class="mjx-c72"></mjx-c><mjx-c class="mjx-c61"></mjx-c><mjx-c class="mjx-c74"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c6F"></mjx-c></mjx-mtext><mjx-script style="vertical-align: 0.413em;"><mjx-texatom size="s" texclass="ORD"><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-texatom></mjx-script></mjx-msup><mjx-mo class="mjx-n"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-mn class="mjx-n" space="2"><mjx-c class="mjx-c31"></mjx-c></mjx-mn><mjx-mo class="mjx-n" space="3"><mjx-c class="mjx-c2212"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="3"><mjx-c class="mjx-c1D6FF TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-mn class="mjx-n" space="2"><mjx-c class="mjx-c31"></mjx-c></mjx-mn><mjx-mo class="mjx-n" space="3"><mjx-c class="mjx-c2B"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="3"><mjx-c class="mjx-c1D6FF TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-texatom texclass="CLOSE"><mjx-mo class="mjx-sop"><mjx-c class="mjx-c29 TEX-S1"></mjx-c></mjx-mo></mjx-texatom><mjx-mo class="mjx-n" space="3"><mjx-c class="mjx-c22C5"></mjx-c></mjx-mo><mjx-msup space="3"><mjx-texatom texclass="ORD"><mjx-mover><mjx-over style="padding-bottom: 0.105em; padding-left: 0.514em; margin-bottom: -0.531em;"><mjx-mo class="mjx-n" style="width: 0px; margin-left: -0.25em;"><mjx-c class="mjx-c5E"></mjx-c></mjx-mo></mjx-over><mjx-base><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D434 TEX-I"></mjx-c></mjx-mi></mjx-base></mjx-mover></mjx-texatom><mjx-script style="vertical-align: 0.413em;"><mjx-texatom size="s" texclass="ORD"><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-texatom></mjx-script></mjx-msup><mjx-mstyle><mjx-mspace style="width: 0.278em;"></mjx-mspace></mjx-mstyle><mjx-mo class="mjx-n" space="3"><mjx-c class="mjx-c2212"></mjx-c></mjx-mo><mjx-mstyle><mjx-mspace style="width: 0.278em;"></mjx-mspace></mjx-mstyle><mjx-mi class="mjx-i" space="3"><mjx-c class="mjx-c1D6FD TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n" space="3"><mjx-c class="mjx-c22C5"></mjx-c></mjx-mo><mjx-msub space="3"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D437 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-texatom size="s" texclass="ORD"><mjx-texatom texclass="ORD"><mjx-mi class="mjx-n"><mjx-c class="mjx-c4B"></mjx-c><mjx-c class="mjx-c4C"></mjx-c></mjx-mi></mjx-texatom></mjx-texatom></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D70B TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-texatom size="s" texclass="ORD"><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D703 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-texatom size="s" texclass="ORD"><mjx-mtext class="mjx-n"><mjx-c class="mjx-c6E"></mjx-c><mjx-c class="mjx-c65"></mjx-c><mjx-c class="mjx-c77"></mjx-c></mjx-mtext></mjx-texatom></mjx-script></mjx-msub></mjx-texatom></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c2016"></mjx-c></mjx-mo><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D70B TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-texatom size="s" texclass="ORD"><mjx-mtext class="mjx-n"><mjx-c class="mjx-c72"></mjx-c><mjx-c class="mjx-c65"></mjx-c><mjx-c class="mjx-c66"></mjx-c></mjx-mtext></mjx-texatom></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-texatom texclass="CLOSE"><mjx-mo class="mjx-lop"><mjx-c class="mjx-c5D TEX-S2"></mjx-c></mjx-mo></mjx-texatom><mjx-mo class="mjx-n"><mjx-c class="mjx-c2E"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="block"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><msub><mi>L</mi><mrow data-mjx-texclass="ORD"><mrow data-mjx-texclass="ORD"><mi data-mjx-auto-op="false">grpo</mi></mrow></mrow></msub><mo stretchy="false">(</mo><mi>θ</mi><mo stretchy="false">)</mo><mo>=</mo><mrow data-mjx-texclass="ORD"><mi mathvariant="double-struck">E</mi></mrow><mrow data-mjx-texclass="OPEN"><mo minsize="1.623em" maxsize="1.623em">[</mo></mrow><mo data-mjx-texclass="OP" movablelimits="true">min</mo><mrow data-mjx-texclass="OPEN"><mo minsize="1.2em" maxsize="1.2em">(</mo></mrow><msup><mtext>ratio</mtext><mrow data-mjx-texclass="ORD"><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo>,</mo><mtext>clip</mtext><mo stretchy="false">(</mo><msup><mtext>ratio</mtext><mrow data-mjx-texclass="ORD"><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo>,</mo><mn>1</mn><mo>−</mo><mi>δ</mi><mo>,</mo><mn>1</mn><mo>+</mo><mi>δ</mi><mo stretchy="false">)</mo><mrow data-mjx-texclass="CLOSE"><mo minsize="1.2em" maxsize="1.2em">)</mo></mrow><mo>⋅</mo><msup><mrow data-mjx-texclass="ORD"><mover><mi>A</mi><mo stretchy="false">^</mo></mover></mrow><mrow data-mjx-texclass="ORD"><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mstyle scriptlevel="0"><mspace width="0.278em"></mspace></mstyle><mo>−</mo><mstyle scriptlevel="0"><mspace width="0.278em"></mspace></mstyle><mi>β</mi><mo>⋅</mo><msub><mi>D</mi><mrow data-mjx-texclass="ORD"><mrow data-mjx-texclass="ORD"><mi data-mjx-auto-op="false">KL</mi></mrow></mrow></msub><mo stretchy="false">(</mo><msub><mi>π</mi><mrow data-mjx-texclass="ORD"><msub><mi>θ</mi><mrow data-mjx-texclass="ORD"><mtext>new</mtext></mrow></msub></mrow></msub><mo data-mjx-texclass="ORD" fence="false" stretchy="false">‖</mo><msub><mi>π</mi><mrow data-mjx-texclass="ORD"><mtext>ref</mtext></mrow></msub><mo stretchy="false">)</mo><mrow data-mjx-texclass="CLOSE"><mo minsize="1.623em" maxsize="1.623em">]</mo></mrow><mo>.</mo></math></mjx-assistive-mml></mjx-container></li>
+</ul>
+</li>
+</ol>
+<p data-ke-size="size18">이를 통해 모델은 다양한 추론 경로를 탐색하며, <i>높은 보상</i>(즉, 정확하고 체계적인 CoT 추론)에 해당하는 응답을 선호하도록 학습된다.</p>
+<hr data-ke-style="style1">
+<p data-ke-size="size18"><!-- 3. Experiments --></p>
+<h3 data-ke-size="size23" id="Experiments-1"><a href="#Experiments-1">Experiments</a></h3>
+<p data-ke-size="size18"><b>이미지 생성</b>, <b>비디오 생성</b>, <b>이미지 이해</b>, <b>비디오 이해</b> 네 가지 영역에 대한 실험 결과이다</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="875" data-origin-height="587" style="margin-left: 50%; transform: translateX(-50%); width: 875px; max-width: 875px;"><span data-url="https://blog.kakaocdn.net/dna/KpdDG/btsNQbsIoVq/AAAAAAAAAAAAAAAAAAAAAPo0FjhDg1fnGv96r8yR3rlO4sfChVM5YuxHXQZXJ0v5/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=7a9dEPIAftq0bQL8vORZRuprGUg%3D" data-phocus="https://blog.kakaocdn.net/dna/KpdDG/btsNQbsIoVq/AAAAAAAAAAAAAAAAAAAAAPo0FjhDg1fnGv96r8yR3rlO4sfChVM5YuxHXQZXJ0v5/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=7a9dEPIAftq0bQL8vORZRuprGUg%3D"><img src="https://blog.kakaocdn.net/dna/KpdDG/btsNQbsIoVq/AAAAAAAAAAAAAAAAAAAAAPo0FjhDg1fnGv96r8yR3rlO4sfChVM5YuxHXQZXJ0v5/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=7a9dEPIAftq0bQL8vORZRuprGUg%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FKpdDG%2FbtsNQbsIoVq%2FAAAAAAAAAAAAAAAAAAAAAPo0FjhDg1fnGv96r8yR3rlO4sfChVM5YuxHXQZXJ0v5%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3D7a9dEPIAftq0bQL8vORZRuprGUg%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="875" height="587" data-origin-width="875" data-origin-height="587" data-phocus-index="1"></span></figure>
+<p></p>
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li>이미지·비디오 생성에선 모든 지표에서 <i>안정적인 우위</i>를 보였다.</li>
+<li>이미지 이해 과제에서 특히 개선 폭이 컸는데, 이는 CoT 추론이 <i>깊은 시각적 이해</i>를 가능하게 했기 때문으로 보인다.</li>
+<li>명시적으로 CoT를 출력하지 않고 “암묵적 추론”만 사용해도, 여전히 기존 모델보다 높은 성능을 보였다 (다소의 성능 하락은 존재).</li>
+</ul>
+<p data-ke-size="size18"><u><b>Ablation Studies</b></u></p>
+<p data-ke-size="size18">두가지에 대한 ablation 결과가있었다</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="875" data-origin-height="612" style="margin-left: 50%; transform: translateX(-50%); width: 875px; max-width: 875px;"><span data-url="https://blog.kakaocdn.net/dna/3e0aY/btsNQpqAF2y/AAAAAAAAAAAAAAAAAAAAAGSZGMU6cFCGqT-XS97oeiJ8zGsjets80n02CWKa_nkQ/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=b%2FSuTexbj%2FbRl3DTD5mnQf8zn9I%3D" data-phocus="https://blog.kakaocdn.net/dna/3e0aY/btsNQpqAF2y/AAAAAAAAAAAAAAAAAAAAAGSZGMU6cFCGqT-XS97oeiJ8zGsjets80n02CWKa_nkQ/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=b%2FSuTexbj%2FbRl3DTD5mnQf8zn9I%3D"><img src="https://blog.kakaocdn.net/dna/3e0aY/btsNQpqAF2y/AAAAAAAAAAAAAAAAAAAAAGSZGMU6cFCGqT-XS97oeiJ8zGsjets80n02CWKa_nkQ/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=b%2FSuTexbj%2FbRl3DTD5mnQf8zn9I%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2F3e0aY%2FbtsNQpqAF2y%2FAAAAAAAAAAAAAAAAAAAAAGSZGMU6cFCGqT-XS97oeiJ8zGsjets80n02CWKa_nkQ%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3Db%252FSuTexbj%252FbRl3DTD5mnQf8zn9I%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="875" height="612" data-origin-width="875" data-origin-height="612" data-phocus-index="2"></span></figure>
+<p></p>
+<p data-ke-size="size16"><b>각 학습 단계의 효과</b>:</p>
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li>Cold Start: CoT 포맷을 학습하나, 정확도 자체는 아직 낮음.</li>
+<li>Rejection Sampling: 올바른 샘플만 남겨 <i>지도 학습</i>하므로 성능이 뚜렷이 향상됨.</li>
+<li>GRPO: 이전에 틀렸던 사례를 집중적으로 탐색·학습해 <i>최대 성능 개선</i>을 달성</li>
+</ul>
+<p data-ke-size="size16"><b>CoT 없는 GRPO</b>:</p>
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li>최종 답만으로 강화학습하면 약간 향상은 있으나, CoT를 명시적으로 학습했을 때만큼은 아니다.</li>
+</ul>
+<hr data-ke-style="style1">
+<p data-ke-size="size18"><!-- 4. Conclusion --></p>
+<p data-ke-size="size18">&nbsp;</p>
+    </div>
+    
+    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+        <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    </div>
+</body>
+</html>

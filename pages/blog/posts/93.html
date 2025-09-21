@@ -1,0 +1,180 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MintNet+codeReview : Building Invertible Neural Networks with Masked Convolution — happy8825 - Seohyun Lee Blog</title>
+    <meta name="description" content="Intro
+Machine learning 에서 invertible neural network는 굉장히 유용하게 쓰임. Invertible neural network를 만들기 위해서는, inverting network랑 computing Jacobian이 효율적이어야함. 그렇지만 전형적인">
+    <link rel="stylesheet" href="../../styles.css">
+    <style>
+        body { 
+            background: #0d0f17; 
+            color: #fff; 
+            font-family: 'Inter', sans-serif; 
+            line-height: 1.6; 
+            margin: 0; 
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .post-header {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 2rem;
+            margin-bottom: 2rem;
+        }
+        .post-meta {
+            color: #888;
+            margin-bottom: 1rem;
+        }
+        .post-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .post-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        .post-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 1rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .post-content p {
+            margin-bottom: 1rem;
+        }
+        .post-content h1, .post-content h2, .post-content h3 {
+            color: #667eea;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .post-content blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 1rem;
+            margin: 1.5rem 0;
+            color: #ccc;
+            font-style: italic;
+        }
+        .post-content code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .post-content pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            color: #667eea;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            background: rgba(102, 126, 234, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    
+    <div class="post-header">
+        <div class="post-meta">
+            <span>📅 2024-06-29</span>
+            <span> | 🏷️ Computer Vision Paper Review</span>
+            <span> | 🔗 <a href="https://happy8825.tistory.com/4" target="_blank">Original Post</a></span>
+            <span> | 📊 4 images</span>
+        </div>
+        <h1 class="post-title">MintNet+codeReview : Building Invertible Neural Networks with Masked Convolution — happy8825</h1>
+        
+    </div>
+    
+    <div class="post-content">
+        <h2 data-ke-size="size26" id="Intro-1"><a href="#Intro-1">Intro</a></h2>
+<p data-ke-size="size16">Machine learning 에서 invertible neural network는 굉장히 유용하게 쓰임. Invertible neural network를 만들기 위해서는, inverting network랑 computing Jacobian이 효율적이어야함. 그렇지만 전형적인 뉴럴 네트워크를 봤을때는 invertible함을 achieve 하기가 어려운게, invertible property는 architecture에 구조적으로 restrictive constraint를 생기게 할 수 있음.</p>
+<p data-ke-size="size16">예룰들어 NICE나 REAL NVP의 경우 coupling layer이라는 특정 구조에 의존한다던지, FFJORD이나 iResNet같은 경우는 constraint는 비교적 적지만, 자코비안 determinent를 정확하게 구한다기 보다는 approximate하는 방식을 사용해서, 반복적으로 training할수록 이 오류가 점점 커질 수 있음.</p>
+<p data-ke-size="size16">그래서, 이 논문에서 제안한거는 flexible한 invertible neural network인데, invert가 쉽고, 자코비안도 정확하고 효율적으로 구할 수 있음.</p>
+<p data-ke-size="size16">어떤 방식으로? : triangular matrix를 기본 모듈로 만들었음(mask convolution을 통해), 그리고 set of composition rule을 적용해서 non linearity를 주고, 자코비안이 non singular이면 invertible 함</p>
+<h2 data-ke-size="size26" id="Background-1"><a href="#Background-1">Background</a></h2>
+<p data-ke-size="size16">D차원에서 L차원으로 데이터를 매핑하는 뉴럴 네트워크를 생각했을때, 모든 L차원의 점에 대해 unique 한 D차원의 점이 있으면 invertible하다고 볼 수 있음.</p>
+<p data-ke-size="size16">즉 Invertible Network를 위해서라면 두가지 성질이 있는데</p>
+<ol style="list-style-type: decimal;" data-ke-list-type="decimal">
+<li>f함수가 연속함수면, L이 D차원이랑 같으면 됨, 이렇게 하면 L점에 D 점이 하나씩 무조건 대응되게 되니까 invert가 가능해짐.</li>
+<li>f1 : d차원 → d차원, 이고 f2 : d차원 → d 차원일경우 f2 o f1 함수도 invertible할것임</li>
+</ol>
+<h3 data-ke-size="size23" id="2.1%20Classification%20with%20invertible%20neural%20networks-1"><a href="#2.1%20Classification%20with%20invertible%20neural%20networks-1">2.1 Classification with invertible neural networks</a></h3>
+<p data-ke-size="size16">L이랑 D랑 같으면 invertible할텐데, 문제는 classification과 같은 경우에는 class의 number L이랑 input 차원 D는 보통 다를거임. 그래서 background 의 두번째 성질을 통해, classifier 함수를 두 부분으로 나눴음. Feature extraction (z = f1(x), classification y=f2(z), 이렇게 두개로 나눴음</p>
+<p data-ke-size="size16">f1을 invertible 하게 만들고, 논문에서는 f2는 invertible 할 필요가 없다고 하는데,,,(여기가 잘 이해가 안되지만 대충 이해해보려고 해보면)</p>
+<p data-ke-size="size16">우리가 중요하게 봐야하는거는 x에서 y를 얻어내는거지, z를 얻는 과정은 별로 안 궁금해. f2의 역할은 단순 클래스를 예측하는거니까, 이부분이 굳이 invertible 할 필요는 없는거지. 즉, y에서 z를 얻었으면 그걸 invert해서 x를 얻는,, x랑 z의 관계 (f1)함수가 궁금한거지</p>
+<h3 data-ke-size="size23" id="2.2%20Generative%20modeling%20with%20invertible%20neural%20networks-1"><a href="#2.2%20Generative%20modeling%20with%20invertible%20neural%20networks-1">2.2 Generative modeling with invertible neural networks</a></h3>
+<p data-ke-size="size16">f : d차원의 x를 입력으로 받아서 latent space의 D차원 z를 뱉는 함수임</p>
+<p data-ke-size="size16">이떄 f는 invertible 해야함.</p>
+<p data-ke-size="size16">다음과 같은 과정을 거치는데</p>
+<ol style="list-style-type: decimal;" data-ke-list-type="decimal">
+<li>f는 입력 데이터 x를 z로 매핑함. 이 과정은 invertible하고, 이 과정에서 x의 분포 p(x)를 간단한 표준 정규분포와 같이 샘플링 하기 쉬운 π(z) 로 매핑</li>
+<li>이 변환은 다음과 같은 공식을 사용함.이부분도 좀 헷갈리는데, 정리를 해보자면, 샘플링을 x의 분포 p(X)에서 바로 해내기가 어려우니까, p(x)분포를 π로 변환시키는거.f함수는 결국 p(x)를 π(z)로 변환시켜주는 함수인거다.</li>
+<li>이 f함수는 Background에서 2번 특성으로 계속 합성해서 깊게 쌓아줄 수 있음.</li>
+<li>그래서 invert시킬떄는 p(x)에서 x를 뽑는게 아니고 π(z)에서 z를 뽑고, f함수를 invert시켜서 π(z)를 p(x)로 바꾸는거.</li>
+</ol>
+<p data-ke-size="size16">&nbsp; &nbsp;f함수는 결국 p(x)를 π(z)로 변환시켜주는 함수인거다.</p>
+<p data-ke-size="size16">&nbsp; &nbsp;이 f함수는 Background에서 2번 특성으로 계속 합성해서 깊게 쌓아줄 수 있음.</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1280" data-origin-height="131" style="margin-left: 50%; transform: translateX(-50%); width: 371px; max-width: 371px;"><span data-url="https://blog.kakaocdn.net/dna/bhf733/btsIhcRPknh/AAAAAAAAAAAAAAAAAAAAAAlPIKpBhlBXsnQMYMeOE3mLoH01gymIDDwmcE2awsfh/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=ITqRuXRWTUpKWrsntlD%2BnLocqd8%3D" data-phocus="https://blog.kakaocdn.net/dna/bhf733/btsIhcRPknh/AAAAAAAAAAAAAAAAAAAAAAlPIKpBhlBXsnQMYMeOE3mLoH01gymIDDwmcE2awsfh/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=ITqRuXRWTUpKWrsntlD%2BnLocqd8%3D"><img src="https://blog.kakaocdn.net/dna/bhf733/btsIhcRPknh/AAAAAAAAAAAAAAAAAAAAAAlPIKpBhlBXsnQMYMeOE3mLoH01gymIDDwmcE2awsfh/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=ITqRuXRWTUpKWrsntlD%2BnLocqd8%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2Fbhf733%2FbtsIhcRPknh%2FAAAAAAAAAAAAAAAAAAAAAAlPIKpBhlBXsnQMYMeOE3mLoH01gymIDDwmcE2awsfh%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DITqRuXRWTUpKWrsntlD%252BnLocqd8%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="371" height="38" data-origin-width="1280" data-origin-height="131" data-phocus-index="0"></span></figure>
+<p></p>
+<p data-ke-size="size16">&nbsp; &nbsp;이거의 total 자코비안은 다음과 같음</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1280" data-origin-height="81" style="margin-left: 50%; transform: translateX(-50%); width: 701px; max-width: 701px;"><span data-url="https://blog.kakaocdn.net/dna/ceuBfg/btsIhMZlpKU/AAAAAAAAAAAAAAAAAAAAAG4dndpr8-Gnc-u64yQbjo-78e7hhysHHO-jj9Cfs-8d/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=UitrxBKYdq1mm7siVF5kV4jI%2FPY%3D" data-phocus="https://blog.kakaocdn.net/dna/ceuBfg/btsIhMZlpKU/AAAAAAAAAAAAAAAAAAAAAG4dndpr8-Gnc-u64yQbjo-78e7hhysHHO-jj9Cfs-8d/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=UitrxBKYdq1mm7siVF5kV4jI%2FPY%3D"><img src="https://blog.kakaocdn.net/dna/ceuBfg/btsIhMZlpKU/AAAAAAAAAAAAAAAAAAAAAG4dndpr8-Gnc-u64yQbjo-78e7hhysHHO-jj9Cfs-8d/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=UitrxBKYdq1mm7siVF5kV4jI%2FPY%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FceuBfg%2FbtsIhMZlpKU%2FAAAAAAAAAAAAAAAAAAAAAG4dndpr8-Gnc-u64yQbjo-78e7hhysHHO-jj9Cfs-8d%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DUitrxBKYdq1mm7siVF5kV4jI%252FPY%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="701" height="44" data-origin-width="1280" data-origin-height="81" data-phocus-index="1"></span></figure>
+<p></p>
+<p data-ke-size="size16">&nbsp;</p>
+<h3 data-ke-size="size23" id="3%20Building%20invertible%20modules%20compositionally-1"><a href="#3%20Building%20invertible%20modules%20compositionally-1">3 Building invertible modules compositionally</a></h3>
+<p data-ke-size="size16">Masked convolution과 같은 간단한 블록을 사용해 inversion이랑 determinant 계산을 효율적으로 할 수 있는 방법 제안.</p>
+<p data-ke-size="size16">3.1 The Basic Module</p>
+<p data-ke-size="size16">기본 모듈은 f(x)=Wx+b, 선형 변환으로 시작함.</p>
+<p data-ke-size="size16">여기서 W는 DxD차원의 가중치 행렬이고 b는 bias.</p>
+<p data-ke-size="size16">일반 가중치 행렬 W를 사용할 경우에는, 선형 변환의 자코비안 식을 계산하는데 O(D^3)의 연산이 필요함. 이렇게 하면 computing 차원이 너무 많이 소요되니까, 계산 효율을 높이기 위해 W를 삼각행렬로 만들어버림.</p>
+<p data-ke-size="size16">이렇게 하면 단순 대각선에 있는 자코비안 원소들의 곱이니까 O(D)로 줄어듦.</p>
+<p data-ke-size="size16">그럼 W를 어떻게 삼각행렬로 만드냐면, masked convolution을 사용하면 됨.</p>
+<p data-ke-size="size16">Convolution은 일종의 linear transform이니까,</p>
+<p data-ke-size="size16">단순 convolution이라는 linear transform으로 삼각 행렬을 만들 수 있음</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1280" data-origin-height="558" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/4aFlv/btsIiWmn588/AAAAAAAAAAAAAAAAAAAAAHZOHI5LxJBtlLxlX12sYjTvfAlBWgGwOeWTZkenymlh/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=eVZezWZrs0%2FVVadwX5rzny6LLSM%3D" data-phocus="https://blog.kakaocdn.net/dna/4aFlv/btsIiWmn588/AAAAAAAAAAAAAAAAAAAAAHZOHI5LxJBtlLxlX12sYjTvfAlBWgGwOeWTZkenymlh/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=eVZezWZrs0%2FVVadwX5rzny6LLSM%3D"><img src="https://blog.kakaocdn.net/dna/4aFlv/btsIiWmn588/AAAAAAAAAAAAAAAAAAAAAHZOHI5LxJBtlLxlX12sYjTvfAlBWgGwOeWTZkenymlh/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=eVZezWZrs0%2FVVadwX5rzny6LLSM%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2F4aFlv%2FbtsIiWmn588%2FAAAAAAAAAAAAAAAAAAAAAHZOHI5LxJBtlLxlX12sYjTvfAlBWgGwOeWTZkenymlh%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DeVZezWZrs0%252FVVadwX5rzny6LLSM%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1280" height="558" data-origin-width="1280" data-origin-height="558" data-phocus-index="2"></span></figure>
+<p></p>
+<p data-ke-size="size16">이건 세개의 필터랑, 커널사이즈 3x3를 통해 masked convolution을 한것. 직관적으로 생각해보면, 이 필터의 causal structure를 통해서(ordering of pixel) triangular structure 를 만들 수 있음.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1280" data-origin-height="110" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/qUOXx/btsIin5GXYN/AAAAAAAAAAAAAAAAAAAAAN4if_ILiSONmzeqmasBL1JytbyaTsqjmNJRL8TsgQ4J/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=%2B%2BHUASYkZtXYl5s6kfmJA448tAQ%3D" data-phocus="https://blog.kakaocdn.net/dna/qUOXx/btsIin5GXYN/AAAAAAAAAAAAAAAAAAAAAN4if_ILiSONmzeqmasBL1JytbyaTsqjmNJRL8TsgQ4J/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=%2B%2BHUASYkZtXYl5s6kfmJA448tAQ%3D" data-alt="이런 formula가 사용되었다고 함.."><img src="https://blog.kakaocdn.net/dna/qUOXx/btsIin5GXYN/AAAAAAAAAAAAAAAAAAAAAN4if_ILiSONmzeqmasBL1JytbyaTsqjmNJRL8TsgQ4J/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=%2B%2BHUASYkZtXYl5s6kfmJA448tAQ%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FqUOXx%2FbtsIin5GXYN%2FAAAAAAAAAAAAAAAAAAAAAN4if_ILiSONmzeqmasBL1JytbyaTsqjmNJRL8TsgQ4J%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3D%252B%252BHUASYkZtXYl5s6kfmJA448tAQ%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1280" height="110" data-origin-width="1280" data-origin-height="110" data-phocus-index="3"></span><figcaption>이런 formula가 사용되었다고 함..</figcaption>
+</figure>
+<p></p>
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li>Basic block 만드는 코드(참고)<b>self.weight1</b>, <b>self.weight2</b>, **self.weight3**는 각 컨볼루션 계층의 가중치이며, <b>self.mask1</b>, <b>self.mask2</b>, **self.mask3**는 각 가중치에 적용될 마스크임. <b>masked_weight1</b>, <b>masked_weight2</b>, **masked_weight3**는 가중치에 마스크를 적용한 결과이고, 이 마스크는 가중치 행렬의 특정 부분을 0으로 만들어 삼각 형태를 만든다.**kernel_mid_y**와 **kernel_mid_x**는 컨볼루션 커널의 중심을 나타내고, 이는 컨볼루션 가중치 행렬의 대각선 부분을 추출하는 데 사용된다. **torch.diagonal**을 사용하여 커널의 중심부분을 대각선으로 추출하고, 이를 통해 삼각 구조를 생성함.</li>
+<li><b>컨볼루션 연산</b>: **latent_output**은 입력 **x**에 마스크된 가중치를 컨볼루션하는 과정을 통해 얻어지고, 첫 번째 컨볼루션 후 비선형 함수(non_linearity)를 적용한다.
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li>Basic block 만드는 코드(참고)<b>self.weight1</b>, <b>self.weight2</b>, **self.weight3**는 각 컨볼루션 계층의 가중치이며, <b>self.mask1</b>, <b>self.mask2</b>, **self.mask3**는 각 가중치에 적용될 마스크임. <b>masked_weight1</b>, <b>masked_weight2</b>, **masked_weight3**는 가중치에 마스크를 적용한 결과이고, 이 마스크는 가중치 행렬의 특정 부분을 0으로 만들어 삼각 형태를 만든다.**kernel_mid_y**와 **kernel_mid_x**는 컨볼루션 커널의 중심을 나타내고, 이는 컨볼루션 가중치 행렬의 대각선 부분을 추출하는 데 사용된다. **torch.diagonal**을 사용하여 커널의 중심부분을 대각선으로 추출하고, 이를 통해 삼각 구조를 생성함.</li>
+<li><b>컨볼루션 연산</b>: **latent_output**은 입력 **x**에 마스크된 가중치를 컨볼루션하는 과정을 통해 얻어지고, 첫 번째 컨볼루션 후 비선형 함수(non_linearity)를 적용한다.</li>
+</ul>
+</li>
+</ul>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">노션으로 정리해놔서 이 뒷부분은</p>
+<p data-ke-size="size16"><a href="https://receptive-pecorino-88d.notion.site/MintNet-codeReview-Building-Invertible-Neural-Networks-with-Masked-Convolution-baf16bed0e9b42999c72ad41b8adbbde?pvs=25" target="_blank" rel="noopener&nbsp;noreferrer">https://receptive-pecorino-88d.notion.site/MintNet-codeReview-Building-Invertible-Neural-Networks-with-Masked-Convolution-baf16bed0e9b42999c72ad41b8adbbde?pvs=25</a></p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">여기서 읽으면 됩니다! 코드랑 같이 정리했보니까 옮겨오는게<s> 귀찮&nbsp; 은건 아니구</s></p>
+<p data-ke-size="size16">노션이 더 잘 정리되어있어요ㅎㅎ</p>
+    </div>
+    
+    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+        <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    </div>
+</body>
+</html>

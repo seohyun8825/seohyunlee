@@ -1,0 +1,124 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log-Linear Attention 빠른 트랜스포머!? — happy8825 - Seohyun Lee Blog</title>
+    <meta name="description" content="long context를 어떻게 처리할지, AI에서는 굉장히 중요한 문제이다.
+&nbsp;
+Transformer,, 굉장하지만 단점이 너무나도 명확하다. 바로 quadratic-compute 이다.
+&nbsp;
+어디서 bottleneck이 발생하냐면,&nbsp; transformer의 ">
+    <link rel="stylesheet" href="../../styles.css">
+    <style>
+        body { 
+            background: #0d0f17; 
+            color: #fff; 
+            font-family: 'Inter', sans-serif; 
+            line-height: 1.6; 
+            margin: 0; 
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .post-header {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 2rem;
+            margin-bottom: 2rem;
+        }
+        .post-meta {
+            color: #888;
+            margin-bottom: 1rem;
+        }
+        .post-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .post-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        .post-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 1rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .post-content p {
+            margin-bottom: 1rem;
+        }
+        .post-content h1, .post-content h2, .post-content h3 {
+            color: #667eea;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .post-content blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 1rem;
+            margin: 1.5rem 0;
+            color: #ccc;
+            font-style: italic;
+        }
+        .post-content code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .post-content pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            color: #667eea;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            background: rgba(102, 126, 234, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    
+    <div class="post-header">
+        <div class="post-meta">
+            <span>📅 2025-06-27</span>
+            <span> | 🏷️ Computer Vision Paper Review</span>
+            <span> | 🔗 <a href="https://happy8825.tistory.com/113" target="_blank">Original Post</a></span>
+            <span> | 📊 1 images</span>
+        </div>
+        <h1 class="post-title">Log-Linear Attention 빠른 트랜스포머!? — happy8825</h1>
+        <div class='tags'><span style="background: rgba(255,255,255,0.1); padding: 0.25rem 0.5rem; border-radius: 12px; margin-right: 0.5rem; font-size: 0.9rem;">#D</span></div>
+    </div>
+    
+    <div class="post-content">
+        <p data-ke-size="size16">long context를 어떻게 처리할지, AI에서는 굉장히 중요한 문제이다.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">Transformer,, 굉장하지만 단점이 너무나도 명확하다. 바로 quadratic-compute 이다.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">어디서 bottleneck이 발생하냐면,&nbsp; transformer의 selfattention 그림인데, attention matrix부분을 보자. attention matrix이 n^2 이 되는데, 그럼 number of token이 많아지면 n^2배만큼 quudratic하게 늘어나게 될것이다.&nbsp;</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1226" data-origin-height="916" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/dHx3it/btsOWbMplh9/AAAAAAAAAAAAAAAAAAAAAJaslkQCSmC-4XyNBG7WR7Go_k8g1tGt2s8m6a_QUEOy/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=n8jBS82TSBQ%2F7lyw0A14BTVHdKM%3D" data-phocus="https://blog.kakaocdn.net/dna/dHx3it/btsOWbMplh9/AAAAAAAAAAAAAAAAAAAAAJaslkQCSmC-4XyNBG7WR7Go_k8g1tGt2s8m6a_QUEOy/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=n8jBS82TSBQ%2F7lyw0A14BTVHdKM%3D"><img src="https://blog.kakaocdn.net/dna/dHx3it/btsOWbMplh9/AAAAAAAAAAAAAAAAAAAAAJaslkQCSmC-4XyNBG7WR7Go_k8g1tGt2s8m6a_QUEOy/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=n8jBS82TSBQ%2F7lyw0A14BTVHdKM%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FdHx3it%2FbtsOWbMplh9%2FAAAAAAAAAAAAAAAAAAAAAJaslkQCSmC-4XyNBG7WR7Go_k8g1tGt2s8m6a_QUEOy%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3Dn8jBS82TSBQ%252F7lyw0A14BTVHdKM%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1226" height="916" data-origin-width="1226" data-origin-height="916" data-phocus-index="0"></span></figure>
+<p></p>
+<p data-ke-size="size16">&nbsp;</p>
+    </div>
+    
+    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+        <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    </div>
+</body>
+</html>

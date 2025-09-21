@@ -1,0 +1,150 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mask RCNN — happy8825 - Seohyun Lee Blog</title>
+    <meta name="description" content="&nbsp;
+
+
+Segmentation, 그 중 instance segmentation(object detection+ semantic segmentation) 을 위한 모델이다
+&nbsp;
+Faster RCNN처럼 두가지 단계를 거쳐 학습된다. RPN
+Faster RCNN은 피쳐맵을 ">
+    <link rel="stylesheet" href="../../styles.css">
+    <style>
+        body { 
+            background: #0d0f17; 
+            color: #fff; 
+            font-family: 'Inter', sans-serif; 
+            line-height: 1.6; 
+            margin: 0; 
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .post-header {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 2rem;
+            margin-bottom: 2rem;
+        }
+        .post-meta {
+            color: #888;
+            margin-bottom: 1rem;
+        }
+        .post-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .post-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        .post-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 1rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .post-content p {
+            margin-bottom: 1rem;
+        }
+        .post-content h1, .post-content h2, .post-content h3 {
+            color: #667eea;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .post-content blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 1rem;
+            margin: 1.5rem 0;
+            color: #ccc;
+            font-style: italic;
+        }
+        .post-content code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .post-content pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            color: #667eea;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            background: rgba(102, 126, 234, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    
+    <div class="post-header">
+        <div class="post-meta">
+            <span>📅 2024-07-31</span>
+            <span> | 🏷️ Computer Vision Paper Review</span>
+            <span> | 🔗 <a href="https://happy8825.tistory.com/30" target="_blank">Original Post</a></span>
+            <span> | 📊 5 images</span>
+        </div>
+        <h1 class="post-title">Mask RCNN — happy8825</h1>
+        
+    </div>
+    
+    <div class="post-content">
+        <p data-ke-size="size16">&nbsp;</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="948" data-origin-height="522" style="margin-left: 50%; transform: translateX(-50%); width: 948px; max-width: 948px;"><span data-url="https://blog.kakaocdn.net/dna/b3ET8n/btsIRgGeTX2/AAAAAAAAAAAAAAAAAAAAAErCKr1eQ1tCFM0kj8M5WgHW6tlhwYEXLsMqP25D5jp_/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=vPIW8vNxc%2BbFnn%2BUOCGDFsekJWY%3D" data-phocus="https://blog.kakaocdn.net/dna/b3ET8n/btsIRgGeTX2/AAAAAAAAAAAAAAAAAAAAAErCKr1eQ1tCFM0kj8M5WgHW6tlhwYEXLsMqP25D5jp_/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=vPIW8vNxc%2BbFnn%2BUOCGDFsekJWY%3D"><img src="https://blog.kakaocdn.net/dna/b3ET8n/btsIRgGeTX2/AAAAAAAAAAAAAAAAAAAAAErCKr1eQ1tCFM0kj8M5WgHW6tlhwYEXLsMqP25D5jp_/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=vPIW8vNxc%2BbFnn%2BUOCGDFsekJWY%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2Fb3ET8n%2FbtsIRgGeTX2%2FAAAAAAAAAAAAAAAAAAAAAErCKr1eQ1tCFM0kj8M5WgHW6tlhwYEXLsMqP25D5jp_%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DvPIW8vNxc%252BbFnn%252BUOCGDFsekJWY%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="948" height="522" data-origin-width="948" data-origin-height="522" data-phocus-index="0"></span></figure>
+<p></p>
+<p data-ke-size="size16">Segmentation, 그 중 instance segmentation(object detection+ semantic segmentation) 을 위한 모델이다</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">Faster RCNN처럼 두가지 단계를 거쳐 학습된다. RPN</p>
+<p data-ke-size="size16">Faster RCNN은 피쳐맵을 RPN에 넘겨서 region of interest를 얻고, 이걸 roi pooling 시켜서 고정된 크기의 피쳐맵으로 다시만들어서 fc layer에 넘겨주는 방식. 여기에&nbsp; bounding box regression branch랑 classification branch를 달아서 바운딩박스 offset이랑 클래스 label이 예측됨</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">그럼&nbsp; Mask RCNN은 ?</p>
+<p data-ke-size="size16">Faster RCNN이랑 거의 동일한데, ROI pooling 말고 roi align을 사용했다는 점과, segmentation을 위한 mask branch 를 하나더 평행하게 추가했음. 그리고 faster rcnn는 fc layer에 태웠는데, segemntation task는 spatial layout도 중요하니까 fc layer 말고 conv layer에 태웠다는 점이 다른 점인 것 같음.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="928" data-origin-height="362" style="margin-left: 50%; transform: translateX(-50%); width: 928px; max-width: 928px;"><span data-url="https://blog.kakaocdn.net/dna/ncDUb/btsIRVawFFx/AAAAAAAAAAAAAAAAAAAAAEosUrI4NzkeVEh0wclJd6PCsXjktbkdNZ5duW2hCHWb/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=Rzgcf3N%2FJ%2B%2FB8f6FBbMWX6ibHRU%3D" data-phocus="https://blog.kakaocdn.net/dna/ncDUb/btsIRVawFFx/AAAAAAAAAAAAAAAAAAAAAEosUrI4NzkeVEh0wclJd6PCsXjktbkdNZ5duW2hCHWb/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=Rzgcf3N%2FJ%2B%2FB8f6FBbMWX6ibHRU%3D"><img src="https://blog.kakaocdn.net/dna/ncDUb/btsIRVawFFx/AAAAAAAAAAAAAAAAAAAAAEosUrI4NzkeVEh0wclJd6PCsXjktbkdNZ5duW2hCHWb/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=Rzgcf3N%2FJ%2B%2FB8f6FBbMWX6ibHRU%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FncDUb%2FbtsIRVawFFx%2FAAAAAAAAAAAAAAAAAAAAAEosUrI4NzkeVEh0wclJd6PCsXjktbkdNZ5duW2hCHWb%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DRzgcf3N%252FJ%252B%252FB8f6FBbMWX6ibHRU%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="928" height="362" data-origin-width="928" data-origin-height="362" data-phocus-index="1"></span></figure>
+<p></p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">이게 ROI ALign인데, 기존 ROI pooling은 quantization 문제 등, faster rcnn에서 detection에 쓰이기에는 너무 괜찮은 알고리즘이지만, 픽셀단위가 중요한 segmentation task에서는 이 ROI pooling에서의 qunaitzation 하는 아이디어가 너무 치명적인 단점이었음. 그래서 정확한 위치를 최대한 보존할 수 있는 ROI align 아이디어가 나옴.</p>
+<p data-ke-size="size16">ROI 영역을 pooling 레이어의 크기에 맞추어 등분하고, 각 grid에 sample 포인트를 잡아, 하나의 샘플포인트를 기준으로 가까운 grid 4개에 대해 bilinear interpolation을 하는 방법.</p>
+<p data-ke-size="size16">그래서 모든 샘플포인트에 대해서 bilinear interpolation을 해주면 한 영역에 값이 4개가 생기는데 여기서 average pooling을 해주는 방식.</p>
+<p data-ke-size="size16">참고로 이것도 differentiable하지 않다는 문제가 있어서 나중에 DETR에서 나오게될 Bicubic Interpolation에서는 이 문제를 더 잘 해결했음..</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="628" data-origin-height="540" style="margin-left: 50%; transform: translateX(-50%); width: 628px; max-width: 628px;"><span data-url="https://blog.kakaocdn.net/dna/C5nVW/btsISUBXyNT/AAAAAAAAAAAAAAAAAAAAAO9b7cSoHiFL64636azGIqPCL7fAKsuzJLyPKEf3AYTR/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=%2FZTnpg%2BoQZ9kzk8MpLxIGamyJZY%3D" data-phocus="https://blog.kakaocdn.net/dna/C5nVW/btsISUBXyNT/AAAAAAAAAAAAAAAAAAAAAO9b7cSoHiFL64636azGIqPCL7fAKsuzJLyPKEf3AYTR/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=%2FZTnpg%2BoQZ9kzk8MpLxIGamyJZY%3D"><img src="https://blog.kakaocdn.net/dna/C5nVW/btsISUBXyNT/AAAAAAAAAAAAAAAAAAAAAO9b7cSoHiFL64636azGIqPCL7fAKsuzJLyPKEf3AYTR/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=%2FZTnpg%2BoQZ9kzk8MpLxIGamyJZY%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FC5nVW%2FbtsISUBXyNT%2FAAAAAAAAAAAAAAAAAAAAAO9b7cSoHiFL64636azGIqPCL7fAKsuzJLyPKEf3AYTR%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3D%252FZTnpg%252BoQZ9kzk8MpLxIGamyJZY%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="628" height="540" data-origin-width="628" data-origin-height="540" data-phocus-index="2"></span></figure>
+<p></p>
+<p data-ke-size="size16">모델 아키텍쳐인데, 회색 하이라이트 된 부분이 Faster RCNN. 여기에 mask rcnn은 추가로 mask를 위한 branch를 하나 더 달아줬다.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">결과</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="782" data-origin-height="420" style="margin-left: 50%; transform: translateX(-50%); width: 782px; max-width: 782px;"><span data-url="https://blog.kakaocdn.net/dna/cSXZLT/btsIS6CnWix/AAAAAAAAAAAAAAAAAAAAAFo1-zsDJQC1KKlBuu2HdGov-eXd1OOFF42fxFvjJiNF/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=6ygbPT65fsL8LhxU8orA53dKbzk%3D" data-phocus="https://blog.kakaocdn.net/dna/cSXZLT/btsIS6CnWix/AAAAAAAAAAAAAAAAAAAAAFo1-zsDJQC1KKlBuu2HdGov-eXd1OOFF42fxFvjJiNF/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=6ygbPT65fsL8LhxU8orA53dKbzk%3D"><img src="https://blog.kakaocdn.net/dna/cSXZLT/btsIS6CnWix/AAAAAAAAAAAAAAAAAAAAAFo1-zsDJQC1KKlBuu2HdGov-eXd1OOFF42fxFvjJiNF/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=6ygbPT65fsL8LhxU8orA53dKbzk%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FcSXZLT%2FbtsIS6CnWix%2FAAAAAAAAAAAAAAAAAAAAAFo1-zsDJQC1KKlBuu2HdGov-eXd1OOFF42fxFvjJiNF%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3D6ygbPT65fsL8LhxU8orA53dKbzk%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="782" height="420" data-origin-width="782" data-origin-height="420" data-phocus-index="3"></span></figure>
+<p></p>
+<p data-ke-size="size16">성능+ ablation study</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="786" data-origin-height="316" style="margin-left: 50%; transform: translateX(-50%); width: 786px; max-width: 786px;"><span data-url="https://blog.kakaocdn.net/dna/bqZEvC/btsISKM6ecl/AAAAAAAAAAAAAAAAAAAAAAwSirDnn4Dp-Rr67jBN_tgp3W2snpM5r2y3bMAOeuLG/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=KwfGRteux%2B35nnCYayiQF%2FvkGTo%3D" data-phocus="https://blog.kakaocdn.net/dna/bqZEvC/btsISKM6ecl/AAAAAAAAAAAAAAAAAAAAAAwSirDnn4Dp-Rr67jBN_tgp3W2snpM5r2y3bMAOeuLG/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=KwfGRteux%2B35nnCYayiQF%2FvkGTo%3D"><img src="https://blog.kakaocdn.net/dna/bqZEvC/btsISKM6ecl/AAAAAAAAAAAAAAAAAAAAAAwSirDnn4Dp-Rr67jBN_tgp3W2snpM5r2y3bMAOeuLG/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=KwfGRteux%2B35nnCYayiQF%2FvkGTo%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FbqZEvC%2FbtsISKM6ecl%2FAAAAAAAAAAAAAAAAAAAAAAwSirDnn4Dp-Rr67jBN_tgp3W2snpM5r2y3bMAOeuLG%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DKwfGRteux%252B35nnCYayiQF%252FvkGTo%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="786" height="316" data-origin-width="786" data-origin-height="316" data-phocus-index="4"></span></figure>
+<p></p>
+<p data-ke-size="size16">당연한 결과지만, 네트워크가 깊을수록 성능이 더 좋았고, ROI align을 한게 ROI pooling등을 사용한것보다 성능이 좋았음. Mask branch 도 MLP보다는 FCN이 성능이 더 좋게 나옴.</p>
+    </div>
+    
+    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+        <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,144 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LOTUS ~ Uniform Distribution — happy8825 - Seohyun Lee Blog</title>
+    <meta name="description" content="&nbsp;
+
+
+
+LOTUS
+Law of the Unconscious Statistician, LOTUS
+&nbsp;
+-&gt;어떤 확률변수의 분포를 알고 있을 때, 그 변수를 함수로 변환한 값의 기댓값을 계산할 수 있게 해준다.
+&nbsp;
+만약 XX가 확률 밀도 함수(PDF) f(x">
+    <link rel="stylesheet" href="../../styles.css">
+    <style>
+        body { 
+            background: #0d0f17; 
+            color: #fff; 
+            font-family: 'Inter', sans-serif; 
+            line-height: 1.6; 
+            margin: 0; 
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .post-header {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 2rem;
+            margin-bottom: 2rem;
+        }
+        .post-meta {
+            color: #888;
+            margin-bottom: 1rem;
+        }
+        .post-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .post-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        .post-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 1rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .post-content p {
+            margin-bottom: 1rem;
+        }
+        .post-content h1, .post-content h2, .post-content h3 {
+            color: #667eea;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .post-content blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 1rem;
+            margin: 1.5rem 0;
+            color: #ccc;
+            font-style: italic;
+        }
+        .post-content code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .post-content pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            color: #667eea;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            background: rgba(102, 126, 234, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    
+    <div class="post-header">
+        <div class="post-meta">
+            <span>📅 2024-10-07</span>
+            <span> | 🏷️ Statistics</span>
+            <span> | 🔗 <a href="https://happy8825.tistory.com/62" target="_blank">Original Post</a></span>
+            <span> | 📊 2 images</span>
+        </div>
+        <h1 class="post-title">LOTUS ~ Uniform Distribution — happy8825</h1>
+        
+    </div>
+    
+    <div class="post-content">
+        <p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16"></p>
+
+
+<h1>LOTUS</h1>
+<p data-ke-size="size16">Law of the Unconscious Statistician, LOTUS</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">-&gt;어떤 확률변수의 분포를 알고 있을 때, 그 변수를 함수로 변환한 값의 기댓값을 계산할 수 있게 해준다.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">만약 <span class="MathJax_Preview" style="color: inherit;"></span><span class="MathJax" id="MathJax-Element-1-Frame" tabindex="0" style="position: relative;" data-mathml="&lt;math xmlns=&quot;http://www.w3.org/1998/Math/MathML&quot;&gt;&lt;mi&gt;X&lt;/mi&gt;&lt;/math&gt;" role="presentation"><nobr aria-hidden="true"><span class="math" id="MathJax-Span-1" style="width: 0.879em; display: inline-block;"><span style="display: inline-block; position: relative; width: 0.821em; height: 0px; font-size: 107%;"><span style="position: absolute; clip: rect(1.346em, 1000.82em, 2.398em, -999.997em); top: -2.217em; left: 0em;"><span class="mrow" id="MathJax-Span-2"><span class="mi" id="MathJax-Span-3" style="font-family: MathJax_Math-italic;">X<span style="display: inline-block; overflow: hidden; height: 1px; width: 0.003em;"></span></span></span><span style="display: inline-block; width: 0px; height: 2.223em;"></span></span></span><span style="display: inline-block; overflow: hidden; vertical-align: -0.059em; border-left: 0px solid; width: 0px; height: 0.878em;"></span></span></nobr><span class="MJX_Assistive_MathML" role="presentation"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>X</mi></math></span></span>가 확률 밀도 함수(PDF) <span class="MathJax_Preview" style="color: inherit;"></span><span class="MathJax" id="MathJax-Element-2-Frame" tabindex="0" style="position: relative;" data-mathml="&lt;math xmlns=&quot;http://www.w3.org/1998/Math/MathML&quot;&gt;&lt;mi&gt;f&lt;/mi&gt;&lt;mo stretchy=&quot;false&quot;&gt;(&lt;/mo&gt;&lt;mi&gt;x&lt;/mi&gt;&lt;mo stretchy=&quot;false&quot;&gt;)&lt;/mo&gt;&lt;/math&gt;" role="presentation"><nobr aria-hidden="true"><span class="math" id="MathJax-Span-4" style="width: 2.106em; display: inline-block;"><span style="display: inline-block; position: relative; width: 1.93em; height: 0px; font-size: 107%;"><span style="position: absolute; clip: rect(1.346em, 1001.81em, 2.69em, -999.997em); top: -2.275em; left: 0em;"><span class="mrow" id="MathJax-Span-5"><span class="mi" id="MathJax-Span-6" style="font-family: MathJax_Math-italic;">f<span style="display: inline-block; overflow: hidden; height: 1px; width: 0.061em;"></span></span><span class="mo" id="MathJax-Span-7" style="font-family: MathJax_Main;">(</span><span class="mi" id="MathJax-Span-8" style="font-family: MathJax_Math-italic;">x</span><span class="mo" id="MathJax-Span-9" style="font-family: MathJax_Main;">)</span></span><span style="display: inline-block; width: 0px; height: 2.281em;"></span></span></span><span style="display: inline-block; overflow: hidden; vertical-align: -0.309em; border-left: 0px solid; width: 0px; height: 1.191em;"></span></span></nobr><span class="MJX_Assistive_MathML" role="presentation"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></math></span></span>를 가진 연속 확률변수이고, <span class="MathJax_Preview" style="color: inherit;"></span><span class="MathJax" id="MathJax-Element-3-Frame" tabindex="0" style="position: relative;" data-mathml="&lt;math xmlns=&quot;http://www.w3.org/1998/Math/MathML&quot;&gt;&lt;mi&gt;g&lt;/mi&gt;&lt;/math&gt;" role="presentation"><nobr aria-hidden="true"><span class="math" id="MathJax-Span-10" style="width: 0.529em; display: inline-block;"><span style="display: inline-block; position: relative; width: 0.47em; height: 0px; font-size: 107%;"><span style="position: absolute; clip: rect(1.58em, 1000.47em, 2.631em, -999.997em); top: -2.217em; left: 0em;"><span class="mrow" id="MathJax-Span-11"><span class="mi" id="MathJax-Span-12" style="font-family: MathJax_Math-italic;">g<span style="display: inline-block; overflow: hidden; height: 1px; width: 0.003em;"></span></span></span><span style="display: inline-block; width: 0px; height: 2.223em;"></span></span></span><span style="display: inline-block; overflow: hidden; vertical-align: -0.309em; border-left: 0px solid; width: 0px; height: 0.816em;"></span></span></nobr><span class="MJX_Assistive_MathML" role="presentation"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>g</mi></math></span></span>가 <span class="MathJax_Preview" style="color: inherit;"></span><span class="MathJax" id="MathJax-Element-4-Frame" tabindex="0" style="position: relative;" data-mathml="&lt;math xmlns=&quot;http://www.w3.org/1998/Math/MathML&quot;&gt;&lt;mrow class=&quot;MJX-TeXAtom-ORD&quot;&gt;&lt;mi mathvariant=&quot;double-struck&quot;&gt;R&lt;/mi&gt;&lt;/mrow&gt;&lt;/math&gt;" role="presentation"><nobr aria-hidden="true"><span class="math" id="MathJax-Span-13" style="width: 0.762em; display: inline-block;"><span style="display: inline-block; position: relative; width: 0.704em; height: 0px; font-size: 107%;"><span style="position: absolute; clip: rect(1.58em, 1000.7em, 2.631em, -999.997em); top: -2.45em; left: 0em;"><span class="mrow" id="MathJax-Span-14"><span class="texatom" id="MathJax-Span-15"><span class="mrow" id="MathJax-Span-16"><span class="mi" id="MathJax-Span-17" style="font-family: MathJax_AMS;">R</span></span></span></span><span style="display: inline-block; width: 0px; height: 2.456em;"></span></span></span><span style="display: inline-block; overflow: hidden; vertical-align: -0.059em; border-left: 0px solid; width: 0px; height: 0.878em;"></span></span></nobr><span class="MJX_Assistive_MathML" role="presentation"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow class="MJX-TeXAtom-ORD"><mi mathvariant="double-struck">R</mi></mrow></math></span></span>에서 <span class="MathJax_Preview" style="color: inherit;"></span><span class="MathJax" id="MathJax-Element-5-Frame" tabindex="0" style="position: relative;" data-mathml="&lt;math xmlns=&quot;http://www.w3.org/1998/Math/MathML&quot;&gt;&lt;mrow class=&quot;MJX-TeXAtom-ORD&quot;&gt;&lt;mi mathvariant=&quot;double-struck&quot;&gt;R&lt;/mi&gt;&lt;/mrow&gt;&lt;/math&gt;" role="presentation"><nobr aria-hidden="true"><span class="math" id="MathJax-Span-18" style="width: 0.762em; display: inline-block;"><span style="display: inline-block; position: relative; width: 0.704em; height: 0px; font-size: 107%;"><span style="position: absolute; clip: rect(1.58em, 1000.7em, 2.631em, -999.997em); top: -2.45em; left: 0em;"><span class="mrow" id="MathJax-Span-19"><span class="texatom" id="MathJax-Span-20"><span class="mrow" id="MathJax-Span-21"><span class="mi" id="MathJax-Span-22" style="font-family: MathJax_AMS;">R</span></span></span></span><span style="display: inline-block; width: 0px; height: 2.456em;"></span></span></span><span style="display: inline-block; overflow: hidden; vertical-align: -0.059em; border-left: 0px solid; width: 0px; height: 0.878em;"></span></span></nobr><span class="MJX_Assistive_MathML" role="presentation"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow class="MJX-TeXAtom-ORD"><mi mathvariant="double-struck">R</mi></mrow></math></span></span>로 가는 함수라면, <span class="MathJax_Preview" style="color: inherit;"></span><span class="MathJax" id="MathJax-Element-6-Frame" tabindex="0" style="position: relative;" data-mathml="&lt;math xmlns=&quot;http://www.w3.org/1998/Math/MathML&quot;&gt;&lt;mi&gt;g&lt;/mi&gt;&lt;mo stretchy=&quot;false&quot;&gt;(&lt;/mo&gt;&lt;mi&gt;X&lt;/mi&gt;&lt;mo stretchy=&quot;false&quot;&gt;)&lt;/mo&gt;&lt;/math&gt;" role="presentation"><nobr aria-hidden="true"><span class="math" id="MathJax-Span-23" style="width: 2.281em; display: inline-block;"><span style="display: inline-block; position: relative; width: 2.106em; height: 0px; font-size: 107%;"><span style="position: absolute; clip: rect(1.346em, 1001.99em, 2.69em, -999.997em); top: -2.275em; left: 0em;"><span class="mrow" id="MathJax-Span-24"><span class="mi" id="MathJax-Span-25" style="font-family: MathJax_Math-italic;">g<span style="display: inline-block; overflow: hidden; height: 1px; width: 0.003em;"></span></span><span class="mo" id="MathJax-Span-26" style="font-family: MathJax_Main;">(</span><span class="mi" id="MathJax-Span-27" style="font-family: MathJax_Math-italic;">X<span style="display: inline-block; overflow: hidden; height: 1px; width: 0.003em;"></span></span><span class="mo" id="MathJax-Span-28" style="font-family: MathJax_Main;">)</span></span><span style="display: inline-block; width: 0px; height: 2.281em;"></span></span></span><span style="display: inline-block; overflow: hidden; vertical-align: -0.309em; border-left: 0px solid; width: 0px; height: 1.191em;"></span></span></nobr><span class="MJX_Assistive_MathML" role="presentation"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>g</mi><mo stretchy="false">(</mo><mi>X</mi><mo stretchy="false">)</mo></math></span></span>의 기댓값은 다음과 같음</p>
+<p data-ke-size="size16"><span class="MathJax_Preview" style="color: inherit;"></span><div class="MathJax_Display" style="text-align: center;"><span class="MathJax" id="MathJax-Element-7-Frame" tabindex="0" style="text-align: center; position: relative;" data-mathml="&lt;math xmlns=&quot;http://www.w3.org/1998/Math/MathML&quot; display=&quot;block&quot;&gt;&lt;mi&gt;E&lt;/mi&gt;&lt;mo stretchy=&quot;false&quot;&gt;(&lt;/mo&gt;&lt;mi&gt;g&lt;/mi&gt;&lt;mo stretchy=&quot;false&quot;&gt;(&lt;/mo&gt;&lt;mi&gt;X&lt;/mi&gt;&lt;mo stretchy=&quot;false&quot;&gt;)&lt;/mo&gt;&lt;mo stretchy=&quot;false&quot;&gt;)&lt;/mo&gt;&lt;mo&gt;=&lt;/mo&gt;&lt;msubsup&gt;&lt;mo&gt;&amp;#x222B;&lt;/mo&gt;&lt;mrow class=&quot;MJX-TeXAtom-ORD&quot;&gt;&lt;mo&gt;&amp;#x2212;&lt;/mo&gt;&lt;mi mathvariant=&quot;normal&quot;&gt;&amp;#x221E;&lt;/mi&gt;&lt;/mrow&gt;&lt;mrow class=&quot;MJX-TeXAtom-ORD&quot;&gt;&lt;mi mathvariant=&quot;normal&quot;&gt;&amp;#x221E;&lt;/mi&gt;&lt;/mrow&gt;&lt;/msubsup&gt;&lt;mi&gt;g&lt;/mi&gt;&lt;mo stretchy=&quot;false&quot;&gt;(&lt;/mo&gt;&lt;mi&gt;x&lt;/mi&gt;&lt;mo stretchy=&quot;false&quot;&gt;)&lt;/mo&gt;&lt;mi&gt;f&lt;/mi&gt;&lt;mo stretchy=&quot;false&quot;&gt;(&lt;/mo&gt;&lt;mi&gt;x&lt;/mi&gt;&lt;mo stretchy=&quot;false&quot;&gt;)&lt;/mo&gt;&lt;mspace width=&quot;thinmathspace&quot; /&gt;&lt;mi&gt;d&lt;/mi&gt;&lt;mi&gt;x&lt;/mi&gt;&lt;/math&gt;" role="presentation"><nobr aria-hidden="true"><span class="math" id="MathJax-Span-29" style="width: 12.912em; display: inline-block;"><span style="display: inline-block; position: relative; width: 12.036em; height: 0px; font-size: 107%;"><span style="position: absolute; clip: rect(0.704em, 1011.98em, 3.391em, -999.997em); top: -2.275em; left: 0em;"><span class="mrow" id="MathJax-Span-30"><span class="mi" id="MathJax-Span-31" style="font-family: MathJax_Math-italic;">E<span style="display: inline-block; overflow: hidden; height: 1px; width: 0.003em;"></span></span><span class="mo" id="MathJax-Span-32" style="font-family: MathJax_Main;">(</span><span class="mi" id="MathJax-Span-33" style="font-family: MathJax_Math-italic;">g<span style="display: inline-block; overflow: hidden; height: 1px; width: 0.003em;"></span></span><span class="mo" id="MathJax-Span-34" style="font-family: MathJax_Main;">(</span><span class="mi" id="MathJax-Span-35" style="font-family: MathJax_Math-italic;">X<span style="display: inline-block; overflow: hidden; height: 1px; width: 0.003em;"></span></span><span class="mo" id="MathJax-Span-36" style="font-family: MathJax_Main;">)</span><span class="mo" id="MathJax-Span-37" style="font-family: MathJax_Main;">)</span><span class="mo" id="MathJax-Span-38" style="font-family: MathJax_Main; padding-left: 0.295em;">=</span><span class="msubsup" id="MathJax-Span-39" style="padding-left: 0.295em;"><span style="display: inline-block; position: relative; width: 1.872em; height: 0px;"><span style="position: absolute; clip: rect(2.456em, 1000.94em, 5.026em, -999.997em); top: -3.969em; left: 0em;"><span class="mo" id="MathJax-Span-40" style="font-family: MathJax_Size2; vertical-align: 0.003em;">∫<span style="display: inline-block; overflow: hidden; height: 1px; width: 0.412em;"></span></span><span style="display: inline-block; width: 0px; height: 3.975em;"></span></span><span style="position: absolute; clip: rect(3.508em, 1000.76em, 4.15em, -999.997em); top: -5.079em; left: 1.113em;"><span class="texatom" id="MathJax-Span-41"><span class="mrow" id="MathJax-Span-42"><span class="mi" id="MathJax-Span-43" style="font-size: 70.7%; font-family: MathJax_Main;">∞</span></span></span><span style="display: inline-block; width: 0px; height: 3.975em;"></span></span><span style="position: absolute; clip: rect(3.391em, 1001.35em, 4.209em, -999.997em); top: -3.093em; left: 0.587em;"><span class="texatom" id="MathJax-Span-44"><span class="mrow" id="MathJax-Span-45"><span class="mo" id="MathJax-Span-46" style="font-size: 70.7%; font-family: MathJax_Main;">−</span><span class="mi" id="MathJax-Span-47" style="font-size: 70.7%; font-family: MathJax_Main;">∞</span></span></span><span style="display: inline-block; width: 0px; height: 3.975em;"></span></span></span></span><span class="mi" id="MathJax-Span-48" style="font-family: MathJax_Math-italic; padding-left: 0.178em;">g<span style="display: inline-block; overflow: hidden; height: 1px; width: 0.003em;"></span></span><span class="mo" id="MathJax-Span-49" style="font-family: MathJax_Main;">(</span><span class="mi" id="MathJax-Span-50" style="font-family: MathJax_Math-italic;">x</span><span class="mo" id="MathJax-Span-51" style="font-family: MathJax_Main;">)</span><span class="mi" id="MathJax-Span-52" style="font-family: MathJax_Math-italic;">f<span style="display: inline-block; overflow: hidden; height: 1px; width: 0.061em;"></span></span><span class="mo" id="MathJax-Span-53" style="font-family: MathJax_Main;">(</span><span class="mi" id="MathJax-Span-54" style="font-family: MathJax_Math-italic;">x</span><span class="mo" id="MathJax-Span-55" style="font-family: MathJax_Main;">)</span><span class="mspace" id="MathJax-Span-56" style="height: 0em; vertical-align: 0em; width: 0.178em; display: inline-block; overflow: hidden;"></span><span class="mi" id="MathJax-Span-57" style="font-family: MathJax_Math-italic;">d<span style="display: inline-block; overflow: hidden; height: 1px; width: 0.003em;"></span></span><span class="mi" id="MathJax-Span-58" style="font-family: MathJax_Math-italic;">x</span></span><span style="display: inline-block; width: 0px; height: 2.281em;"></span></span></span><span style="display: inline-block; overflow: hidden; vertical-align: -1.059em; border-left: 0px solid; width: 0px; height: 2.628em;"></span></span></nobr><span class="MJX_Assistive_MathML MJX_Assistive_MathML_Block" role="presentation"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mi>E</mi><mo stretchy="false">(</mo><mi>g</mi><mo stretchy="false">(</mo><mi>X</mi><mo stretchy="false">)</mo><mo stretchy="false">)</mo><mo>=</mo><msubsup><mo>∫</mo><mrow class="MJX-TeXAtom-ORD"><mo>−</mo><mi mathvariant="normal">∞</mi></mrow><mrow class="MJX-TeXAtom-ORD"><mi mathvariant="normal">∞</mi></mrow></msubsup><mi>g</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mspace width="thinmathspace"></mspace><mi>d</mi><mi>x</mi></math></span></span></div></p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">이걸 이용해서 uniform distribution의 variance를 구해보자</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">일단 평균부터 구해보면</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1431" data-origin-height="751" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/b9UohS/btsJWPngjdn/AAAAAAAAAAAAAAAAAAAAANeF79HwDReOnzKO0bSUfCqk5Xhq7O7Kr6eWGNMTLlab/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=GyNMcT2GYvpXcCVISzsBoDHU77s%3D" data-phocus="https://blog.kakaocdn.net/dna/b9UohS/btsJWPngjdn/AAAAAAAAAAAAAAAAAAAAANeF79HwDReOnzKO0bSUfCqk5Xhq7O7Kr6eWGNMTLlab/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=GyNMcT2GYvpXcCVISzsBoDHU77s%3D"><img src="https://blog.kakaocdn.net/dna/b9UohS/btsJWPngjdn/AAAAAAAAAAAAAAAAAAAAANeF79HwDReOnzKO0bSUfCqk5Xhq7O7Kr6eWGNMTLlab/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=GyNMcT2GYvpXcCVISzsBoDHU77s%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2Fb9UohS%2FbtsJWPngjdn%2FAAAAAAAAAAAAAAAAAAAAANeF79HwDReOnzKO0bSUfCqk5Xhq7O7Kr6eWGNMTLlab%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DGyNMcT2GYvpXcCVISzsBoDHU77s%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1431" height="751" data-origin-width="1431" data-origin-height="751" data-phocus-index="0"></span></figure>
+<p></p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">그리고 lotus를 사용해서 var구하는 과정</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="818" data-origin-height="460" style="margin-left: 50%; transform: translateX(-50%); width: 818px; max-width: 818px;"><span data-url="https://blog.kakaocdn.net/dna/d9k0Gi/btsJX8Tqqe4/AAAAAAAAAAAAAAAAAAAAAGLgOiEby_MOMbAzmtkngfbhvEfBb8ZEdKChO5HCbEkL/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=PSi4qNityFPWJJ8KEIGfJuViC2U%3D" data-phocus="https://blog.kakaocdn.net/dna/d9k0Gi/btsJX8Tqqe4/AAAAAAAAAAAAAAAAAAAAAGLgOiEby_MOMbAzmtkngfbhvEfBb8ZEdKChO5HCbEkL/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=PSi4qNityFPWJJ8KEIGfJuViC2U%3D"><img src="https://blog.kakaocdn.net/dna/d9k0Gi/btsJX8Tqqe4/AAAAAAAAAAAAAAAAAAAAAGLgOiEby_MOMbAzmtkngfbhvEfBb8ZEdKChO5HCbEkL/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=PSi4qNityFPWJJ8KEIGfJuViC2U%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2Fd9k0Gi%2FbtsJX8Tqqe4%2FAAAAAAAAAAAAAAAAAAAAAGLgOiEby_MOMbAzmtkngfbhvEfBb8ZEdKChO5HCbEkL%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DPSi4qNityFPWJJ8KEIGfJuViC2U%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="818" height="460" data-origin-width="818" data-origin-height="460" data-phocus-index="1"></span></figure>
+<p></p>
+<p data-ke-size="size16">정리하자면, LOTUS는 확률변수를 함수로 변환한 값의 기댓값을 간단히 계산할 수 있게 해준다.&nbsp; 확률변수의 분포를 알고 있다면, 그 변환된 함수에 대한 기댓값을 쉽게 계산할수있음</p>
+    </div>
+    
+    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+        <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    </div>
+</body>
+</html>

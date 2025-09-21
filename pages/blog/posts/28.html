@@ -1,0 +1,311 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VTimeLLM: Empower LLM to Grasp Video Moments — happy8825 - Seohyun Lee Blog</title>
+    <meta name="description" content="
+
+&nbsp;
+
+&lt;Intro&gt;
+Limitations of 기존 LLM
+기존 LLM은 텍스트 생성이나 이해에 뛰어난 성능을 보여주었지만, 멀티모달, 특히 비디오 이해(video understanding)에 있어서는 visual details나 temporal dynamics를">
+    <link rel="stylesheet" href="../../styles.css">
+    <style>
+        body { 
+            background: #0d0f17; 
+            color: #fff; 
+            font-family: 'Inter', sans-serif; 
+            line-height: 1.6; 
+            margin: 0; 
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .post-header {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 2rem;
+            margin-bottom: 2rem;
+        }
+        .post-meta {
+            color: #888;
+            margin-bottom: 1rem;
+        }
+        .post-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .post-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        .post-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 1rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .post-content p {
+            margin-bottom: 1rem;
+        }
+        .post-content h1, .post-content h2, .post-content h3 {
+            color: #667eea;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .post-content blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 1rem;
+            margin: 1.5rem 0;
+            color: #ccc;
+            font-style: italic;
+        }
+        .post-content code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .post-content pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            color: #667eea;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            background: rgba(102, 126, 234, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    
+    <div class="post-header">
+        <div class="post-meta">
+            <span>📅 2024-11-26</span>
+            <span> | 🏷️ Computer Vision Paper Review</span>
+            <span> | 🔗 <a href="https://happy8825.tistory.com/79" target="_blank">Original Post</a></span>
+            <span> | 📊 6 images</span>
+        </div>
+        <h1 class="post-title">VTimeLLM: Empower LLM to Grasp Video Moments — happy8825</h1>
+        
+    </div>
+    
+    <div class="post-content">
+        
+
+<p data-ke-size="size16">&nbsp;</p>
+<div style="font-family: Arial, sans-serif; line-height: 1.8; font-size: 16px;">
+<h3 data-ke-size="size23">&lt;Intro&gt;</h3>
+<h3 data-ke-size="size23">Limitations of 기존 LLM</h3>
+<p data-ke-size="size16">기존 LLM은 <b>텍스트 생성</b>이나 <b>이해</b>에 뛰어난 성능을 보여주었지만, 멀티모달, 특히 <b>비디오 이해(video understanding)</b>에 있어서는 <i>visual details</i>나 <i>temporal dynamics</i>를 분석해야 하기 때문에 한계가 있었다. 비디오 이해를 잘 수행하기 위한 다양한 연구가 있었지만, 대부분은 <b>비디오 캡션 생성</b> 또는 <b>핵심 주제 요약</b>에 그쳤다. 기존 LLM은 <b>세부적인 시간 경계(time boundary)</b>와 같은 시간적 특성을 제대로 파악하지 못한다.</p>
+<figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1158" data-origin-height="626" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/3X6X4/btsKU7UUAub/AAAAAAAAAAAAAAAAAAAAADvMph1zYZe4OqztMxpzQgfD4yQPVYaDplqUUEtI4_FX/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=FDzDZgD25rV3K8AdHbWiofX8inM%3D" data-phocus="https://blog.kakaocdn.net/dna/3X6X4/btsKU7UUAub/AAAAAAAAAAAAAAAAAAAAADvMph1zYZe4OqztMxpzQgfD4yQPVYaDplqUUEtI4_FX/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=FDzDZgD25rV3K8AdHbWiofX8inM%3D" data-alt="이런 task를 기존 모델이 잘 못한다."><img src="https://blog.kakaocdn.net/dna/3X6X4/btsKU7UUAub/AAAAAAAAAAAAAAAAAAAAADvMph1zYZe4OqztMxpzQgfD4yQPVYaDplqUUEtI4_FX/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=FDzDZgD25rV3K8AdHbWiofX8inM%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2F3X6X4%2FbtsKU7UUAub%2FAAAAAAAAAAAAAAAAAAAAADvMph1zYZe4OqztMxpzQgfD4yQPVYaDplqUUEtI4_FX%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DFDzDZgD25rV3K8AdHbWiofX8inM%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1158" height="626" data-origin-width="1158" data-origin-height="626" data-phocus-index="0"></span><figcaption>이런 task를 기존 모델이 잘 못한다.</figcaption>
+</figure>
+
+<h3 data-ke-size="size23">두 가지 main challenge</h3>
+<ol style="list-style-type: decimal;" data-ke-list-type="decimal">
+<li>정확한 시간 경계를 갖춘 <b>대규모 데이터셋</b>의 부족.</li>
+<li>비디오 내 여러 순간의 콘텐츠를 이해하도록 훈련할 수 있는 <b>효과적인 시간 관련 비디오 작업(temporal-related video task)</b> 설계의 어려움.</li>
+</ol>
+<h3 data-ke-size="size23">VTimeLLM</h3>
+<p data-ke-size="size16">이러한 문제를 해결하기 위해 논문에서는 <b>VTimeLLM</b>이라는 모델을 제안한다. VTimeLLM은 비디오 내 <b>세부적인 시간 경계(fine-grained segments)</b>를 더 잘 이해하고 <b>시간적 추론 능력(temporal reasoning ability)</b>을 갖춘 모델이다.</p>
+<h3 data-ke-size="size23">VTimeLLM의 주요 component</h3>
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li><b>Visual Encoder &amp; Visual Adapter</b>: 입력 비디오를 처리.</li>
+<li><b>맞춤형 LLM</b>: 텍스트와 비디오 콘텐츠를 동시에 이해하도록 설계.</li>
+</ul>
+<h3 data-ke-size="size23">3 stage training strategy</h3>
+<ol style="list-style-type: decimal;" data-ke-list-type="decimal">
+<li><b>1단계: 이미지-텍스트 정렬(image-text alignment):</b> 대규모 이미지-텍스트 데이터를 활용해 시각적 특징과 LLM의 의미 공간을 align.</li>
+<li><b>2단계: 시간 경계 인식 강화:</b> 단일 및 다중 턴 QA 작업을 통해 시간 경계 인식과 이벤트 이해 능력을 강화.</li>
+<li><b>3단계: 명령 조정(Instruction Tuning):</b> 고품질 대화 데이터셋을 통해 VTimeLLM을 인간 의도에 align시키고 비디오 세그먼트의 시간 이해 능력을 향상.</li>
+</ol>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style5"></div>
+<h3 style="color: #000000; text-align: start;" data-ke-size="size23" id="%3CMethod%3E-1"><a href="#%3CMethod%3E-1">&lt;Method&gt;</a></h3>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1064" data-origin-height="472" style="margin-left: 50%; transform: translateX(-50%); width: 1064px; max-width: 1064px;"><span data-url="https://blog.kakaocdn.net/dna/bEBZfb/btsKWTVscQ3/AAAAAAAAAAAAAAAAAAAAAChKUI4fJ3-zRdHQz7dkkI1FNP10grDltC6rzs3G_-FE/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=0Wwd7X11QXI2DHqer9K3PjUdll8%3D" data-phocus="https://blog.kakaocdn.net/dna/bEBZfb/btsKWTVscQ3/AAAAAAAAAAAAAAAAAAAAAChKUI4fJ3-zRdHQz7dkkI1FNP10grDltC6rzs3G_-FE/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=0Wwd7X11QXI2DHqer9K3PjUdll8%3D"><img src="https://blog.kakaocdn.net/dna/bEBZfb/btsKWTVscQ3/AAAAAAAAAAAAAAAAAAAAAChKUI4fJ3-zRdHQz7dkkI1FNP10grDltC6rzs3G_-FE/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=0Wwd7X11QXI2DHqer9K3PjUdll8%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FbEBZfb%2FbtsKWTVscQ3%2FAAAAAAAAAAAAAAAAAAAAAChKUI4fJ3-zRdHQz7dkkI1FNP10grDltC6rzs3G_-FE%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3D0Wwd7X11QXI2DHqer9K3PjUdll8%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1064" height="472" data-origin-width="1064" data-origin-height="472" data-phocus-index="1"></span></figure>
+<p></p>
+<p data-ke-size="size16">&nbsp;</p>
+<div style="font-family: Arial, sans-serif; line-height: 1.8; font-size: 16px;">
+<h3 data-ke-size="size23">Architecture</h3>
+<p data-ke-size="size16">VTimeLLM은 비디오 데이터를 처리하고 이해하기 위해 LLM에 <b>Visual Encoder</b>와 <b>Visual Adapter </b>두 가지 추가 모듈을 포함한다. 이 모듈들은 비디오의 시각적 정보를 텍스트 임베딩 공간으로 변환하는 역할을 한다.</p>
+<h4 data-ke-size="size20">Visual Encoder</h4>
+<p data-ke-size="size16">시각적 인코더는 <b>CLIP ViT-L/14</b> 모델의 frozen 버전을 활용하며, 비디오를 다음과 같은 형태로 처리한다:</p>
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li>비디오는 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="0" style="font-size: 117.4%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D447 TEX-I"></mjx-c></mjx-mi></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>T</mi></math></mjx-assistive-mml></mjx-container>개의 프레임으로 이루어진 sequence <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="1" style="font-size: 117.4%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D449 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c2208"></mjx-c></mjx-mo><mjx-msup space="4"><mjx-texatom texclass="ORD"><mjx-mi class="mjx-ds mjx-b"><mjx-c class="mjx-c211D TEX-A"></mjx-c></mjx-mi></mjx-texatom><mjx-script style="vertical-align: 0.363em;"><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D447 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-cD7"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D43B TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-cD7"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D44A TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-cD7"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D436 TEX-I"></mjx-c></mjx-mi></mjx-texatom></mjx-script></mjx-msup></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>V</mi><mo>∈</mo><msup><mrow data-mjx-texclass="ORD"><mi mathvariant="double-struck">R</mi></mrow><mrow data-mjx-texclass="ORD"><mi>T</mi><mo>×</mo><mi>H</mi><mo>×</mo><mi>W</mi><mo>×</mo><mi>C</mi></mrow></msup></math></mjx-assistive-mml></mjx-container>로 표현한다.</li>
+<li>모든 프레임 중 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="2" style="font-size: 117.4%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D441 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mn class="mjx-n" space="4"><mjx-c class="mjx-c31"></mjx-c><mjx-c class="mjx-c30"></mjx-c><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>N</mi><mo>=</mo><mn>100</mn></math></mjx-assistive-mml></mjx-container>개의 프레임을 균일하게 샘플링하여, <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="3" style="font-size: 117.4%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mo class="mjx-n"><mjx-c class="mjx-c7B"></mjx-c></mjx-mo><mjx-msub><mjx-texatom texclass="ORD"><mjx-mover><mjx-over style="padding-bottom: 0.105em; padding-left: 0.431em; margin-bottom: -0.215em;"><mjx-mo class="mjx-n" style="width: 0px; margin-left: -0.25em;"><mjx-c class="mjx-c7E"></mjx-c></mjx-mo></mjx-over><mjx-base><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D449 TEX-I"></mjx-c></mjx-mi></mjx-base></mjx-mover></mjx-texatom><mjx-script style="vertical-align: -0.15em; margin-left: -0.186em;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c31"></mjx-c></mjx-mn></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-msub space="2"><mjx-texatom texclass="ORD"><mjx-mover><mjx-over style="padding-bottom: 0.105em; padding-left: 0.431em; margin-bottom: -0.215em;"><mjx-mo class="mjx-n" style="width: 0px; margin-left: -0.25em;"><mjx-c class="mjx-c7E"></mjx-c></mjx-mo></mjx-over><mjx-base><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D449 TEX-I"></mjx-c></mjx-mi></mjx-base></mjx-mover></mjx-texatom><mjx-script style="vertical-align: -0.15em; margin-left: -0.186em;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c32"></mjx-c></mjx-mn></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="2"><mjx-c class="mjx-c2E"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="2"><mjx-c class="mjx-c2E"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="2"><mjx-c class="mjx-c2E"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="2"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-msub space="2"><mjx-texatom texclass="ORD"><mjx-mover><mjx-over style="padding-bottom: 0.105em; padding-left: 0.431em; margin-bottom: -0.215em;"><mjx-mo class="mjx-n" style="width: 0px; margin-left: -0.25em;"><mjx-c class="mjx-c7E"></mjx-c></mjx-mo></mjx-over><mjx-base><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D449 TEX-I"></mjx-c></mjx-mi></mjx-base></mjx-mover></mjx-texatom><mjx-script style="vertical-align: -0.15em; margin-left: -0.186em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D441 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c7D"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mo fence="false" stretchy="false">{</mo><msub><mrow data-mjx-texclass="ORD"><mover><mi>V</mi><mo stretchy="false">~</mo></mover></mrow><mn>1</mn></msub><mo>,</mo><msub><mrow data-mjx-texclass="ORD"><mover><mi>V</mi><mo stretchy="false">~</mo></mover></mrow><mn>2</mn></msub><mo>,</mo><mo>.</mo><mo>.</mo><mo>.</mo><mo>,</mo><msub><mrow data-mjx-texclass="ORD"><mover><mi>V</mi><mo stretchy="false">~</mo></mover></mrow><mi>N</mi></msub><mo fence="false" stretchy="false">}</mo></math></mjx-assistive-mml></mjx-container>를 생성한다.</li>
+<li>각각의 프레임 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="4" style="font-size: 117.4%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-msub><mjx-texatom texclass="ORD"><mjx-mover><mjx-over style="padding-bottom: 0.105em; padding-left: 0.431em; margin-bottom: -0.215em;"><mjx-mo class="mjx-n" style="width: 0px; margin-left: -0.25em;"><mjx-c class="mjx-c7E"></mjx-c></mjx-mo></mjx-over><mjx-base><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D449 TEX-I"></mjx-c></mjx-mi></mjx-base></mjx-mover></mjx-texatom><mjx-script style="vertical-align: -0.15em; margin-left: -0.186em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow data-mjx-texclass="ORD"><mover><mi>V</mi><mo stretchy="false">~</mo></mover></mrow><mi>i</mi></msub></math></mjx-assistive-mml></mjx-container>는 CLIP의 ViT 인코더를 통해 개별적으로 처리된다: <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" display="true" tabindex="0" ctxtmenu_counter="5" style="font-size: 117.4%; position: relative;"><mjx-math display="true" class="MJX-TEX" aria-hidden="true" style="margin-left: 0px; margin-right: 0px;"><mjx-mo class="mjx-n"><mjx-c class="mjx-c7B"></mjx-c></mjx-mo><mjx-msubsup><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D463 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.247em; margin-left: 0px;"><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D450 TEX-I"></mjx-c></mjx-mi><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D459 TEX-I"></mjx-c></mjx-mi><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D460 TEX-I"></mjx-c></mjx-mi></mjx-texatom><mjx-spacer style="margin-top: 0.185em;"></mjx-spacer><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msubsup><mjx-mo class="mjx-n"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-msubsup space="2"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D463 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.247em; margin-left: 0px;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c31"></mjx-c></mjx-mn><mjx-spacer style="margin-top: 0.193em;"></mjx-spacer><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msubsup><mjx-mo class="mjx-n"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-msubsup space="2"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D463 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.247em; margin-left: 0px;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c32"></mjx-c></mjx-mn><mjx-spacer style="margin-top: 0.193em;"></mjx-spacer><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msubsup><mjx-mo class="mjx-n"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="2"><mjx-c class="mjx-c2E"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="2"><mjx-c class="mjx-c2E"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="2"><mjx-c class="mjx-c2E"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="2"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-msubsup space="2"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D463 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.294em; margin-left: 0px;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D45D TEX-I"></mjx-c></mjx-mi><mjx-spacer style="margin-top: 0.18em;"></mjx-spacer><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msubsup><mjx-mo class="mjx-n"><mjx-c class="mjx-c7D"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mtext class="mjx-n" space="4"><mjx-c class="mjx-c56"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c54"></mjx-c></mjx-mtext><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-msub><mjx-texatom texclass="ORD"><mjx-mover><mjx-over style="padding-bottom: 0.105em; padding-left: 0.431em; margin-bottom: -0.215em;"><mjx-mo class="mjx-n" style="width: 0px; margin-left: -0.25em;"><mjx-c class="mjx-c7E"></mjx-c></mjx-mo></mjx-over><mjx-base><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D449 TEX-I"></mjx-c></mjx-mi></mjx-base></mjx-mover></mjx-texatom><mjx-script style="vertical-align: -0.15em; margin-left: -0.186em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-mo class="mjx-n"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-mstyle><mjx-mspace style="width: 0.167em;"></mjx-mspace></mjx-mstyle><mjx-mi class="mjx-i" space="2"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mn class="mjx-n" space="4"><mjx-c class="mjx-c31"></mjx-c></mjx-mn><mjx-mo class="mjx-n"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-mn class="mjx-n" space="2"><mjx-c class="mjx-c32"></mjx-c></mjx-mn><mjx-mo class="mjx-n"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="2"><mjx-c class="mjx-c2E"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="2"><mjx-c class="mjx-c2E"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="2"><mjx-c class="mjx-c2E"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="2"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="2"><mjx-c class="mjx-c1D441 TEX-I"></mjx-c></mjx-mi></mjx-math><mjx-assistive-mml unselectable="on" display="block"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mo fence="false" stretchy="false">{</mo><msubsup><mi>v</mi><mi>i</mi><mrow data-mjx-texclass="ORD"><mi>c</mi><mi>l</mi><mi>s</mi></mrow></msubsup><mo>,</mo><msubsup><mi>v</mi><mi>i</mi><mn>1</mn></msubsup><mo>,</mo><msubsup><mi>v</mi><mi>i</mi><mn>2</mn></msubsup><mo>,</mo><mo>.</mo><mo>.</mo><mo>.</mo><mo>,</mo><msubsup><mi>v</mi><mi>i</mi><mi>p</mi></msubsup><mo fence="false" stretchy="false">}</mo><mo>=</mo><mtext>ViT</mtext><mo stretchy="false">(</mo><msub><mrow data-mjx-texclass="ORD"><mover><mi>V</mi><mo stretchy="false">~</mo></mover></mrow><mi>i</mi></msub><mo stretchy="false">)</mo><mo>,</mo><mstyle scriptlevel="0"><mspace width="0.167em"></mspace></mstyle><mi>i</mi><mo>=</mo><mn>1</mn><mo>,</mo><mn>2</mn><mo>,</mo><mo>.</mo><mo>.</mo><mo>.</mo><mo>,</mo><mi>N</mi></math></mjx-assistive-mml></mjx-container> 여기서 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="6" style="font-size: 117.4%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-msubsup><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D463 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.292em; margin-left: 0px;"><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D450 TEX-I"></mjx-c></mjx-mi><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D459 TEX-I"></mjx-c></mjx-mi><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D460 TEX-I"></mjx-c></mjx-mi></mjx-texatom><mjx-spacer style="margin-top: 0.18em;"></mjx-spacer><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msubsup></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><msubsup><mi>v</mi><mi>i</mi><mrow data-mjx-texclass="ORD"><mi>c</mi><mi>l</mi><mi>s</mi></mrow></msubsup></math></mjx-assistive-mml></mjx-container>는 global feature를 나타내고, <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="7" style="font-size: 117.4%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D45D TEX-I"></mjx-c></mjx-mi></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>p</mi></math></mjx-assistive-mml></mjx-container>는 ViT에서 생성된 패치의 개수를 의미한다.</li>
+</ul>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style2">
+<h4 data-ke-size="size20">Visual Adapter</h4>
+<p data-ke-size="size16">Visual Adapter는 각 프레임의 globalr feature <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="8" style="font-size: 117.4%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-msubsup><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D463 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.292em; margin-left: 0px;"><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D450 TEX-I"></mjx-c></mjx-mi><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D459 TEX-I"></mjx-c></mjx-mi><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D460 TEX-I"></mjx-c></mjx-mi></mjx-texatom><mjx-spacer style="margin-top: 0.18em;"></mjx-spacer><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msubsup></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><msubsup><mi>v</mi><mi>i</mi><mrow data-mjx-texclass="ORD"><mi>c</mi><mi>l</mi><mi>s</mi></mrow></msubsup></math></mjx-assistive-mml></mjx-container>를 입력으로 받아,&nbsp; <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="9" style="font-size: 117.4%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D453 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mo class="mjx-n"><mjx-c class="mjx-c22C5"></mjx-c></mjx-mo><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>f</mi><mo stretchy="false">(</mo><mo>⋅</mo><mo stretchy="false">)</mo></math></mjx-assistive-mml></mjx-container>을 통해 LLM의 텍스트 임베딩 공간으로 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="10" style="font-size: 117.4%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D467 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>z</mi><mi>i</mi></msub></math></mjx-assistive-mml></mjx-container>로 변환한다:</p>
+<p style="text-align: center;" data-ke-size="size16"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" display="true" tabindex="0" ctxtmenu_counter="11" style="font-size: 117.4%; position: relative;"><mjx-math display="true" class="MJX-TEX" aria-hidden="true" style="margin-left: 0px; margin-right: 0px;"><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D467 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="4"><mjx-c class="mjx-c1D453 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-msubsup><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D463 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.247em; margin-left: 0px;"><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D450 TEX-I"></mjx-c></mjx-mi><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D459 TEX-I"></mjx-c></mjx-mi><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D460 TEX-I"></mjx-c></mjx-mi></mjx-texatom><mjx-spacer style="margin-top: 0.185em;"></mjx-spacer><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msubsup><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-mo class="mjx-n"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-mstyle><mjx-mspace style="width: 0.167em;"></mjx-mspace></mjx-mstyle><mjx-mi class="mjx-i" space="2"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mn class="mjx-n" space="4"><mjx-c class="mjx-c31"></mjx-c></mjx-mn><mjx-mo class="mjx-n"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-mn class="mjx-n" space="2"><mjx-c class="mjx-c32"></mjx-c></mjx-mn><mjx-mo class="mjx-n"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="2"><mjx-c class="mjx-c2E"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="2"><mjx-c class="mjx-c2E"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="2"><mjx-c class="mjx-c2E"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="2"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="2"><mjx-c class="mjx-c1D441 TEX-I"></mjx-c></mjx-mi></mjx-math><mjx-assistive-mml unselectable="on" display="block"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><msub><mi>z</mi><mi>i</mi></msub><mo>=</mo><mi>f</mi><mo stretchy="false">(</mo><msubsup><mi>v</mi><mi>i</mi><mrow data-mjx-texclass="ORD"><mi>c</mi><mi>l</mi><mi>s</mi></mrow></msubsup><mo stretchy="false">)</mo><mo>,</mo><mstyle scriptlevel="0"><mspace width="0.167em"></mspace></mstyle><mi>i</mi><mo>=</mo><mn>1</mn><mo>,</mo><mn>2</mn><mo>,</mo><mo>.</mo><mo>.</mo><mo>.</mo><mo>,</mo><mi>N</mi></math></mjx-assistive-mml></mjx-container></p>
+<p data-ke-size="size16">변환된 모든 프레임의 결과는 다음과 같이 표현된다: <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" display="true" tabindex="0" ctxtmenu_counter="12" style="font-size: 117.4%; position: relative;"><mjx-math display="true" class="MJX-TEX" aria-hidden="true" style="margin-left: 0px; margin-right: 0px;"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D44D TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c7B"></mjx-c></mjx-mo><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D467 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c7D"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c2208"></mjx-c></mjx-mo><mjx-msup space="4"><mjx-texatom texclass="ORD"><mjx-mi class="mjx-ds mjx-b"><mjx-c class="mjx-c211D TEX-A"></mjx-c></mjx-mi></mjx-texatom><mjx-script style="vertical-align: 0.413em;"><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D441 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-cD7"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D451 TEX-I"></mjx-c></mjx-mi></mjx-texatom></mjx-script></mjx-msup></mjx-math><mjx-assistive-mml unselectable="on" display="block"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mi>Z</mi><mo>=</mo><mo fence="false" stretchy="false">{</mo><msub><mi>z</mi><mi>i</mi></msub><mo fence="false" stretchy="false">}</mo><mo>∈</mo><msup><mrow data-mjx-texclass="ORD"><mi mathvariant="double-struck">R</mi></mrow><mrow data-mjx-texclass="ORD"><mi>N</mi><mo>×</mo><mi>d</mi></mrow></msup></math></mjx-assistive-mml></mjx-container> 여기서 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="13" style="font-size: 117.4%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D451 TEX-I"></mjx-c></mjx-mi></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>d</mi></math></mjx-assistive-mml></mjx-container>는 LLM의 hidden dimension</p>
+<p data-ke-size="size16">&nbsp;프레임 간 시간적 관계를 여기서&nbsp; 명시적으로 모델링하지 않는데,&nbsp; 이는 LLM이 입력된 시퀀스 데이터를 처리하고, 시간적 관계를 학습할 수 있기에 그렇다.</p>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style2"></div>
+<div style="font-family: Arial, sans-serif; line-height: 1.8; font-size: 16px;">
+<h4 data-ke-size="size20">Input of LLM</h4>
+<p data-ke-size="size16">VTimeLLM은 비디오와 텍스트 데이터를 동시에 처리할 수 있도록&nbsp; <b>특수 토큰</b> <code>&lt;video&gt;</code>를 사용하며, 텍스트와 비디오 feature를 결합하여 모델에 입력한다.</p>
+<h4 data-ke-size="size20">(1) special 토큰 <code>&lt;video&gt;</code> 사용</h4>
+<p data-ke-size="size16">비디오 콘텐츠를 나타내기 위해 <code>&lt;video&gt;</code>라는 토큰을 문장에 삽입한다. 예를 들어:</p>
+<blockquote data-ke-style="style1">"This is a video <code>&lt;video&gt;</code> can you describe this video?"</blockquote>
+<p data-ke-size="size16">&nbsp;</p>
+<h4 data-ke-size="size20">(2) 텍스트 임베딩 처리</h4>
+<p data-ke-size="size16"><code>&lt;video&gt;</code>를 제외한 모든 단어는 LLM의 임베딩 레이어를 통해 변환되어, 텍스트 임베딩 리스트 <span style="font-family: 'Courier New', monospace;">[w<sub>1</sub>, w<sub>2</sub>, ..., w<sub>M</sub>]</span>로 생성된다.</p>
+<h4 data-ke-size="size20">(3) 비디오 feature 끼워넣기</h4>
+<p data-ke-size="size16">비디오 임베딩 시퀀스 <i>Z</i>는 <code>&lt;video&gt;</code> 토큰의 위치에 삽입되어 최종 입력 리스트가 생성된다.&nbsp;</p>
+<p style="text-align: center;" data-ke-size="size16"><code>input = [w<sub>1</sub>, ..., w<sub>j-1</sub>, Z, w<sub>j</sub>, ..., w<sub>M</sub>]</code></p>
+<p data-ke-size="size16">여기서:</p>
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li><i>w<sub>j-1</sub></i>와 <i>w<sub>j</sub></i>는 <code>&lt;video&gt;</code> 토큰에 인접한 단어를 나타낸다.</li>
+<li>예를 들어, 위 예시 문장에서 <i>w<sub>j-1</sub></i>는 "video", <i>w<sub>j</sub></i>는 "can"에 해당한다.</li>
+</ul>
+<p data-ke-size="size16">그리고~</p>
+<p data-ke-size="size16">LLM은 이 결합된 입력 리스트를 받아 비디오 콘텐츠와 텍스트 쿼리를 동시에 처리한다.</p>
+<h4 data-ke-size="size20">Output for Temporal Boundaries</h4>
+<p data-ke-size="size16">VTimeLLM은 비디오의 <b>Temporal Boundaries</b>를 텍스트 형식으로 출력한다. --&gt;이런식</p>
+<p data-ke-size="size16">"from <i>s</i> to <i>e</i>"</p>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style5"></div>
+<h3 data-ke-size="size23" id="Boundary-aware%20Training-1"><a href="#Boundary-aware%20Training-1">Boundary-aware Training</a></h3>
+<div style="font-family: Arial, sans-serif; line-height: 1.8; font-size: 16px;">
+<p data-ke-size="size16">VTimeLLM은 기존 비디오 LLM의 <b>2단계 학습 전략</b>(feature alignmentf랑 instruction tuning)에 더해 <b>시간적 이해 능력</b>을 향상시키기 위한 <b>추가적인 학습 단계</b>를 도입한다. 이를 통해 모델이 비디오 내 세부적인 시간 경계를 잘 이해할 수 있도록 한다.</p>
+<h4 data-ke-size="size20"><b>1단계 Feature Alignment</b></h4>
+<p data-ke-size="size16">비디오 특징을 LLM의 <b>의미적 공간(semantic space)</b>과 정렬시키기 위해 <b><span style="text-align: start;">&nbsp;이미지-텍스트 쌍 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="14" style="font-size: 117.4%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mo class="mjx-n"><mjx-c class="mjx-c27E8"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D43C TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="2"><mjx-c class="mjx-c1D447 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c27E9"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mo fence="false" stretchy="false">⟨</mo><mi>I</mi><mo>,</mo><mi>T</mi><mo fence="false" stretchy="false">⟩</mo></math></mjx-assistive-mml></mjx-container> 데이터를 활용하여 <b>Visual Adapter</b> <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="15" style="font-size: 117.4%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D453 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mo class="mjx-n"><mjx-c class="mjx-c22C5"></mjx-c></mjx-mo><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>f</mi><mo stretchy="false">(</mo><mo>⋅</mo><mo stretchy="false">)</mo></math></mjx-assistive-mml></mjx-container></span> </b>를 학습한다.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p style="text-align: start;" data-ke-size="size16">아래와 같이 생성된 이미지 임베딩을</p>
+<p style="text-align: center;" data-ke-size="size16"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" display="true" tabindex="0" ctxtmenu_counter="16" style="font-size: 117.4%; position: relative;"><mjx-math display="true" class="MJX-TEX" aria-hidden="true" style="margin-left: 0px; margin-right: 0px;"><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D44D TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em; margin-left: -0.04em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D43C TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="4"><mjx-c class="mjx-c1D453 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mtext class="mjx-n"><mjx-c class="mjx-c56"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c54"></mjx-c></mjx-mtext><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D43C TEX-I"></mjx-c></mjx-mi><mjx-msup><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-script style="vertical-align: 0.413em;"><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D450 TEX-I"></mjx-c></mjx-mi><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D459 TEX-I"></mjx-c></mjx-mi><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D460 TEX-I"></mjx-c></mjx-mi></mjx-texatom></mjx-script></mjx-msup><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-mo class="mjx-n"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="block"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><msub><mi>Z</mi><mi>I</mi></msub><mo>=</mo><mi>f</mi><mo stretchy="false">(</mo><mtext>ViT</mtext><mo stretchy="false">(</mo><mi>I</mi><msup><mo stretchy="false">)</mo><mrow data-mjx-texclass="ORD"><mi>c</mi><mi>l</mi><mi>s</mi></mrow></msup><mo stretchy="false">)</mo><mo>,</mo></math></mjx-assistive-mml></mjx-container></p>
+<p style="text-align: start;" data-ke-size="size16">텍스트 임베딩 시퀀스 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="17" style="font-size: 117.4%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mo class="mjx-n"><mjx-c class="mjx-c5B"></mjx-c></mjx-mo><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D464 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c31"></mjx-c></mjx-mn></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-msub space="2"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D464 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c32"></mjx-c></mjx-mn></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="2"><mjx-c class="mjx-c22EF"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="2"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-msub space="2"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D464 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D440 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c5D"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mo stretchy="false">[</mo><msub><mi>w</mi><mn>1</mn></msub><mo>,</mo><msub><mi>w</mi><mn>2</mn></msub><mo>,</mo><mo>⋯</mo><mo>,</mo><msub><mi>w</mi><mi>M</mi></msub><mo stretchy="false">]</mo></math></mjx-assistive-mml></mjx-container>를 결합하여 최종 입력 시퀀스를 구성한다:</p>
+<p style="text-align: center;" data-ke-size="size16"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" display="true" tabindex="0" ctxtmenu_counter="18" style="font-size: 117.4%; position: relative;"><mjx-math display="true" class="MJX-TEX" aria-hidden="true" style="margin-left: 0px; margin-right: 0px;"><mjx-mtext class="mjx-n"><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c6E"></mjx-c><mjx-c class="mjx-c70"></mjx-c><mjx-c class="mjx-c75"></mjx-c><mjx-c class="mjx-c74"></mjx-c></mjx-mtext><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c5B"></mjx-c></mjx-mo><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D44D TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em; margin-left: -0.04em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D43C TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-msub space="2"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D464 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c31"></mjx-c></mjx-mn></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-msub space="2"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D464 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c32"></mjx-c></mjx-mn></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="2"><mjx-c class="mjx-c22EF"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="2"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-msub space="2"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D464 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D440 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c5D"></mjx-c></mjx-mo><mjx-mo class="mjx-n"><mjx-c class="mjx-c2E"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="block"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mtext>input</mtext><mo>=</mo><mo stretchy="false">[</mo><msub><mi>Z</mi><mi>I</mi></msub><mo>,</mo><msub><mi>w</mi><mn>1</mn></msub><mo>,</mo><msub><mi>w</mi><mn>2</mn></msub><mo>,</mo><mo>⋯</mo><mo>,</mo><msub><mi>w</mi><mi>M</mi></msub><mo stretchy="false">]</mo><mo>.</mo></math></mjx-assistive-mml></mjx-container></p>
+<p style="text-align: start;" data-ke-size="size16">생성된 입력 시퀀스를 LLM의 원래&nbsp;<b>auto-regressive training objective</b>에 맞춰 비주얼 어댑터 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="19" style="font-size: 117.4%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D453 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mo class="mjx-n"><mjx-c class="mjx-c22C5"></mjx-c></mjx-mo><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>f</mi><mo stretchy="false">(</mo><mo>⋅</mo><mo stretchy="false">)</mo></math></mjx-assistive-mml></mjx-container>를 학습시키는 데 활용한다</p>
+<p style="text-align: start;" data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">데이터 구성은 다음과같다.&nbsp;</p>
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li>이미지-텍스트 쌍으로 이루어진 <b>LCS-558K 데이터셋</b>을 사용한다.</li>
+<li>비디오-텍스트 데이터셋은 사용하지 않는데, 그 이유는 다음과 같다:
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li><b>텍스트 노이즈 문제</b>: 기존 비디오-텍스트 데이터셋(WebVid2M 등)은 텍스트에 많은 노이즈가 포함되어 있어 비주얼 특징과 텍스트 의미 간 align을 방해한다.</li>
+<li><b>정보 손실 문제</b>: 비디오를 텍스트로 요약할 때, 세부적인 (색상등)시각적 정보가 손실될 가능성이 크다. 반면, 이미지를 텍스트로 요약하면 손실이 상대적으로 적다</li>
+</ul>
+</ul>
+</li>
+</ul>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style2">
+<div style="font-family: Arial, sans-serif; line-height: 1.8; font-size: 16px;">
+<div style="font-family: Arial, sans-serif; line-height: 1.8; font-size: 16px;">
+<h4 style="color: #000000; text-align: start;" data-ke-size="size20"><b>2단계 Boundary Perception</b></h4>
+<p data-ke-size="size16"><span style="letter-spacing: 0px;">Boundary Perception 단계에서는 모델이 </span><b>연속적인 이미지 프레임</b><span style="letter-spacing: 0px;">을 이해하고, 각 비디오 세그먼트의 의미를 파악하면서 </span><b>시간 경계</b><span style="letter-spacing: 0px;">와의 align 강화하도록 학습한다.</span></p>
+</div>
+</div>
+</div>
+<div style="font-family: Arial, sans-serif; line-height: 1.8; font-size: 16px;">
+<h4 data-ke-size="size20">데이터 구성&nbsp;</h4>
+<h4 data-ke-size="size20">&lt;기존 문제점&gt;</h4>
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li><b>대규모 데이터셋 부족:</b> 비디오 세그먼트의 타임스탬프와 의미를 수작업으로 주석 처리하는 것은 시간이 많이 소요됨.</li>
+<li><b>기존 방식의 한계:</b> 자동 음성 인식(ASR) 기반 텍스트 전사와 비디오 세그먼트를 정렬하는 기존 방법은 다음 문제를 가짐:
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li>행동과 음성간 alignment 부족.</li>
+<li>boundary annotation의 정확도가 낮음.</li>
+</ul>
+</li>
+</ul>
+<h4 data-ke-size="size20">&lt;해결책: InternVid-10M-FLT 데이터셋&gt;</h4>
+<h5>데이터 선정 기준</h5>
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li>비디오 길이는 120초를 초과하지 않음.</li>
+<li>비디오는 서로 겹치지 않는(non-overlapping) 이벤트 주석을 포함.</li>
+<li>각 이벤트는 최소 3초 이상 지속되며, 평균 이벤트 길이는 비디오 길이의 8%를 초과.</li>
+</ul>
+<p data-ke-size="size16">--&gt; 이렇게 총 134,000개의 비디오를 선정했으며, 각 비디오는 여러 이벤트와 그에 대한 대략적인 시간 주석 및 텍스트 설명을 포함한다.</p>
+<h3 data-ke-size="size23">&lt;QA 대화 데이터 생성&gt;</h3>
+<p data-ke-size="size16">비디오 event 정보를 기반으로 LLM 학습에 적합한 QA(질문-응답) 대화 데이터를 생성한다.</p>
+<h4 data-ke-size="size20">QA 데이터 구조</h4>
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li>각 비디오에는 이벤트 정보 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="20" style="font-size: 117.4%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mo class="mjx-n"><mjx-c class="mjx-c7B"></mjx-c></mjx-mo><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D460 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-msub space="2"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D452 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-msub space="2"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D447 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em; margin-left: -0.12em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c7D"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mo fence="false" stretchy="false">{</mo><msub><mi>s</mi><mi>i</mi></msub><mo>,</mo><msub><mi>e</mi><mi>i</mi></msub><mo>,</mo><msub><mi>T</mi><mi>i</mi></msub><mo fence="false" stretchy="false">}</mo></math></mjx-assistive-mml></mjx-container>가 포함된다:
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="21" style="font-size: 117.4%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D460 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-msub space="2"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D452 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>s</mi><mi>i</mi></msub><mo>,</mo><msub><mi>e</mi><mi>i</mi></msub></math></mjx-assistive-mml></mjx-container>: 이벤트의 시작 및 종료 시간(프레임 단위, 00~99).</li>
+<li><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="22" style="font-size: 117.4%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D447 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em; margin-left: -0.12em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>T</mi><mi>i</mi></msub></math></mjx-assistive-mml></mjx-container>: 해당 이벤트의 텍스트 설명.</li>
+</ul>
+</li>
+</ul>
+<h4 data-ke-size="size20">QA 대화 유형</h4>
+<figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1182" data-origin-height="284" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/BcMhi/btsKX5OAkUK/AAAAAAAAAAAAAAAAAAAAALrUSp4cJfYkAlqFx6MovYz-pvOOtoHjq48i2lNZ9DCZ/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=jARo1MbjKQnh7bSKwwINwtjQh7U%3D" data-phocus="https://blog.kakaocdn.net/dna/BcMhi/btsKX5OAkUK/AAAAAAAAAAAAAAAAAAAAALrUSp4cJfYkAlqFx6MovYz-pvOOtoHjq48i2lNZ9DCZ/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=jARo1MbjKQnh7bSKwwINwtjQh7U%3D"><img src="https://blog.kakaocdn.net/dna/BcMhi/btsKX5OAkUK/AAAAAAAAAAAAAAAAAAAAALrUSp4cJfYkAlqFx6MovYz-pvOOtoHjq48i2lNZ9DCZ/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=jARo1MbjKQnh7bSKwwINwtjQh7U%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FBcMhi%2FbtsKX5OAkUK%2FAAAAAAAAAAAAAAAAAAAAALrUSp4cJfYkAlqFx6MovYz-pvOOtoHjq48i2lNZ9DCZ%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DjARo1MbjKQnh7bSKwwINwtjQh7U%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1182" height="284" data-origin-width="1182" data-origin-height="284" data-phocus-index="2"></span></figure>
+
+<h5>1. Single-turn QA (단일 질문-응답)</h5>
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li><b>작업:</b> Dense Video Captioning.</li>
+<li>질문(Q1): 비디오의 모든 이벤트와 해당 타임스탬프에 대한 포괄적인 설명 요청. <br>응답(A1): 각 이벤트의 설명과 타임스탬프를 특정 형식으로 출력.</li>
+</ul>
+<h5>2. Multi-turn QA (다중 질문-응답)</h5>
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li><b>Segment Captioning:</b>&nbsp;타임스탬프를 기반으로 설명 생성</li>
+<li><b>Temporal Video Grounding:</b>&nbsp;설명을 기반으로 타임스탬프 생성.</li>
+<li>질문은 이벤트 순서에 상관없이 무작위로 제시되며, 각 이벤트에 대해 두 작업 중 하나를 요구.</li>
+<li>10개의 질문 템플릿을 설계하여 QA 대화 데이터를 생성.</li>
+</ul>
+<h3 data-ke-size="size23">&lt;Training Strategy&gt;</h3>
+<h4 data-ke-size="size20">1. 입력 format</h4>
+<figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1168" data-origin-height="216" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/dyriuA/btsKW6gnYxK/AAAAAAAAAAAAAAAAAAAAAPdMXA7SMbkDjxYXCb8unZ3GDvxf2rg520HN4TOPGLe6/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=9SJSjF5AUhQrOt5f2utfAly4%2Bb8%3D" data-phocus="https://blog.kakaocdn.net/dna/dyriuA/btsKW6gnYxK/AAAAAAAAAAAAAAAAAAAAAPdMXA7SMbkDjxYXCb8unZ3GDvxf2rg520HN4TOPGLe6/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=9SJSjF5AUhQrOt5f2utfAly4%2Bb8%3D"><img src="https://blog.kakaocdn.net/dna/dyriuA/btsKW6gnYxK/AAAAAAAAAAAAAAAAAAAAAPdMXA7SMbkDjxYXCb8unZ3GDvxf2rg520HN4TOPGLe6/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=9SJSjF5AUhQrOt5f2utfAly4%2Bb8%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FdyriuA%2FbtsKW6gnYxK%2FAAAAAAAAAAAAAAAAAAAAAPdMXA7SMbkDjxYXCb8unZ3GDvxf2rg520HN4TOPGLe6%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3D9SJSjF5AUhQrOt5f2utfAly4%252Bb8%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1168" height="216" data-origin-width="1168" data-origin-height="216" data-phocus-index="3"></span></figure>
+
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li>QA 데이터를 원래 LLM의 형식에 맞춰 포맷팅.</li>
+<li>첫 질문 전에 "This is a video with 100 frames: <code>&lt;video&gt;</code>\n" 문장을 추가.</li>
+</ul>
+<p data-ke-size="size16">생성된 QA 데이터를 활용하여 LLM의 <b>auto-regressive training objective</b>를 적용한다.</p>
+<p data-ke-size="size16">loss는 QA 응답 부분(A1, A2 등)의 토큰에만 계산한다.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16"><b>LoRA (Low-Rank Adaptation):</b> LLM을 미세 조정하기 위해 활용.</p>
+<p data-ke-size="size16"><b>Visual Adapter:</b> 동결(frozen) 상태로 유지하며 새롭게 추가된 LoRA 모듈만 학습.</p>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style2">
+<h4 style="color: #000000; text-align: start;" data-ke-size="size20"><b>3단계 Instruction tuning</b></h4>
+</div>
+<div style="font-family: Arial, sans-serif; line-height: 1.8; font-size: 16px;">
+<p data-ke-size="size16">Instruction Tuning 단계에서는 VTimeLLM이 비디오 내 모든 이벤트를 이해하고 해당 타임스탬프와 align하는 기존 능력을 기반으로, <b>더 정확한 비디오 시간 이해와 추론</b>을 가능하게 한다. 또한, <b>사용자와 자연스럽게 대화</b>할 수 있는 능력을 추가로 학습한다.</p>
+<p data-ke-size="size16">이 단계는 다음과 같은 문제를 해결하기 위해 설계었음.</p>
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li><b>출력 오버피팅 문제:</b> 2단계 학습 결과, 모델이 단순한 응답("from 00 to 10")만 제공하며 대화 능력이 부족함.</li>
+<li><b>노이즈 데이터 문제:</b> 2단계에서 사용된 InternVid 데이터셋의 자동 주석이 정확하지 않고, 노이즈가 포함됨.</li>
+</ul>
+<h3 data-ke-size="size23">데이터 구성</h3>
+<h4 data-ke-size="size20">high quality QA 데이터셋( <span style="color: #333333; text-align: start;">ActivityNet Captions와 DiDeMo<span> 에서 일부 비디오 선택)</span></span></h4>
+<h5>QA 대화 데이터 변환</h5>
+<p data-ke-size="size16">각 비디오의 이벤트 정보 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="23" style="font-size: 117.4%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mo class="mjx-n"><mjx-c class="mjx-c7B"></mjx-c></mjx-mo><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D460 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-msub space="2"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D452 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-msub space="2"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D447 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em; margin-left: -0.12em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c7D"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mo fence="false" stretchy="false">{</mo><msub><mi>s</mi><mi>i</mi></msub><mo>,</mo><msub><mi>e</mi><mi>i</mi></msub><mo>,</mo><msub><mi>T</mi><mi>i</mi></msub><mo fence="false" stretchy="false">}</mo></math></mjx-assistive-mml></mjx-container>를 기반으로 QA 대화 데이터를 생성한다.</p>
+<p data-ke-size="size16">이전 단계에서 사용된 템플릿 기반 대화는 모델 오버피팅 문제가 있었기에 이 단계에서는 템플릿 대신 LLM을 활용한다:</p>
+<h3 data-ke-size="size23">Training</h3>
+<h4 data-ke-size="size20">LoRA&nbsp; module</h4>
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li>2단계에서 학습된 LoRA 모듈을 원래 모델과 병합.</li>
+<li>새로운 LoRA 모듈을 추가하여 이 단계에서 학습 가능한 유일한 param</li>
+<li>나머지 모든 파라미터는 freeze</li>
+</ul>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style5"></div>
+<p data-ke-size="size16">Result</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1202" data-origin-height="240" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/c1j0LL/btsKXX4f9Vw/AAAAAAAAAAAAAAAAAAAAAGTxI-LURs2ftJ3vmxMIengo8uss6h3dG8Rstm3awPIU/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=yRUB52TLG7Z06F2bAluvT05IH8Y%3D" data-phocus="https://blog.kakaocdn.net/dna/c1j0LL/btsKXX4f9Vw/AAAAAAAAAAAAAAAAAAAAAGTxI-LURs2ftJ3vmxMIengo8uss6h3dG8Rstm3awPIU/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=yRUB52TLG7Z06F2bAluvT05IH8Y%3D"><img src="https://blog.kakaocdn.net/dna/c1j0LL/btsKXX4f9Vw/AAAAAAAAAAAAAAAAAAAAAGTxI-LURs2ftJ3vmxMIengo8uss6h3dG8Rstm3awPIU/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=yRUB52TLG7Z06F2bAluvT05IH8Y%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2Fc1j0LL%2FbtsKXX4f9Vw%2FAAAAAAAAAAAAAAAAAAAAAGTxI-LURs2ftJ3vmxMIengo8uss6h3dG8Rstm3awPIU%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DyRUB52TLG7Z06F2bAluvT05IH8Y%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1202" height="240" data-origin-width="1202" data-origin-height="240" data-phocus-index="4"></span></figure>
+<p></p>
+<p data-ke-size="size16">Ablation</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1258" data-origin-height="394" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/bkYsYU/btsKWIfPzHV/AAAAAAAAAAAAAAAAAAAAAHgitZXC_PDm7qpU0PPd-f8Ps7Q3FYVI4QRKoC7XjQqn/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=KlzvlUgzr4XoPSIFI76DWbA5CzE%3D" data-phocus="https://blog.kakaocdn.net/dna/bkYsYU/btsKWIfPzHV/AAAAAAAAAAAAAAAAAAAAAHgitZXC_PDm7qpU0PPd-f8Ps7Q3FYVI4QRKoC7XjQqn/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=KlzvlUgzr4XoPSIFI76DWbA5CzE%3D"><img src="https://blog.kakaocdn.net/dna/bkYsYU/btsKWIfPzHV/AAAAAAAAAAAAAAAAAAAAAHgitZXC_PDm7qpU0PPd-f8Ps7Q3FYVI4QRKoC7XjQqn/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=KlzvlUgzr4XoPSIFI76DWbA5CzE%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FbkYsYU%2FbtsKWIfPzHV%2FAAAAAAAAAAAAAAAAAAAAAHgitZXC_PDm7qpU0PPd-f8Ps7Q3FYVI4QRKoC7XjQqn%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DKlzvlUgzr4XoPSIFI76DWbA5CzE%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1258" height="394" data-origin-width="1258" data-origin-height="394" data-phocus-index="5"></span></figure>
+<p></p>
+    </div>
+    
+    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+        <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,175 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HybriK - 3d human pose and shape estimation — happy8825 - Seohyun Lee Blog</title>
+    <meta name="description" content="A Hybrid Analytical-Neural Inverse Kinematics Solution for 3D Human Pose and Shape Estimation
+Regressor를 통해 SMPL body model parameter를 추정하고,
+추정된 parameter들은 3d ">
+    <link rel="stylesheet" href="../../styles.css">
+    <style>
+        body { 
+            background: #0d0f17; 
+            color: #fff; 
+            font-family: 'Inter', sans-serif; 
+            line-height: 1.6; 
+            margin: 0; 
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .post-header {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 2rem;
+            margin-bottom: 2rem;
+        }
+        .post-meta {
+            color: #888;
+            margin-bottom: 1rem;
+        }
+        .post-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .post-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        .post-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 1rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .post-content p {
+            margin-bottom: 1rem;
+        }
+        .post-content h1, .post-content h2, .post-content h3 {
+            color: #667eea;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .post-content blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 1rem;
+            margin: 1.5rem 0;
+            color: #ccc;
+            font-style: italic;
+        }
+        .post-content code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .post-content pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            color: #667eea;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            background: rgba(102, 126, 234, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    
+    <div class="post-header">
+        <div class="post-meta">
+            <span>📅 2024-07-13</span>
+            <span> | 🏷️ Computer Vision Paper Review</span>
+            <span> | 🔗 <a href="https://happy8825.tistory.com/20" target="_blank">Original Post</a></span>
+            <span> | 📊 9 images</span>
+        </div>
+        <h1 class="post-title">HybriK - 3d human pose and shape estimation — happy8825</h1>
+        
+    </div>
+    
+    <div class="post-content">
+        <p data-ke-size="size18">A Hybrid Analytical-Neural Inverse Kinematics Solution for 3D Human Pose and Shape Estimation</p>
+<p data-ke-size="size18">Regressor를 통해 SMPL body model parameter를 추정하고,</p>
+<p data-ke-size="size18">추정된 parameter들은 3d human model(freezed)에 forward되어 3d mesh를 출력하는</p>
+<p data-ke-size="size18">Model Based 접근법을 이용하는 모델이다.</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1340" data-origin-height="658" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/Afa4O/btsIyFlq9HA/AAAAAAAAAAAAAAAAAAAAAKk74BweiBZR1R0MjlzdfoWm6Tw3rOhVCqmmKATrMews/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=SOvpo3mze8YitrQLlDyAfq9V82Q%3D" data-phocus="https://blog.kakaocdn.net/dna/Afa4O/btsIyFlq9HA/AAAAAAAAAAAAAAAAAAAAAKk74BweiBZR1R0MjlzdfoWm6Tw3rOhVCqmmKATrMews/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=SOvpo3mze8YitrQLlDyAfq9V82Q%3D"><img src="https://blog.kakaocdn.net/dna/Afa4O/btsIyFlq9HA/AAAAAAAAAAAAAAAAAAAAAKk74BweiBZR1R0MjlzdfoWm6Tw3rOhVCqmmKATrMews/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=SOvpo3mze8YitrQLlDyAfq9V82Q%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FAfa4O%2FbtsIyFlq9HA%2FAAAAAAAAAAAAAAAAAAAAAKk74BweiBZR1R0MjlzdfoWm6Tw3rOhVCqmmKATrMews%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DSOvpo3mze8YitrQLlDyAfq9V82Q%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1340" height="658" data-origin-width="1340" data-origin-height="658" data-phocus-index="0"></span></figure>
+<p></p>
+<p data-ke-size="size18">Forward Kinematics?</p>
+<p data-ke-size="size18">입력 : 3d 관절 회전과 T-pose에서의 3d 관절 좌표</p>
+<p data-ke-size="size18">출력: 입력의 3d 관절 회전을 적용한 3d 관절 좌표</p>
+<p data-ke-size="size18">Inverse Kinemetics?</p>
+<p data-ke-size="size18">입력 : 목표로 하는 3d 관절 좌표, T pose에서의 3d 관절 좌표</p>
+<p data-ke-size="size18">출력 : 입력의 3d 관절 좌표에 해당하는 3d 관절 회전</p>
+<p data-ke-size="size18">즉, T pose 에서 무슨 회전을 해야 목표로 하는 3d 관절 좌표가 나올지? Output이 회전임</p>
+<p data-ke-size="size18">—&gt; Solution이 없거나 여러개일 수 있다는게 문제점.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">Pipeline</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1340" data-origin-height="437" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/xE97T/btsIxgttlNH/AAAAAAAAAAAAAAAAAAAAALhJTNqqq-w_Cm9YoyQmaIKw7v-2O_Oj0ozo3XYIozXS/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=Ui%2F%2FNoKsmgDt9o0CcSX%2B%2BCk%2BGyY%3D" data-phocus="https://blog.kakaocdn.net/dna/xE97T/btsIxgttlNH/AAAAAAAAAAAAAAAAAAAAALhJTNqqq-w_Cm9YoyQmaIKw7v-2O_Oj0ozo3XYIozXS/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=Ui%2F%2FNoKsmgDt9o0CcSX%2B%2BCk%2BGyY%3D"><img src="https://blog.kakaocdn.net/dna/xE97T/btsIxgttlNH/AAAAAAAAAAAAAAAAAAAAALhJTNqqq-w_Cm9YoyQmaIKw7v-2O_Oj0ozo3XYIozXS/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=Ui%2F%2FNoKsmgDt9o0CcSX%2B%2BCk%2BGyY%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FxE97T%2FbtsIxgttlNH%2FAAAAAAAAAAAAAAAAAAAAALhJTNqqq-w_Cm9YoyQmaIKw7v-2O_Oj0ozo3XYIozXS%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DUi%252F%252FNoKsmgDt9o0CcSX%252B%252BCk%252BGyY%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1340" height="437" data-origin-width="1340" data-origin-height="437" data-phocus-index="1"></span></figure>
+<p></p>
+<p data-ke-size="size18">Inverse Kinemetics에서 보면, 회전 추정이 어렵다는 것을 알 수 있는데, 이 모델에서는 이 문제를 살짝 relax 시킨 느낌인것 같음</p>
+<p data-ke-size="size18">Neural network 가 모든 회전을 추정하는게 아니고, 3d관절 좌표와 twist 하는 관절의 1d rotation만 추정한 후, 이를 통해 모델이 모든 3d 회전을 얻는 방식.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">Swing 회전과 Twist 회전으로 3d 관절 회전을 분해.</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1340" data-origin-height="124" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/bKU1R3/btsIxDWeuph/AAAAAAAAAAAAAAAAAAAAAKdaNlJqzxpdn0SBilTYXP5EvPLfP9AZSlRDViKa-3pP/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=mL7ryoYvnbWznUJTsnHBUKvdpDg%3D" data-phocus="https://blog.kakaocdn.net/dna/bKU1R3/btsIxDWeuph/AAAAAAAAAAAAAAAAAAAAAKdaNlJqzxpdn0SBilTYXP5EvPLfP9AZSlRDViKa-3pP/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=mL7ryoYvnbWznUJTsnHBUKvdpDg%3D"><img src="https://blog.kakaocdn.net/dna/bKU1R3/btsIxDWeuph/AAAAAAAAAAAAAAAAAAAAAKdaNlJqzxpdn0SBilTYXP5EvPLfP9AZSlRDViKa-3pP/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=mL7ryoYvnbWznUJTsnHBUKvdpDg%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FbKU1R3%2FbtsIxDWeuph%2FAAAAAAAAAAAAAAAAAAAAAKdaNlJqzxpdn0SBilTYXP5EvPLfP9AZSlRDViKa-3pP%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DmL7ryoYvnbWznUJTsnHBUKvdpDg%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1340" height="124" data-origin-width="1340" data-origin-height="124" data-phocus-index="2"></span></figure>
+<figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1340" data-origin-height="825" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/pNS4W/btsIzq8VzCs/AAAAAAAAAAAAAAAAAAAAAAvn8UcY3Yzo8jym8b1ufuldaDzIzxXudOTTNLWCuDE4/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=t1mfYAINTjGxyPOe2kaZxTXcr1A%3D" data-phocus="https://blog.kakaocdn.net/dna/pNS4W/btsIzq8VzCs/AAAAAAAAAAAAAAAAAAAAAAvn8UcY3Yzo8jym8b1ufuldaDzIzxXudOTTNLWCuDE4/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=t1mfYAINTjGxyPOe2kaZxTXcr1A%3D"><img src="https://blog.kakaocdn.net/dna/pNS4W/btsIzq8VzCs/AAAAAAAAAAAAAAAAAAAAAAvn8UcY3Yzo8jym8b1ufuldaDzIzxXudOTTNLWCuDE4/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=t1mfYAINTjGxyPOe2kaZxTXcr1A%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FpNS4W%2FbtsIzq8VzCs%2FAAAAAAAAAAAAAAAAAAAAAAvn8UcY3Yzo8jym8b1ufuldaDzIzxXudOTTNLWCuDE4%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3Dt1mfYAINTjGxyPOe2kaZxTXcr1A%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1340" height="825" data-origin-width="1340" data-origin-height="825" data-phocus-index="3"></span></figure>
+<p></p>
+<p data-ke-size="size18">특정 Tpose 에서 어떠한 pose를 취했을때 나오는 Axis Angle rotation을 하나의 축을 기준으로 회전하는거랑 똑같다고 표현할 수 있음.</p>
+<p data-ke-size="size18">이렇게 Swing 이랑 Twist rotation 분해하고,</p>
+<p data-ke-size="size18">Swing Rotation은 추정한 3d 관절 좌표로부터 계산.</p>
+<p data-ke-size="size18">근데 Twist rotation은 계산으로 구할 수 가 없어서 neural network로부터 구해와야함.</p>
+<p data-ke-size="size18">Naive Hybrik (Twist and Swing 분해 기반)</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1340" data-origin-height="814" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/dQnR7z/btsIyE7Uq6t/AAAAAAAAAAAAAAAAAAAAAIiJXfL7QuWBvzkhFpY8TTKLQ43E2Z_uNZLpzH2Nk3DY/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=vpHktvo%2Ftq%2BUibOT8TZ17kNZY6k%3D" data-phocus="https://blog.kakaocdn.net/dna/dQnR7z/btsIyE7Uq6t/AAAAAAAAAAAAAAAAAAAAAIiJXfL7QuWBvzkhFpY8TTKLQ43E2Z_uNZLpzH2Nk3DY/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=vpHktvo%2Ftq%2BUibOT8TZ17kNZY6k%3D"><img src="https://blog.kakaocdn.net/dna/dQnR7z/btsIyE7Uq6t/AAAAAAAAAAAAAAAAAAAAAIiJXfL7QuWBvzkhFpY8TTKLQ43E2Z_uNZLpzH2Nk3DY/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=vpHktvo%2Ftq%2BUibOT8TZ17kNZY6k%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FdQnR7z%2FbtsIyE7Uq6t%2FAAAAAAAAAAAAAAAAAAAAAIiJXfL7QuWBvzkhFpY8TTKLQ43E2Z_uNZLpzH2Nk3DY%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DvpHktvo%252Ftq%252BUibOT8TZ17kNZY6k%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1340" height="814" data-origin-width="1340" data-origin-height="814" data-phocus-index="4"></span></figure>
+<p></p>
+<p data-ke-size="size18">Input :목표하고 있는 관절 좌표, T pose 관절 좌표</p>
+<p data-ke-size="size18">Output : 추정된 twist angle로부터 3d 상대 관절 회전 을 얻음</p>
+<p data-ke-size="size18">상대 관절 회전이면 관절이 바뀌어도 상대적으로 회전이 계산이 되는거니까 twist 범위가 제한되고, 뉴럴 네트워크가 학습하기 쉬워짐.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1340" data-origin-height="755" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/FADdg/btsIyxBdpBM/AAAAAAAAAAAAAAAAAAAAAHuHfhSbrd7yRaivWgkBYCv-xTRQ_Kd_2hfz9dTLfZTO/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=yJURrNna%2Bf2TBexL0t34w2wYv14%3D" data-phocus="https://blog.kakaocdn.net/dna/FADdg/btsIyxBdpBM/AAAAAAAAAAAAAAAAAAAAAHuHfhSbrd7yRaivWgkBYCv-xTRQ_Kd_2hfz9dTLfZTO/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=yJURrNna%2Bf2TBexL0t34w2wYv14%3D"><img src="https://blog.kakaocdn.net/dna/FADdg/btsIyxBdpBM/AAAAAAAAAAAAAAAAAAAAAHuHfhSbrd7yRaivWgkBYCv-xTRQ_Kd_2hfz9dTLfZTO/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=yJURrNna%2Bf2TBexL0t34w2wYv14%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FFADdg%2FbtsIyxBdpBM%2FAAAAAAAAAAAAAAAAAAAAAHuHfhSbrd7yRaivWgkBYCv-xTRQ_Kd_2hfz9dTLfZTO%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DyJURrNna%252Bf2TBexL0t34w2wYv14%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1340" height="755" data-origin-width="1340" data-origin-height="755" data-phocus-index="5"></span></figure>
+<p></p>
+<p data-ke-size="size18">Naive Hybrik 성능도 괜찮게 나오는데 에러가 accumulate된다는 문제가 있음.</p>
+<p data-ke-size="size18">Inverse Kinematics 이 식 부분에서</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1340" data-origin-height="185" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/dpoJvE/btsIydJwGZa/AAAAAAAAAAAAAAAAAAAAADq8qITWtJ_j6WDBby63K48Ro0c49Q_MunwCmw7zQjZ_/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=4TyBPtU7KIf9cu7pNcL9ZHkROY0%3D" data-phocus="https://blog.kakaocdn.net/dna/dpoJvE/btsIydJwGZa/AAAAAAAAAAAAAAAAAAAAADq8qITWtJ_j6WDBby63K48Ro0c49Q_MunwCmw7zQjZ_/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=4TyBPtU7KIf9cu7pNcL9ZHkROY0%3D"><img src="https://blog.kakaocdn.net/dna/dpoJvE/btsIydJwGZa/AAAAAAAAAAAAAAAAAAAAADq8qITWtJ_j6WDBby63K48Ro0c49Q_MunwCmw7zQjZ_/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=4TyBPtU7KIf9cu7pNcL9ZHkROY0%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FdpoJvE%2FbtsIydJwGZa%2FAAAAAAAAAAAAAAAAAAAAADq8qITWtJ_j6WDBby63K48Ro0c49Q_MunwCmw7zQjZ_%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3D4TyBPtU7KIf9cu7pNcL9ZHkROY0%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1340" height="185" data-origin-width="1340" data-origin-height="185" data-phocus-index="6"></span></figure>
+<p></p>
+<p data-ke-size="size18">pk - ppa(k)랑 tk-tpa(k)랑 크기가 안맞아서 생기는 문제인데, 틀린 부분을 계속 누적해서 가져간다는 문제점이 있음.</p>
+<p data-ke-size="size18">이걸 해결한게</p>
+<p data-ke-size="size18">Adaptive Hybrik</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1340" data-origin-height="887" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/bLdwr3/btsIx6xnaST/AAAAAAAAAAAAAAAAAAAAAPEcfzUSXIa65n8CY8gVNr7ka8ymX6rI-No1927gR1qx/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=iF42sS77ke9X1EDc9Ovi1JL29ic%3D" data-phocus="https://blog.kakaocdn.net/dna/bLdwr3/btsIx6xnaST/AAAAAAAAAAAAAAAAAAAAAPEcfzUSXIa65n8CY8gVNr7ka8ymX6rI-No1927gR1qx/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=iF42sS77ke9X1EDc9Ovi1JL29ic%3D"><img src="https://blog.kakaocdn.net/dna/bLdwr3/btsIx6xnaST/AAAAAAAAAAAAAAAAAAAAAPEcfzUSXIa65n8CY8gVNr7ka8ymX6rI-No1927gR1qx/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=iF42sS77ke9X1EDc9Ovi1JL29ic%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FbLdwr3%2FbtsIx6xnaST%2FAAAAAAAAAAAAAAAAAAAAAPEcfzUSXIa65n8CY8gVNr7ka8ymX6rI-No1927gR1qx%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DiF42sS77ke9X1EDc9Ovi1JL29ic%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1340" height="887" data-origin-width="1340" data-origin-height="887" data-phocus-index="7"></span></figure>
+<p></p>
+<p data-ke-size="size18">알고리즘 4번줄에서 원래 naive hybrik에서는 pk-ppa(k)인데 이부분을 pk-qpa(k)로 바꾼듯 함</p>
+<p data-ke-size="size18">즉, target을 추정된 3d 관절 좌표로 fix시키지 않고 adaptive하게 바꿀 수 있도록 만들었음</p>
+<p data-ke-size="size18"><b>정리하자면, 가장 큰 핵심 아이디어는 3d 회전을 상대적 회전으로 바꿔서, twist angle의 범위를 제한해서, neural network가 estimate하기 좋게 만들어줬다는 것 같음</b></p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18"><b>Result?</b></p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1340" data-origin-height="527" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/v6YXu/btsIxeI97ic/AAAAAAAAAAAAAAAAAAAAAB7P6ZaeCbBOujLJADMEfeJl9nuPJg2RPLEJDnU9-dNC/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=CSysoRybUrNk%2BSFihLdeQLlKcTU%3D" data-phocus="https://blog.kakaocdn.net/dna/v6YXu/btsIxeI97ic/AAAAAAAAAAAAAAAAAAAAAB7P6ZaeCbBOujLJADMEfeJl9nuPJg2RPLEJDnU9-dNC/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=CSysoRybUrNk%2BSFihLdeQLlKcTU%3D"><img src="https://blog.kakaocdn.net/dna/v6YXu/btsIxeI97ic/AAAAAAAAAAAAAAAAAAAAAB7P6ZaeCbBOujLJADMEfeJl9nuPJg2RPLEJDnU9-dNC/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=CSysoRybUrNk%2BSFihLdeQLlKcTU%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2Fv6YXu%2FbtsIxeI97ic%2FAAAAAAAAAAAAAAAAAAAAAB7P6ZaeCbBOujLJADMEfeJl9nuPJg2RPLEJDnU9-dNC%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DCSysoRybUrNk%252BSFihLdeQLlKcTU%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1340" height="527" data-origin-width="1340" data-origin-height="527" data-phocus-index="8"></span></figure>
+<p></p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">성능은 좋지만,, 좌표 x,y축이 다 픽셀에 정의되어 있는 형태로 사람이 이미지 상에서 잘려져있으면 모델 적용이 어렵다는 한계가 있음</p>
+    </div>
+    
+    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+        <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    </div>
+</body>
+</html>

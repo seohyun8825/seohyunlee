@@ -1,0 +1,157 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Self-Rag : Learning TO Retrieve, Generate, and Critique through Self-Reflection — happy8825 - Seohyun Lee Blog</title>
+    <meta name="description" content="LLM의 hallucination 문제를 해결하기 위해 RAG라는 접근방식이 도입되었는데, RAG란 LLM이 외부 데이터베 이스에서 관련 정보를 검색해서 응답을 생성하는 방식이다. 이걸로 hallucination 문제를 해결하고자 했으나! 검색된 정보가 항상 유용하지 않거나, 너무 많은">
+    <link rel="stylesheet" href="../../styles.css">
+    <style>
+        body { 
+            background: #0d0f17; 
+            color: #fff; 
+            font-family: 'Inter', sans-serif; 
+            line-height: 1.6; 
+            margin: 0; 
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .post-header {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 2rem;
+            margin-bottom: 2rem;
+        }
+        .post-meta {
+            color: #888;
+            margin-bottom: 1rem;
+        }
+        .post-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .post-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        .post-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 1rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .post-content p {
+            margin-bottom: 1rem;
+        }
+        .post-content h1, .post-content h2, .post-content h3 {
+            color: #667eea;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .post-content blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 1rem;
+            margin: 1.5rem 0;
+            color: #ccc;
+            font-style: italic;
+        }
+        .post-content code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .post-content pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            color: #667eea;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            background: rgba(102, 126, 234, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    
+    <div class="post-header">
+        <div class="post-meta">
+            <span>📅 2024-09-02</span>
+            <span> | 🏷️ Computer Vision Paper Review</span>
+            <span> | 🔗 <a href="https://happy8825.tistory.com/47" target="_blank">Original Post</a></span>
+            <span> | 📊 5 images</span>
+        </div>
+        <h1 class="post-title">Self-Rag : Learning TO Retrieve, Generate, and Critique through Self-Reflection — happy8825</h1>
+        
+    </div>
+    
+    <div class="post-content">
+        <p data-ke-size="size18">LLM의 hallucination 문제를 해결하기 위해 RAG라는 접근방식이 도입되었는데, RAG란 LLM이 외부 데이터베 이스에서 관련 정보를 검색해서 응답을 생성하는 방식이다. 이걸로 hallucination 문제를 해결하고자 했으나! 검색된 정보가 항상 유용하지 않거나, 너무 많은 불필요한 정보를 가져올 수도 있다는 문제가 있었다.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">그래서 이런 문제를 해결하기 위해 고안된게 SELF-RAG이다. 이 framework에서는 LLM이 필요할때만 검색을 수행하고, 자신이 생성한 결과를 스스로 reflect 하도록 훈련된다.&nbsp; Reflection Token 이 도입되어, 모델이 검색이 필요한지 여부를 판단하고, 생성된 결과의 질을 평가해서, 이에 따른 최적의 결과를 선택할 수 있게한다.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">주어진 입력 X에대해, 여러 segement 로 구성된 y가 순차적으로 ouput 된다. y1, y2, ..yT 등등, 여기 토큰에는 text 뿐만 아니라 reflect token 도 포함. 다음과 같은 이런 4가지 type의 reflection 토큰이 들어간다.</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1028" data-origin-height="314" style="margin-left: 50%; transform: translateX(-50%); width: 1028px; max-width: 1028px;"><span data-url="https://blog.kakaocdn.net/dna/lCVxX/btsJmMrAeE9/AAAAAAAAAAAAAAAAAAAAAE7uEp3SbZ1LJTbQrFCWPHkRc5XBD22nWBFwCFZMmR3i/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=XRUYrOLPwpWdpCPjR6N7aW2OKKE%3D" data-phocus="https://blog.kakaocdn.net/dna/lCVxX/btsJmMrAeE9/AAAAAAAAAAAAAAAAAAAAAE7uEp3SbZ1LJTbQrFCWPHkRc5XBD22nWBFwCFZMmR3i/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=XRUYrOLPwpWdpCPjR6N7aW2OKKE%3D"><img src="https://blog.kakaocdn.net/dna/lCVxX/btsJmMrAeE9/AAAAAAAAAAAAAAAAAAAAAE7uEp3SbZ1LJTbQrFCWPHkRc5XBD22nWBFwCFZMmR3i/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=XRUYrOLPwpWdpCPjR6N7aW2OKKE%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FlCVxX%2FbtsJmMrAeE9%2FAAAAAAAAAAAAAAAAAAAAAE7uEp3SbZ1LJTbQrFCWPHkRc5XBD22nWBFwCFZMmR3i%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DXRUYrOLPwpWdpCPjR6N7aW2OKKE%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1028" height="314" data-origin-width="1028" data-origin-height="314" data-phocus-index="0"></span></figure>
+<p></p>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style5">
+<p data-ke-size="size18"><b>Inference overview</b></p>
+<p data-ke-size="size18">다음과 같은 알고리으로 inference 된다.</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1088" data-origin-height="380" style="margin-left: 50%; transform: translateX(-50%); width: 1088px; max-width: 1088px;"><span data-url="https://blog.kakaocdn.net/dna/eGbeM9/btsJnu5axVh/AAAAAAAAAAAAAAAAAAAAAAXwggUnWI1nvQLWGDVCgeFFFyMbB3ffF7XykD9OBxzW/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=xA3POb%2Bgu73%2FVaK7rpEY7TvSXmc%3D" data-phocus="https://blog.kakaocdn.net/dna/eGbeM9/btsJnu5axVh/AAAAAAAAAAAAAAAAAAAAAAXwggUnWI1nvQLWGDVCgeFFFyMbB3ffF7XykD9OBxzW/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=xA3POb%2Bgu73%2FVaK7rpEY7TvSXmc%3D"><img src="https://blog.kakaocdn.net/dna/eGbeM9/btsJnu5axVh/AAAAAAAAAAAAAAAAAAAAAAXwggUnWI1nvQLWGDVCgeFFFyMbB3ffF7XykD9OBxzW/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=xA3POb%2Bgu73%2FVaK7rpEY7TvSXmc%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FeGbeM9%2FbtsJnu5axVh%2FAAAAAAAAAAAAAAAAAAAAAAXwggUnWI1nvQLWGDVCgeFFFyMbB3ffF7XykD9OBxzW%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DxA3POb%252Bgu73%252FVaK7rpEY7TvSXmc%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1088" height="380" data-origin-width="1088" data-origin-height="380" data-phocus-index="1"></span></figure>
+<p></p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">x랑 이전에 생성된 텍스트 y&lt;t를 받아서 다음 생성할 text segemnt yt를 예측한다. 모델은 retreive 토큰을 예측해서 검색이 필요한지 여부를 결정한다.</p>
+<p data-ke-size="size18">검색이 필요하지 않으면, 바로 yt생성.</p>
+<p data-ke-size="size18">만약 검색이 필요하다고 판단되면 Retreive == yes -&gt; 관련 텍스트를 검색한다. Retriever 를 사용해 입력 x랑 이전 텍스트에 따라 관련 text passage를 검색하고, 이를 통해 passage d를 얻는다.&nbsp;</p>
+<p data-ke-size="size18">얻은 d 에 대해 ISREL, ISSUP, ISUSE를 평가한다</p>
+<p data-ke-size="size18">이걸 바탕으로 여러 검생ㄱ된 passage를 비교하고, yt의 순위를 배겨 최종 출력을 결정한다.</p>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style5">
+<h4 data-ke-size="size20"><b>Training overview</b></h4>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">일단 critic 모델부터 학습시키는데, 이때 data 가 없으니까 inintial 데이터는 gpt로 만들었음.</p>
+<p data-ke-size="size18">토큰별로 이게 진짜relevant 합니까? fully support 됩니까? 등에 대한 질문을 물어봐서 만든것 같음.&nbsp;</p>
+<p data-ke-size="size18">그리고 Llama로 initialize시키고, reflection token prediction의 likelihood를&nbsp; maximize 하는 방향으로 학습이 된다.</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1044" data-origin-height="428" style="margin-left: 50%; transform: translateX(-50%); width: 1044px; max-width: 1044px;"><span data-url="https://blog.kakaocdn.net/dna/bTlYbh/btsJpoI1QGg/AAAAAAAAAAAAAAAAAAAAAIlYZ5TLkH4uYiSb9NzX_dRsd2F4bK5GfoGd4DozsA0E/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=BsSSD97yWbsG9GmnvHuGcp%2F6XOo%3D" data-phocus="https://blog.kakaocdn.net/dna/bTlYbh/btsJpoI1QGg/AAAAAAAAAAAAAAAAAAAAAIlYZ5TLkH4uYiSb9NzX_dRsd2F4bK5GfoGd4DozsA0E/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=BsSSD97yWbsG9GmnvHuGcp%2F6XOo%3D"><img src="https://blog.kakaocdn.net/dna/bTlYbh/btsJpoI1QGg/AAAAAAAAAAAAAAAAAAAAAIlYZ5TLkH4uYiSb9NzX_dRsd2F4bK5GfoGd4DozsA0E/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=BsSSD97yWbsG9GmnvHuGcp%2F6XOo%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FbTlYbh%2FbtsJpoI1QGg%2FAAAAAAAAAAAAAAAAAAAAAIlYZ5TLkH4uYiSb9NzX_dRsd2F4bK5GfoGd4DozsA0E%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DBsSSD97yWbsG9GmnvHuGcp%252F6XOo%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1044" height="428" data-origin-width="1044" data-origin-height="428" data-phocus-index="2"></span></figure>
+<p></p>
+<p data-ke-size="size18">이렇게 하고나면, 내가 생성한 input과 ouput에 대해서 비판할 critic 이 생성 완료!</p>
+<p data-ke-size="size18">그다음은 generator model을 학습시키는데,</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">우선 training 을 하기 위해 data augmentation이 이루어진다.</p>
+<p data-ke-size="size18">generator 를 학습시키는 데이터는 다음과 같이 생겼을것임. (Input이랑, retrieval과 critic을 통해 augmented 된 아웃풋)</p>
+<p data-ke-size="size18">inference 하는 과정이랑 거의 비슷하게 training되는것 같다.</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1266" data-origin-height="326" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/bsTJnW/btsJnI96dYs/AAAAAAAAAAAAAAAAAAAAAI_2a8WR6ylZHqgjMoLBlpDvrM58IcGweQVgUOVGsUmm/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=vJkNXhQ2mRB6uhPaDbEJJziQnlY%3D" data-phocus="https://blog.kakaocdn.net/dna/bsTJnW/btsJnI96dYs/AAAAAAAAAAAAAAAAAAAAAI_2a8WR6ylZHqgjMoLBlpDvrM58IcGweQVgUOVGsUmm/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=vJkNXhQ2mRB6uhPaDbEJJziQnlY%3D"><img src="https://blog.kakaocdn.net/dna/bsTJnW/btsJnI96dYs/AAAAAAAAAAAAAAAAAAAAAI_2a8WR6ylZHqgjMoLBlpDvrM58IcGweQVgUOVGsUmm/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=vJkNXhQ2mRB6uhPaDbEJJziQnlY%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FbsTJnW%2FbtsJnI96dYs%2FAAAAAAAAAAAAAAAAAAAAAI_2a8WR6ylZHqgjMoLBlpDvrM58IcGweQVgUOVGsUmm%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DvJkNXhQ2mRB6uhPaDbEJJziQnlY%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1266" height="326" data-origin-width="1266" data-origin-height="326" data-phocus-index="3"></span></figure>
+<p></p>
+<p data-ke-size="size18">&nbsp;</p>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style5">
+<p data-ke-size="size18">정리</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1192" data-origin-height="654" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/b3Dael/btsJoq2czUz/AAAAAAAAAAAAAAAAAAAAAFwP8iBbtKNXBH4iMfhpH6HkdYs0UgYHDhubuSSZ9Ku9/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=S4YN97xVEF9k0R6S6fYPu9t3YlU%3D" data-phocus="https://blog.kakaocdn.net/dna/b3Dael/btsJoq2czUz/AAAAAAAAAAAAAAAAAAAAAFwP8iBbtKNXBH4iMfhpH6HkdYs0UgYHDhubuSSZ9Ku9/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=S4YN97xVEF9k0R6S6fYPu9t3YlU%3D"><img src="https://blog.kakaocdn.net/dna/b3Dael/btsJoq2czUz/AAAAAAAAAAAAAAAAAAAAAFwP8iBbtKNXBH4iMfhpH6HkdYs0UgYHDhubuSSZ9Ku9/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=S4YN97xVEF9k0R6S6fYPu9t3YlU%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2Fb3Dael%2FbtsJoq2czUz%2FAAAAAAAAAAAAAAAAAAAAAFwP8iBbtKNXBH4iMfhpH6HkdYs0UgYHDhubuSSZ9Ku9%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DS4YN97xVEF9k0R6S6fYPu9t3YlU%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1192" height="654" data-origin-width="1192" data-origin-height="654" data-phocus-index="4"></span></figure>
+<p></p>
+<p data-ke-size="size18">정리해보자면 왼쪽은 conventional 한 RAG이고, 오른쪽은 새로 제안된 Self-RAG인데</p>
+<p data-ke-size="size18">RAG에서는 prompt가 들어가면 K개의 document를 뽑아 그대로 prompt랑 concat해서 LLM에 넘겨준다. 그래서 outuput 이 만들어지는데, 보면 k개의 document의 내용들이 반대되는 경우, 혹은 information이 비는 경우에는&nbsp; hallucination혹은 contradictory 문장이 output 되는걸 볼수 있다.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">반면 Self-RAG는프롬프트가 들어가면, 필요한만큼 retrieve 하고, 그중에서도 좋은 segment를 골라서, output 하는 방식이니까, 더 efficient 하고 hallucination이 덜 발생한다.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">&nbsp;</p>
+    </div>
+    
+    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+        <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    </div>
+</body>
+</html>

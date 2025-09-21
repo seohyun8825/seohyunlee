@@ -1,0 +1,175 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real time segmentation of a hiking road, and an algorithm to navigate the direction — happy8825 - Seohyun Lee Blog</title>
+    <meta name="description" content="올해 초쯤, 서울대 데이터 사이언스 Ambient AI 대회를 위해 만들었던 모델이다.
+최종 목표는 구글 코랄 보드에서 돌아갈 수 있게 최대한 경량화 해서, 괜찮은 성능을 내는게 목표였다.
+&nbsp;
+제일 큰 문제가, 구글 코랄 보드가 tensorflow만 지원했다. 그래서 거의 처음">
+    <link rel="stylesheet" href="../../styles.css">
+    <style>
+        body { 
+            background: #0d0f17; 
+            color: #fff; 
+            font-family: 'Inter', sans-serif; 
+            line-height: 1.6; 
+            margin: 0; 
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .post-header {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 2rem;
+            margin-bottom: 2rem;
+        }
+        .post-meta {
+            color: #888;
+            margin-bottom: 1rem;
+        }
+        .post-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .post-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        .post-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 1rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .post-content p {
+            margin-bottom: 1rem;
+        }
+        .post-content h1, .post-content h2, .post-content h3 {
+            color: #667eea;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .post-content blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 1rem;
+            margin: 1.5rem 0;
+            color: #ccc;
+            font-style: italic;
+        }
+        .post-content code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .post-content pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            color: #667eea;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            background: rgba(102, 126, 234, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    
+    <div class="post-header">
+        <div class="post-meta">
+            <span>📅 2024-08-07</span>
+            <span> | 🏷️ 이것저것</span>
+            <span> | 🔗 <a href="https://happy8825.tistory.com/40" target="_blank">Original Post</a></span>
+            <span> | 📊 7 images</span>
+        </div>
+        <h1 class="post-title">Real time segmentation of a hiking road, and an algorithm to navigate the direction — happy8825</h1>
+        
+    </div>
+    
+    <div class="post-content">
+        <p data-ke-size="size16">올해 초쯤, 서울대 데이터 사이언스 Ambient AI 대회를 위해 만들었던 모델이다.</p>
+<p data-ke-size="size16">최종 목표는 구글 코랄 보드에서 돌아갈 수 있게 최대한 경량화 해서, 괜찮은 성능을 내는게 목표였다.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">제일 큰 문제가, 구글 코랄 보드가 tensorflow만 지원했다. 그래서 거의 처음이자 마지막(?ㅎㅎ)으로 tensorflow 기반으로 코드를 짰는데, 역시 모듈 불러오거나 이용하는게 좀 많이 서투르기도 했고, tensorflow 기반 코드 중에 내가 이용할 수 있는 코드를 못찾아서, 이왕 이렇게 된거 아예 from the scratch 로 코드를 짜보자! 해서 짰던 코드이다. ( <a href="https://github.com/seohyun8825/UnetAttention_realtime-segmentation">seohyun8825/UnetAttention_realtime-segmentation: Real time segmentation of a hiking road, and an algorithm to navigate the direction (github.com)</a>)</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="2364" data-origin-height="1002" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/b2OxbZ/btsIX4KRvJj/AAAAAAAAAAAAAAAAAAAAAGEzWWNh59ruYXfLECAkmC-GxD2QkAlCOqloQARIf4an/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=qgO3EzR3iWWaZQy09wLuODJRIXo%3D" data-phocus="https://blog.kakaocdn.net/dna/b2OxbZ/btsIX4KRvJj/AAAAAAAAAAAAAAAAAAAAAGEzWWNh59ruYXfLECAkmC-GxD2QkAlCOqloQARIf4an/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=qgO3EzR3iWWaZQy09wLuODJRIXo%3D"><img src="https://blog.kakaocdn.net/dna/b2OxbZ/btsIX4KRvJj/AAAAAAAAAAAAAAAAAAAAAGEzWWNh59ruYXfLECAkmC-GxD2QkAlCOqloQARIf4an/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=qgO3EzR3iWWaZQy09wLuODJRIXo%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2Fb2OxbZ%2FbtsIX4KRvJj%2FAAAAAAAAAAAAAAAAAAAAAGEzWWNh59ruYXfLECAkmC-GxD2QkAlCOqloQARIf4an%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DqgO3EzR3iWWaZQy09wLuODJRIXo%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="2364" height="1002" data-origin-width="2364" data-origin-height="1002" data-phocus-index="0"></span></figure>
+<p></p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">image net에서 pretrained된 mobilenetv2를 백본으로 사용했고, 전처리된 이미지가 MobileNetV2를 통과해 다양한 featuremap을 뽑는다. 이 feature map은 유넷에서 다운샘플링 업샘플링을 거쳐서, 최종 출력으로는 9개 클래스(이것저것 배경 나무 돌 하늘 등등)으로 출력이 된다. 기본적인 구조는 그냥 일반적인 유넷 구조인데, 성능 향상과 공부를 위해 모든 잡기술 CBAM 모듈이나 ASPP, Denseblock 등을 다 끼워넣었다.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">당연히 성능은 엄청 잘 나왔지만, realtime 이라고 하기엔 살짝 애매한,, 정도의 결과가 나왔다.</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="981" data-origin-height="528" style="margin-left: 50%; transform: translateX(-50%); width: 613px; max-width: 613px;"><span data-url="https://blog.kakaocdn.net/dna/zUWSB/btsIWjirm94/AAAAAAAAAAAAAAAAAAAAAEZnu-B4nfK2RV37-bWEMUjvIlw4Mgl1EfDy0sLgh8z8/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=2RujaGsli764tboAa8cNkDLEIDc%3D" data-phocus="https://blog.kakaocdn.net/dna/zUWSB/btsIWjirm94/AAAAAAAAAAAAAAAAAAAAAEZnu-B4nfK2RV37-bWEMUjvIlw4Mgl1EfDy0sLgh8z8/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=2RujaGsli764tboAa8cNkDLEIDc%3D"><img src="https://blog.kakaocdn.net/dna/zUWSB/btsIWjirm94/AAAAAAAAAAAAAAAAAAAAAEZnu-B4nfK2RV37-bWEMUjvIlw4Mgl1EfDy0sLgh8z8/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=2RujaGsli764tboAa8cNkDLEIDc%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FzUWSB%2FbtsIWjirm94%2FAAAAAAAAAAAAAAAAAAAAAEZnu-B4nfK2RV37-bWEMUjvIlw4Mgl1EfDy0sLgh8z8%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3D2RujaGsli764tboAa8cNkDLEIDc%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="613" height="330" data-origin-width="981" data-origin-height="528" data-phocus-index="1"></span></figure>
+<p></p>
+<p data-ke-size="size16">결국, 마지막 구글 코랄보드에 넣은 모델은 이런 잡다한것들 다 빼서 성능을 좀 포기하고 , realtime에 더 집중해서 만들었다.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">시각화 결과~</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1984" data-origin-height="966" style="margin-left: 50%; transform: translateX(-50%); width: 813px; max-width: 813px;"><span data-url="https://blog.kakaocdn.net/dna/N6e21/btsIWFSZfoj/AAAAAAAAAAAAAAAAAAAAAN0pr3eDy3HbiJLVVPyh9vRTpUSB73SPdOUza_QzLmoE/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=nGgSBw9FtjB3L%2FGH11WG9q%2B1JVE%3D" data-phocus="https://blog.kakaocdn.net/dna/N6e21/btsIWFSZfoj/AAAAAAAAAAAAAAAAAAAAAN0pr3eDy3HbiJLVVPyh9vRTpUSB73SPdOUza_QzLmoE/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=nGgSBw9FtjB3L%2FGH11WG9q%2B1JVE%3D"><img src="https://blog.kakaocdn.net/dna/N6e21/btsIWFSZfoj/AAAAAAAAAAAAAAAAAAAAAN0pr3eDy3HbiJLVVPyh9vRTpUSB73SPdOUza_QzLmoE/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=nGgSBw9FtjB3L%2FGH11WG9q%2B1JVE%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FN6e21%2FbtsIWFSZfoj%2FAAAAAAAAAAAAAAAAAAAAAN0pr3eDy3HbiJLVVPyh9vRTpUSB73SPdOUza_QzLmoE%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DnGgSBw9FtjB3L%252FGH11WG9q%252B1JVE%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="813" height="396" data-origin-width="1984" data-origin-height="966" data-phocus-index="2"></span></figure>
+<p></p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">이렇게 Segmentation까지 구현 완료하고 교수님 미팅을 가서 들었던 feedback이,&nbsp;</p>
+<p data-ke-size="size16">우리 주제가 원래는 시각장애인들을 위한 hiking 보조 모델을 만드는거였는데 과연 이게 실제로 도움이 될까?에 대한 내용,</p>
+<p data-ke-size="size16">그리고 원래는 segmentation을 해서 realtime으로 방해물들이 있으면 알림을 주는걸 구현하려고 했는데, 이걸 왜 segmentation으로? 그냥 yolo 사용하는게 훨씬 낫지 않겠냐는 feedback을 받았다.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">오히려 정말 필요할것 같은 기능은, 제대로 된 길을 가고 있는지에 대한 알림과, 보행자나 위험한 장애물이 갑자기 튀어나올때, 혹은 길이 갑자기 꺾여서 위험한 경우, 에 대한 알림이 있어야 할 것 같다는 피드백을 받았다</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">그래서 다시 목표를 설정해서!</p>
+<p data-ke-size="size16">제대로 된 길을 가고 있는지에 대한 알림을 위해서는 motion planning도 들어가야 하는데, 시간 안에 구현이 가능할까? 그리고 가장 큰 문제는 코랄보드에 돌아갈 수 있을까? 이러한 이유들로 이건 포기,,</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">그러면 간단하게&nbsp;</p>
+<p data-ke-size="size16">보행자나 위험한 장애물이 갑자기 튀어나오는건 yolo로 하면 되는데</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">길이 갑자기 꺾이는 경우(발을 잘못 딛게 되면 낭떠러지니까) , 길의 커브를 탐지해서 direction을 알려주는 건 어떻게 할지 고민하다가, 그냥 segmentation 모델 만들어놓은거 있으니까 최대한 이걸 사용하고, 길의 direction을 알려주는건 단순 알고리즘으로 구현해보자!는 타협점을 찾았다..&nbsp;</p>
+<p data-ke-size="size16">이것도 딥러닝으로 구현하고 싶었지만, 그러려면 길 direction에 대한 ground truth direction이 있어야했는데, 데이터셋이 없었고, 이걸 만들기에도 시간이 부족했다.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1280" data-origin-height="434" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/bDOy3u/btsIWV87RkG/AAAAAAAAAAAAAAAAAAAAAC9lmJeSlltobVmL3BDfEkJtaghWpZzxmN8RXW8KUuLd/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=WHS5Q33wcpySeJJRW1sBM8eWE%2B4%3D" data-phocus="https://blog.kakaocdn.net/dna/bDOy3u/btsIWV87RkG/AAAAAAAAAAAAAAAAAAAAAC9lmJeSlltobVmL3BDfEkJtaghWpZzxmN8RXW8KUuLd/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=WHS5Q33wcpySeJJRW1sBM8eWE%2B4%3D"><img src="https://blog.kakaocdn.net/dna/bDOy3u/btsIWV87RkG/AAAAAAAAAAAAAAAAAAAAAC9lmJeSlltobVmL3BDfEkJtaghWpZzxmN8RXW8KUuLd/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=WHS5Q33wcpySeJJRW1sBM8eWE%2B4%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FbDOy3u%2FbtsIWV87RkG%2FAAAAAAAAAAAAAAAAAAAAAC9lmJeSlltobVmL3BDfEkJtaghWpZzxmN8RXW8KUuLd%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DWHS5Q33wcpySeJJRW1sBM8eWE%252B4%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1280" height="434" data-origin-width="1280" data-origin-height="434" data-phocus-index="3"></span></figure>
+<p></p>
+<p data-ke-size="size16"><br>알고리즘의 아이디어는 되게 간단했는데, 그냥 줄을 세개 그어서, 이 줄이랑 segmentation된 road의 영역의 overlap 된 길이를 계산해서, 이걸 토대로 left overlap이 더 크면 go left, right overlap이 더 크다면 go right, 그리고 threshold처럼 center overlap이 전체 이미지의 어느정도 비율 이상 차지하고 있으면 go straight가 나오게 했다.</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1708" data-origin-height="1038" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/7acmO/btsIV6wXWUq/AAAAAAAAAAAAAAAAAAAAAAZUEbnIgkwFKLywzvSHXEOC2gn0u3mruMCaT0Xm29LV/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=PYqmWrOt7LKSJ2wBfZ7cRhIBY10%3D" data-phocus="https://blog.kakaocdn.net/dna/7acmO/btsIV6wXWUq/AAAAAAAAAAAAAAAAAAAAAAZUEbnIgkwFKLywzvSHXEOC2gn0u3mruMCaT0Xm29LV/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=PYqmWrOt7LKSJ2wBfZ7cRhIBY10%3D"><img src="https://blog.kakaocdn.net/dna/7acmO/btsIV6wXWUq/AAAAAAAAAAAAAAAAAAAAAAZUEbnIgkwFKLywzvSHXEOC2gn0u3mruMCaT0Xm29LV/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=PYqmWrOt7LKSJ2wBfZ7cRhIBY10%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2F7acmO%2FbtsIV6wXWUq%2FAAAAAAAAAAAAAAAAAAAAAAZUEbnIgkwFKLywzvSHXEOC2gn0u3mruMCaT0Xm29LV%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DPYqmWrOt7LKSJ2wBfZ7cRhIBY10%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1708" height="1038" data-origin-width="1708" data-origin-height="1038" data-phocus-index="4"></span></figure>
+<p></p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">사람 detect하는건 yolo로 했는데, 코랄보드에 모델이 segmentation 모델이랑 2개 들어가다 보니까 yolo조차 안들어가서, 이것도 적당히 가벼우면서 잘 돌아가는 SSD MoblieNet을 경량화 시켜서 넣어줬다.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">사람 detect하고, alert 하는 알고리즘도, detect 된 사람의 바운딩박스가 이미지 전체의 어느정도 비율이상일때, 소리로 알림을 주는 방식으로 구현했다</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">이건 최종적인 파이프라인</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1280" data-origin-height="500" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/LZI3w/btsIWDOpwf0/AAAAAAAAAAAAAAAAAAAAAFQxZUl7vN_33kEsiryzIEN6gTbjTMibLZkczmJo9hYU/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=P%2BHf3SVDLcNbL3RFrZhUZy1sf%2B8%3D" data-phocus="https://blog.kakaocdn.net/dna/LZI3w/btsIWDOpwf0/AAAAAAAAAAAAAAAAAAAAAFQxZUl7vN_33kEsiryzIEN6gTbjTMibLZkczmJo9hYU/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=P%2BHf3SVDLcNbL3RFrZhUZy1sf%2B8%3D"><img src="https://blog.kakaocdn.net/dna/LZI3w/btsIWDOpwf0/AAAAAAAAAAAAAAAAAAAAAFQxZUl7vN_33kEsiryzIEN6gTbjTMibLZkczmJo9hYU/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=P%2BHf3SVDLcNbL3RFrZhUZy1sf%2B8%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FLZI3w%2FbtsIWDOpwf0%2FAAAAAAAAAAAAAAAAAAAAAFQxZUl7vN_33kEsiryzIEN6gTbjTMibLZkczmJo9hYU%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DP%252BHf3SVDLcNbL3RFrZhUZy1sf%252B8%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1280" height="500" data-origin-width="1280" data-origin-height="500" data-phocus-index="5"></span></figure>
+<p></p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">관악산에서 coral board 에 카메라를 달아 촬영하고 실험한 결과이다</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">segment랑 detection도 잘되고, 갑작스러운 커브길, 혹은 낭떠러지 가까이 가고 있어 segmented 된 길이 없거나 조금 남았을떄, direction 에 대한 알림도 잘 나왔다</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1160" data-origin-height="1028" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/9LPWT/btsIXeU2gtq/AAAAAAAAAAAAAAAAAAAAAAkrhn_pjfZ6BCoMEhIftqwCsMFSR79TJXbxpu0WUwhg/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=ijAcMxDj1IQe3MrKoOjVBCRzGkA%3D" data-phocus="https://blog.kakaocdn.net/dna/9LPWT/btsIXeU2gtq/AAAAAAAAAAAAAAAAAAAAAAkrhn_pjfZ6BCoMEhIftqwCsMFSR79TJXbxpu0WUwhg/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=ijAcMxDj1IQe3MrKoOjVBCRzGkA%3D"><img src="https://blog.kakaocdn.net/dna/9LPWT/btsIXeU2gtq/AAAAAAAAAAAAAAAAAAAAAAkrhn_pjfZ6BCoMEhIftqwCsMFSR79TJXbxpu0WUwhg/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=ijAcMxDj1IQe3MrKoOjVBCRzGkA%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2F9LPWT%2FbtsIXeU2gtq%2FAAAAAAAAAAAAAAAAAAAAAAkrhn_pjfZ6BCoMEhIftqwCsMFSR79TJXbxpu0WUwhg%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DijAcMxDj1IQe3MrKoOjVBCRzGkA%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1160" height="1028" data-origin-width="1160" data-origin-height="1028" data-phocus-index="6"></span></figure>
+<p></p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">&nbsp;</p>
+    </div>
+    
+    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+        <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    </div>
+</body>
+</html>

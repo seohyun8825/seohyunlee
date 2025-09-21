@@ -1,0 +1,191 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MA-LMM: Memory-Augmented Large Multimodal Modelfor Long-Term Video Understanding — happy8825 - Seohyun Lee Blog</title>
+    <meta name="description" content="긴 동영상 입력을 효과적으로 처리하기 위한 방법을 제시한 논문이다.
+&nbsp;
+기존 LLM은 text뿐만 아니라 이미지, 동영상 등 visual data를 함께 처리할 수 있는데, 동영상을 처리할떄는 , 여러 frame을 LLM에 직접적으로 넣기에는 한계가 있었다.
+&nbsp;
+우선 ">
+    <link rel="stylesheet" href="../../styles.css">
+    <style>
+        body { 
+            background: #0d0f17; 
+            color: #fff; 
+            font-family: 'Inter', sans-serif; 
+            line-height: 1.6; 
+            margin: 0; 
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .post-header {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 2rem;
+            margin-bottom: 2rem;
+        }
+        .post-meta {
+            color: #888;
+            margin-bottom: 1rem;
+        }
+        .post-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .post-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        .post-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 1rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .post-content p {
+            margin-bottom: 1rem;
+        }
+        .post-content h1, .post-content h2, .post-content h3 {
+            color: #667eea;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .post-content blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 1rem;
+            margin: 1.5rem 0;
+            color: #ccc;
+            font-style: italic;
+        }
+        .post-content code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .post-content pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            color: #667eea;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            background: rgba(102, 126, 234, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    
+    <div class="post-header">
+        <div class="post-meta">
+            <span>📅 2024-09-03</span>
+            <span> | 🏷️ Computer Vision Paper Review</span>
+            <span> | 🔗 <a href="https://happy8825.tistory.com/49" target="_blank">Original Post</a></span>
+            <span> | 📊 4 images</span>
+        </div>
+        <h1 class="post-title">MA-LMM: Memory-Augmented Large Multimodal Modelfor Long-Term Video Understanding — happy8825</h1>
+        
+    </div>
+    
+    <div class="post-content">
+        <p data-ke-size="size18">긴 동영상 입력을 효과적으로 처리하기 위한 방법을 제시한 논문이다.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">기존 LLM은 text뿐만 아니라 이미지, 동영상 등 visual data를 함께 처리할 수 있는데, 동영상을 처리할떄는 , 여러 frame을 LLM에 직접적으로 넣기에는 한계가 있었다.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">우선 LLM은 한번에 처리할 수 있는 입력 길이에 제한이 있다. 예를 들면 ,Llama는&nbsp; 최대 2048 토큰만 처리할 수 있음.</p>
+<p data-ke-size="size18">그리고 가장 중요한 GPU문제..</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">기존의 해결책으로는 video-chatGPT처럼, 각 frame의 정보를 평균내는 방식이 있지만, 이 방법은 시간에 다른 변화를 제대로 반영하지 못해서 성능이 떨어진다.&nbsp;</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">MA-LMM은 이런 문제를 해결하기 위해 long-term memroy bank라는 개념을 도입했다. 이 메모리뱅큰느, 동영상의 각 frame에서 추출된 정보를 메모리 뱅크에 저장하고, 이 저장된 정보를 LLM이 이후 frame을 처리할 떄 참고할 수 있도록 한다.&nbsp;</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">Framework</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1098" data-origin-height="672" style="margin-left: 50%; transform: translateX(-50%); width: 1098px; max-width: 1098px;"><span data-url="https://blog.kakaocdn.net/dna/cWI1Qd/btsJnr8FhNR/AAAAAAAAAAAAAAAAAAAAAKu5N0VOnefeVT2GePbdUZ3a10nM8C3Zumt05QYWiQ0i/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=Ip9qQrYEhJdQcg8RzrCvv9sGYIg%3D" data-phocus="https://blog.kakaocdn.net/dna/cWI1Qd/btsJnr8FhNR/AAAAAAAAAAAAAAAAAAAAAKu5N0VOnefeVT2GePbdUZ3a10nM8C3Zumt05QYWiQ0i/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=Ip9qQrYEhJdQcg8RzrCvv9sGYIg%3D"><img src="https://blog.kakaocdn.net/dna/cWI1Qd/btsJnr8FhNR/AAAAAAAAAAAAAAAAAAAAAKu5N0VOnefeVT2GePbdUZ3a10nM8C3Zumt05QYWiQ0i/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=Ip9qQrYEhJdQcg8RzrCvv9sGYIg%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FcWI1Qd%2FbtsJnr8FhNR%2FAAAAAAAAAAAAAAAAAAAAAKu5N0VOnefeVT2GePbdUZ3a10nM8C3Zumt05QYWiQ0i%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DIp9qQrYEhJdQcg8RzrCvv9sGYIg%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1098" height="672" data-origin-width="1098" data-origin-height="672" data-phocus-index="0"></span></figure>
+<p></p>
+<p data-ke-size="size18">프레임을 한꺼번에 처리하지 않고, 동영상을 autoregressive 하게 처리한다.</p>
+<p data-ke-size="size18">전체적으로 세부분으로 나눌 수 있는데</p>
+<p data-ke-size="size18">1. 동영상을 visual encdoer 를 통해 feature 를 추출</p>
+<p data-ke-size="size18">2. 동영상의 시각적 embedding이랑 text embedding을 정렬하는 역할 -&gt; Q-former</p>
+<p data-ke-size="size18">3. Text Decoding&nbsp; - freeze 된 LLM으로 text 생성</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">하나씩 보자</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18"><b>Visual Feature Extraction</b></p>
+<p data-ke-size="size18">각 동영상 프레임을 미리 학습된 vision 인코더에 통과시켜 visual feature들을 뽑아낸다. V = [v1, v2, ..., vT]</p>
+<p data-ke-size="size18">여기에 positional embedding을 더해 frame 간의 시간적 순서를 모델이 인식할 수 있게 한다.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18"><b>Long-term Temporal Modeling</b></p>
+<p data-ke-size="size18">우선 Q-Former는 시각적 정보를 텍스트 임베딩 공간에 맞추기 위해 사용된다.</p>
+<p data-ke-size="size18">visual feature extraction을 통해 나온 f1 f2 f3 -- ft 까지 모두 concat되어 corss attention의 key와 value로 쓰인다.</p>
+<p data-ke-size="size18">즉 key 와 value로 과거의 모든 시각적 특징을 포함하는거니까, 현재 frame의 쿼리가 과거 모든 frame의 시각적 정보랑 상호작용해서 의미있는 정보를 추출한다고 생각하면 됨.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">그럼 어떤거를 쿼리로 쓰냐?는 query memory bank를 보자</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18"><b>Query Memory bank</b></p>
+<p data-ke-size="size18">Query memory bank는 각 시간 단계에서 입력 쿼리zt를 축적하고 저장하는 메모리이다.</p>
+<p data-ke-size="size18">q1, q2, q3 ,, qt 이거는 각 frame 의 쿼리가 저장되는거거</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">self attention layer 의 query는 해당 frame에서의 z쿼리가, key value는 q1 q2 q3,,,,,,,, qt까지 합친 즉 모든쿼리를 concat 시킨게 키랑 value로 사용됨.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">이 query memory bank는 학습 과정에서 계속 업데이트 되고, 쿼리들이 점점 더 추상적인 수준에서 복잡한 수준으로, 동영상의 개념과 패턴을 포착하게됨.&nbsp;</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18"><b>Memory bank compression</b></p>
+<p data-ke-size="size18">근데 메모리 뱅크의 문제점이, 동영상이 길어질수록 gpu 사용량이나 계산 비용이 엄청 증가하게 됨.</p>
+<p data-ke-size="size18">그래서 메모리 뱅크를 압축해서 크기를 줄여야하는데</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">기존의 해결책이 FIFO (r근데 이건 first 들어간게 정보가 손실된다는 문제 가 있었구..)</p>
+<p data-ke-size="size18">Learnable pooling operators : 추가적인 학습 param 도입? 근데 이것도 복잡도가 높아짐.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">논문에서 새로제시한건 Memory Bank Compression (MBC)라는 접근버.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">동영상에 내재된 시간적 중복성을 활용해 메모리 뱅크 크기를 줄이는 방법이다. 인접한 frame 간의 유사성을 이용해 비슷한 시각적 특징을 통합하거나 압축하는것.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">구체적으로 f1, f2, f3,,,, fn 이 있고, fn+1이 들어와야하면, (미리 정해진 임계값을 초과할 수 없음으로) 이때 메모리 뱅크의 길이르 1만큼 줄여야한다.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">그럼 어떻게 줄이냐?</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">코사인 유사도 계산을 하는데</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="678" data-origin-height="92" style="margin-left: 50%; transform: translateX(-50%); width: 678px; max-width: 678px;"><span data-url="https://blog.kakaocdn.net/dna/b3vbU5/btsJpethpap/AAAAAAAAAAAAAAAAAAAAALOaoz4WnObEMTFL0-wkk9neXqWNGqcNwkxFanr9Rlw-/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=5%2F0XYB48j8k7jwNDbdeUGUM2MNQ%3D" data-phocus="https://blog.kakaocdn.net/dna/b3vbU5/btsJpethpap/AAAAAAAAAAAAAAAAAAAAALOaoz4WnObEMTFL0-wkk9neXqWNGqcNwkxFanr9Rlw-/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=5%2F0XYB48j8k7jwNDbdeUGUM2MNQ%3D"><img src="https://blog.kakaocdn.net/dna/b3vbU5/btsJpethpap/AAAAAAAAAAAAAAAAAAAAALOaoz4WnObEMTFL0-wkk9neXqWNGqcNwkxFanr9Rlw-/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=5%2F0XYB48j8k7jwNDbdeUGUM2MNQ%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2Fb3vbU5%2FbtsJpethpap%2FAAAAAAAAAAAAAAAAAAAAALOaoz4WnObEMTFL0-wkk9neXqWNGqcNwkxFanr9Rlw-%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3D5%252F0XYB48j8k7jwNDbdeUGUM2MNQ%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="678" height="92" data-origin-width="678" data-origin-height="92" data-phocus-index="1"></span></figure>
+<p></p>
+<p data-ke-size="size18">각 공간적 위치 i에서 인접한 시각적 특징들 사이의 코사인 유사도를 계산한다</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="360" data-origin-height="76" style="margin-left: 50%; transform: translateX(-50%); width: 360px; max-width: 360px;"><span data-url="https://blog.kakaocdn.net/dna/b48FE5/btsJpmR90Al/AAAAAAAAAAAAAAAAAAAAALSZLw8vHDmhKS-2J5sGST7S2gYdBvHUQlrZhfELSP_N/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=Wut4SuQQ7EC%2BtrEMOO0l1GQmF1M%3D" data-phocus="https://blog.kakaocdn.net/dna/b48FE5/btsJpmR90Al/AAAAAAAAAAAAAAAAAAAAALSZLw8vHDmhKS-2J5sGST7S2gYdBvHUQlrZhfELSP_N/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=Wut4SuQQ7EC%2BtrEMOO0l1GQmF1M%3D"><img src="https://blog.kakaocdn.net/dna/b48FE5/btsJpmR90Al/AAAAAAAAAAAAAAAAAAAAALSZLw8vHDmhKS-2J5sGST7S2gYdBvHUQlrZhfELSP_N/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=Wut4SuQQ7EC%2BtrEMOO0l1GQmF1M%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2Fb48FE5%2FbtsJpmR90Al%2FAAAAAAAAAAAAAAAAAAAAALSZLw8vHDmhKS-2J5sGST7S2gYdBvHUQlrZhfELSP_N%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DWut4SuQQ7EC%252BtrEMOO0l1GQmF1M%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="360" height="76" data-origin-width="360" data-origin-height="76" data-phocus-index="2"></span></figure>
+<p></p>
+<p data-ke-size="size18">가장 높은 유사도를 가진 index K를 선택하고</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="406" data-origin-height="88" style="margin-left: 50%; transform: translateX(-50%); width: 406px; max-width: 406px;"><span data-url="https://blog.kakaocdn.net/dna/dQ792h/btsJn0itGIV/AAAAAAAAAAAAAAAAAAAAAMTVCIiFZAH5Ib9KJaDbSWdFxmcdMCoS5QEYQ4AmAd3y/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=68X1V9N5%2BUGxbP%2BYjJGXo1sqWOc%3D" data-phocus="https://blog.kakaocdn.net/dna/dQ792h/btsJn0itGIV/AAAAAAAAAAAAAAAAAAAAAMTVCIiFZAH5Ib9KJaDbSWdFxmcdMCoS5QEYQ4AmAd3y/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=68X1V9N5%2BUGxbP%2BYjJGXo1sqWOc%3D"><img src="https://blog.kakaocdn.net/dna/dQ792h/btsJn0itGIV/AAAAAAAAAAAAAAAAAAAAAMTVCIiFZAH5Ib9KJaDbSWdFxmcdMCoS5QEYQ4AmAd3y/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=68X1V9N5%2BUGxbP%2BYjJGXo1sqWOc%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FdQ792h%2FbtsJn0itGIV%2FAAAAAAAAAAAAAAAAAAAAAMTVCIiFZAH5Ib9KJaDbSWdFxmcdMCoS5QEYQ4AmAd3y%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3D68X1V9N5%252BUGxbP%252BYjJGXo1sqWOc%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="406" height="88" data-origin-width="406" data-origin-height="88" data-phocus-index="3"></span></figure>
+<p></p>
+<p data-ke-size="size18">유사하다고 선택된 인텍스에서는 공간적 위치 i에서 k 랑 k+1를 평균내서 메모리 뱅크의 길이를 줄인다.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18"><b>Text Decoding</b></p>
+<p data-ke-size="size18">일단 모델은 비디오 - text 페어되어있는 데이터셋을 이용해서 학습이 되고, 실제 text 토큰이랑 모델이 예측한 토큰간의 차이를 최소화하기 위해 학습된다</p>
+<p data-ke-size="size18">이때 사용되는 LLM은 freezed. Q-former가 업데이트되면서 loss를 줄이는 방향으로 학습되는듯함.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">&nbsp;</p>
+    </div>
+    
+    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+        <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    </div>
+</body>
+</html>

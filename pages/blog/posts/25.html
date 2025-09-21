@@ -1,0 +1,151 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera Trajectory Learning — happy8825 - Seohyun Lee Blog</title>
+    <meta name="description" content="motion learning → camera 궤도 learning for multi view 비디오 generation
+&nbsp;
+Lamp (Learn a motion pattern)논문을 읽다가 확장해볼 수 있을것 같아 시작한 프로젝트이다
+
+
+&nbsp;
+여기서 지금은 “run” 을">
+    <link rel="stylesheet" href="../../styles.css">
+    <style>
+        body { 
+            background: #0d0f17; 
+            color: #fff; 
+            font-family: 'Inter', sans-serif; 
+            line-height: 1.6; 
+            margin: 0; 
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .post-header {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 2rem;
+            margin-bottom: 2rem;
+        }
+        .post-meta {
+            color: #888;
+            margin-bottom: 1rem;
+        }
+        .post-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .post-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        .post-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 1rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .post-content p {
+            margin-bottom: 1rem;
+        }
+        .post-content h1, .post-content h2, .post-content h3 {
+            color: #667eea;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .post-content blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 1rem;
+            margin: 1.5rem 0;
+            color: #ccc;
+            font-style: italic;
+        }
+        .post-content code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .post-content pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            color: #667eea;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            background: rgba(102, 126, 234, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    
+    <div class="post-header">
+        <div class="post-meta">
+            <span>📅 2024-12-27</span>
+            <span> | 🏷️ 이것저것</span>
+            <span> | 🔗 <a href="https://happy8825.tistory.com/83" target="_blank">Original Post</a></span>
+            <span> | 📊 3 images</span>
+        </div>
+        <h1 class="post-title">Camera Trajectory Learning — happy8825</h1>
+        
+    </div>
+    
+    <div class="post-content">
+        <p data-ke-size="size16">motion learning → camera 궤도 learning for multi view 비디오 generation</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">Lamp (Learn a motion pattern)논문을 읽다가 확장해볼 수 있을것 같아 시작한 프로젝트이다</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="2024" data-origin-height="618" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/MfsS0/btsLA0y2xdY/AAAAAAAAAAAAAAAAAAAAANns5G3Yn530Y5JZec7rRhR19Y9rNON7fETOBRnkDirg/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=NhILGrkp8KVrzPYVGg6jhVsHQiw%3D" data-phocus="https://blog.kakaocdn.net/dna/MfsS0/btsLA0y2xdY/AAAAAAAAAAAAAAAAAAAAANns5G3Yn530Y5JZec7rRhR19Y9rNON7fETOBRnkDirg/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=NhILGrkp8KVrzPYVGg6jhVsHQiw%3D"><img src="https://blog.kakaocdn.net/dna/MfsS0/btsLA0y2xdY/AAAAAAAAAAAAAAAAAAAAANns5G3Yn530Y5JZec7rRhR19Y9rNON7fETOBRnkDirg/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=NhILGrkp8KVrzPYVGg6jhVsHQiw%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FMfsS0%2FbtsLA0y2xdY%2FAAAAAAAAAAAAAAAAAAAAANns5G3Yn530Y5JZec7rRhR19Y9rNON7fETOBRnkDirg%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DNhILGrkp8KVrzPYVGg6jhVsHQiw%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="2024" height="618" data-origin-width="2024" data-origin-height="618" data-phocus-index="0"></span></figure>
+<p></p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">여기서 지금은 “run” 을 배우는것.</p>
+<p data-ke-size="size16">즉 first frame 에서 시작해서 , Horse Run 이라는 프롬프트가 주어지면,</p>
+<p data-ke-size="size16">노이즈에서 시작해서 prompt를 conditioning 해가면서, 실제 run하는 영상의 frame과 비교해서 비슷해지도록 loss가 설계되어있음.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">그럼 모션이 아닌 camera trajectory를 배우는것도 가능할것.</p>
+<p data-ke-size="size16">( 카메라 trajectory - 예를들어 왼쪽에서 오른쪽으로 회전하는 camera) of a horse</p>
+<p data-ke-size="size16">카메라 궤도 방향이 비슷한 10개정도의 영상을 찾고 이걸 training 시키는것.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">아웃풋형태는</p>
+<p data-ke-size="size16">nerf 아웃풋 과 비슷한 형태. 고정된 물건에 대해서 camera 궤도만 배워서, 다른 first frame을 주었을떄도 같은 카메라 궤적을 따라 도는 multiview 영상을 generate 할 수 있을것 같음</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">&lt;실험결과&gt;</p>
+<p data-ke-size="size16">약 10개의 <b>왼쪽에서 오른쪽</b>으로 카메라가 회전하는 비디오를 찍고 학습에 사용했다.</p>
+<p data-ke-size="size16">왼쪽에서 오른쪽으로 도는 camera trajectory를 학습 시켜보았다. 생각만큼 드라마틱하진 않지만, autoregressive한 방법이나, 데이터셋 속도를 좀 빠르게 하는 방식도 시도 중이다.</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-filename="sample-5600.gif" data-origin-width="512" data-origin-height="320" style="margin-left: 50%; transform: translateX(-50%); width: 512px; max-width: 512px;"><span data-url="https://blog.kakaocdn.net/dna/bjLOAr/btsLAXCkaON/AAAAAAAAAAAAAAAAAAAAAGZPsVTjno87pCanmHTh_VJBqsTWa9MpzXGsHi2t_oO1/img.gif?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=lHIEV4a6bbYCZi7g7eXgLIZFeqM%3D" data-phocus="https://blog.kakaocdn.net/dna/bjLOAr/btsLAXCkaON/AAAAAAAAAAAAAAAAAAAAAGZPsVTjno87pCanmHTh_VJBqsTWa9MpzXGsHi2t_oO1/img.gif?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=lHIEV4a6bbYCZi7g7eXgLIZFeqM%3D"><img src="https://blog.kakaocdn.net/dna/bjLOAr/btsLAXCkaON/AAAAAAAAAAAAAAAAAAAAAGZPsVTjno87pCanmHTh_VJBqsTWa9MpzXGsHi2t_oO1/img.gif?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=lHIEV4a6bbYCZi7g7eXgLIZFeqM%3D" srcset="https://blog.kakaocdn.net/dna/bjLOAr/btsLAXCkaON/AAAAAAAAAAAAAAAAAAAAAGZPsVTjno87pCanmHTh_VJBqsTWa9MpzXGsHi2t_oO1/img.gif?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=lHIEV4a6bbYCZi7g7eXgLIZFeqM%3D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="512" height="320" data-filename="sample-5600.gif" data-origin-width="512" data-origin-height="320" data-phocus-index="1"></span></figure>
+<p></p>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style3">
+<p data-ke-size="size16">&lt;업데이트&gt;</p>
+<p data-ke-size="size16">데이터셋을 좀 더 빠르게 돌도록 만들고 다시 실험을 돌렸다. 이때 최대한 consistency 를 유지해주기 위해 두가지 방법을 더했보았다.</p>
+<p data-ke-size="size16">1. 카메라 모션이 학습되어서 입혀진,<b> 즉 추측된 latent의 마지막 frame 과 GT영상의 마지막 frame이랑 같아지도록</b> loss함수를 추가 설계했다.</p>
+<p data-ke-size="size16">2. 데이터셋 자체에 카메라 pose가 없으니까, 그냥 공통으로 랜덤 샘플링을 해서 pre define을 시킨 후에. 이 카메라 포즈를 general 하게 배우도록 해줘봤다. 카메라 포즈는 diffusion 에서 latent 예측할때 같이 들어가서 예측이 되도록 코드 수정을 했다.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">&lt;업데이트된 실험 결과&gt;</p>
+<p data-ke-size="size16">역시나! 성능이 별로 좋지 않다.&nbsp; 그래도 커피나 연필 노트 보면 나름 왼쪽에서 오른쪽으로 가는건 좀 희망적이다(?)</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-filename="sample-8800.gif" data-origin-width="512" data-origin-height="320" style="margin-left: 50%; transform: translateX(-50%); width: 512px; max-width: 512px;"><span data-url="https://blog.kakaocdn.net/dna/dMTT8X/btsLATgP8Rb/AAAAAAAAAAAAAAAAAAAAANKk0VvTT9mNWHH_mjBilM99Oa8EWXPQXCo9xev1hPFs/img.gif?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=JTVZyOb7Avk1OWpKyLNMBarUCBo%3D" data-phocus="https://blog.kakaocdn.net/dna/dMTT8X/btsLATgP8Rb/AAAAAAAAAAAAAAAAAAAAANKk0VvTT9mNWHH_mjBilM99Oa8EWXPQXCo9xev1hPFs/img.gif?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=JTVZyOb7Avk1OWpKyLNMBarUCBo%3D"><img src="https://blog.kakaocdn.net/dna/dMTT8X/btsLATgP8Rb/AAAAAAAAAAAAAAAAAAAAANKk0VvTT9mNWHH_mjBilM99Oa8EWXPQXCo9xev1hPFs/img.gif?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=JTVZyOb7Avk1OWpKyLNMBarUCBo%3D" srcset="https://blog.kakaocdn.net/dna/dMTT8X/btsLATgP8Rb/AAAAAAAAAAAAAAAAAAAAANKk0VvTT9mNWHH_mjBilM99Oa8EWXPQXCo9xev1hPFs/img.gif?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=JTVZyOb7Avk1OWpKyLNMBarUCBo%3D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="512" height="320" data-filename="sample-8800.gif" data-origin-width="512" data-origin-height="320" data-phocus-index="2"></span></figure>
+<p></p>
+<p data-ke-size="size16">&nbsp;</p>
+    </div>
+    
+    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+        <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    </div>
+</body>
+</html>

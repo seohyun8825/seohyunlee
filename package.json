@@ -1,0 +1,20 @@
+{
+  "name": "seohyun-portfolio",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Seohyun Lee – static portfolio site for GitHub Pages (project site).",
+  "scripts": {
+    "deploy": "gh-pages -d .",
+    "publish": "git add . && git commit -m \"Auto update\" && git push origin main && npm run deploy",
+    "crawl-blog": "python crawl_tistory.py",
+    "update-blog": "python crawl_tistory.py && npm run publish",
+    "dev": "python -m http.server 8000"
+  },
+  "main": "script.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "gh-pages": "^6.3.0"
+  }
+}

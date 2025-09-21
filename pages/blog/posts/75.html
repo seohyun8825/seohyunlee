@@ -1,0 +1,302 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniEdit: A Unified Tuning-Free Framework forVideo Motion and Appearance Editing — happy8825 - Seohyun Lee Blog</title>
+    <meta name="description" content="
+
+
+
+Abstract
+최근 text 기반 video 편집에 대한 연구는 많이 진행됐지만, video editing(temporal dimension에서의) 에 관한 연구는 많이 진행되지 않았음. 이 논문에서는 pretrained 된 text- video 모델을 활용해 video의 mo">
+    <link rel="stylesheet" href="../../styles.css">
+    <style>
+        body { 
+            background: #0d0f17; 
+            color: #fff; 
+            font-family: 'Inter', sans-serif; 
+            line-height: 1.6; 
+            margin: 0; 
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .post-header {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 2rem;
+            margin-bottom: 2rem;
+        }
+        .post-meta {
+            color: #888;
+            margin-bottom: 1rem;
+        }
+        .post-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .post-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        .post-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 1rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .post-content p {
+            margin-bottom: 1rem;
+        }
+        .post-content h1, .post-content h2, .post-content h3 {
+            color: #667eea;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .post-content blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 1rem;
+            margin: 1.5rem 0;
+            color: #ccc;
+            font-style: italic;
+        }
+        .post-content code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .post-content pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            color: #667eea;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            background: rgba(102, 126, 234, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    
+    <div class="post-header">
+        <div class="post-meta">
+            <span>📅 2024-07-14</span>
+            <span> | 🏷️ Computer Vision Paper Review</span>
+            <span> | 🔗 <a href="https://happy8825.tistory.com/21" target="_blank">Original Post</a></span>
+            <span> | 📊 16 images</span>
+        </div>
+        <h1 class="post-title">UniEdit: A Unified Tuning-Free Framework forVideo Motion and Appearance Editing — happy8825</h1>
+        
+    </div>
+    
+    <div class="post-content">
+        <hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style5">
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1098" data-origin-height="448" style="margin-left: 50%; transform: translateX(-50%); width: 1098px; max-width: 1098px;"><span data-url="https://blog.kakaocdn.net/dna/bPlWh7/btsIy28nTBF/AAAAAAAAAAAAAAAAAAAAABEMwDvvipLIhbu63I7BxbfZGt9G35Xr3W8LbJFGivkz/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=XWVJvWHzWeOJdAjcryl5FADO7WI%3D" data-phocus="https://blog.kakaocdn.net/dna/bPlWh7/btsIy28nTBF/AAAAAAAAAAAAAAAAAAAAABEMwDvvipLIhbu63I7BxbfZGt9G35Xr3W8LbJFGivkz/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=XWVJvWHzWeOJdAjcryl5FADO7WI%3D"><img src="https://blog.kakaocdn.net/dna/bPlWh7/btsIy28nTBF/AAAAAAAAAAAAAAAAAAAAABEMwDvvipLIhbu63I7BxbfZGt9G35Xr3W8LbJFGivkz/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=XWVJvWHzWeOJdAjcryl5FADO7WI%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FbPlWh7%2FbtsIy28nTBF%2FAAAAAAAAAAAAAAAAAAAAABEMwDvvipLIhbu63I7BxbfZGt9G35Xr3W8LbJFGivkz%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DXWVJvWHzWeOJdAjcryl5FADO7WI%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1098" height="448" data-origin-width="1098" data-origin-height="448" data-phocus-index="0"></span></figure>
+<p></p>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style5">
+<h3 data-ke-size="size23" id="Abstract-1"><a href="#Abstract-1">Abstract</a></h3>
+<p data-ke-size="size18">최근 text 기반 video 편집에 대한 연구는 많이 진행됐지만, video editing(temporal dimension에서의) 에 관한 연구는 많이 진행되지 않았음. 이 논문에서는<u><b> pretrained 된 text- video 모델을 활용해 video의 motion이랑 appearance를 모두 바꾸는, 튜닝이 필요없는 framework</b></u>를 제안함.</p>
+<p data-ke-size="size18">Motion editing 을 하면서 원본 source video 특징을 살리기 위해 Temporal, Spatial self attention를 활용한 <b>auxiliary motion-reference, reconstruction branches를 제안함</b>. auxiliary motion-reference 는 쉽게 말하자면, text 지시에 따른 새로운 motion feature 를 생성하는 친구로 예를들어 걷기 동작을 뛰기로 바꾸는 경우,&nbsp; 뛰기에 해당하는 특징을 생성한다.</p>
+<p data-ke-size="size18">Reconstruction branches는 원본 video의 feature 를 재국성해서 원래 source의 feature 를 보존할 수 있게 도와주는 친구.</p>
+<p data-ke-size="size18">이렇게 생성된 동작이랑 source video feature는 main editing path에 주입되는데, 이때 temporal, spatial self attention layer 를 통해 특징이 들어가게 됨.</p>
+<p data-ke-size="size18">예를 들어 source img 에 사람이 사과를 먹는 장면이 있고, text 지시로 "사람이 사과를 먹는 동작을 손을 흔드는 동작으로 변경" 이 들어가면</p>
+<p data-ke-size="size18"><b>temporal self attention</b>은 사람이 사과를 먹는 동안의 연속적인 동작을 학습하고</p>
+<p data-ke-size="size18"><b>spatial self attention</b> 은 사과를 먹는 동안 손과 사과의 위치 &amp; 관계를 학습하고</p>
+<p data-ke-size="size18"><span style="color: #333333; text-align: start;"><b>auxiliary motion-reference</b>는 손을 흔드는 새로운 동작을 생성하고</span></p>
+<p data-ke-size="size18"><span style="color: #333333; text-align: start;"><b>reconstruction branches source video</b>의 사과랑 사람의 모습을 재구성하고</span><span style="color: #333333; text-align: start;"></span></p>
+<p data-ke-size="size18"><span style="color: #333333; text-align: start;">이렇게 생성된 feature 들이 <b>main editing path 에 insert</b> 되어서 비디오로 변환되는 형식</span></p>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style5">
+<h3 data-ke-size="size23" id="Intro-1"><a href="#Intro-1">Intro</a></h3>
+<h4 data-ke-size="size20"><u><span style="color: #333333; text-align: start;">Video editing 의 challenge</span></u></h4>
+<p data-ke-size="size18"><span style="color: #333333; text-align: start;">이미지 editing 과 달리, <b>video editting 은 여러 frame 간 일관성을 유지</b>해야함. 이 challenge 를 풀기 위해 여러 방법들이 개발되었는데 그중 <b>Pix2VIdeo 방법</b>은, 고정된 anchor frame 에서 다른 frame으로 일관된 appearance 를 전달하기 위해 <b>pretrained 된 image generator 모델을 사용하고,&nbsp; self-attention을 cross-frame attention으로 확장해서 나머지 frame을 생성</b>한다. 그치만 이런 방법들은 motion을 edit 하는것에서는 <b>motion prior 부족과 frame 간 dependency 문제</b>로 한계가 있었음.</span></p>
+<h4 data-ke-size="size20"><u><span style="color: #333333; text-align: start;">Previous attempt at video motion editing</span></u></h4>
+<p data-ke-size="size18"><span style="color: #333333; text-align: start;">그래서 motion edit에서의 challenge 를 해결하기 위해 이전 연구들은 source video에 pretrained generator를 달아서 fine tuning 하고, text guide 를 통해 motion 을 편집하는 방식이 사용되었음. 효과적이었지만, 생성 모델의 능력과, source video 특징 보존 사이에 균형을 맞춰야하는 어려움이 있었음. 이로 인해 모션의 다양성이 제한되거나, 원치 않는 content variation이 일어날 수 있음</span><span style="color: #333333; text-align: start;"></span></p>
+<h4 style="color: #000000; text-align: start;" data-ke-size="size20"><u>UniEdit의 목표</u></h4>
+<p data-ke-size="size18">이런 균형 맞추기 문제를 해결하기 위해, UniEdit은 video의 motion이랑 appearnace를 동시에 편집할 수 있는, 튜닝이 필요없는 framework를 제안했음. 이렇게 하기 위해서는 세가지 challenge 가 있었는데</p>
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li>1)Text 기반 motion integration : 텍스트를 기반으로 한 motion을 video content 에 자연스럽게 통합하는게 쉽지가 않음</li>
+<li>2) 원본 video에서 편집되지 않을 부분은 그대로 보존해야함</li>
+<li>3) spatial structure 또한 유지되어져야 함</li>
+</ul>
+<p style="color: #000000; text-align: start;" data-ke-size="size18"><u>UniEdit의 Solution</u></p>
+<p data-ke-size="size18">UniEdit은 pretrained 된 text-to -video generator를 활용해, <b>inversion-then-generation 프레임워크</b>를 사용한다.</p>
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li>1)Text 기반 motion integration를 위해<b> temporal self-attention layer를 통해 frame 간의 dependency</b>를 encoding 함. 이를 통해 text 기반 motion feature 를 뽑아낼 수 있음. 이게&nbsp; main editing path 에 추가될 것임.</li>
+<li>2) 원본 video에서 편집되지 않을 부분은 그대로 보존하기 위해, <b>spatial self attention layer 활용. Frame 내 종속성</b>을 encoding해서 feature 를 얻어</li>
+<li>3) spatial structure를 유지하기 위해 spatial attention maps를 reconstruction branch 에 있는 걸로 바꿔치기 함</li>
+</ul>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="974" data-origin-height="658" style="margin-left: 50%; transform: translateX(-50%); width: 974px; max-width: 974px;"><span data-url="https://blog.kakaocdn.net/dna/cqcl2A/btsIx3Odyd4/AAAAAAAAAAAAAAAAAAAAAM6uqSXDAB_27_wRBrif1XCOE8inEd6VhAQH1G0m0bO9/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=v7jkWNVWClAXnOPNdr39%2FJwquck%3D" data-phocus="https://blog.kakaocdn.net/dna/cqcl2A/btsIx3Odyd4/AAAAAAAAAAAAAAAAAAAAAM6uqSXDAB_27_wRBrif1XCOE8inEd6VhAQH1G0m0bO9/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=v7jkWNVWClAXnOPNdr39%2FJwquck%3D"><img src="https://blog.kakaocdn.net/dna/cqcl2A/btsIx3Odyd4/AAAAAAAAAAAAAAAAAAAAAM6uqSXDAB_27_wRBrif1XCOE8inEd6VhAQH1G0m0bO9/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=v7jkWNVWClAXnOPNdr39%2FJwquck%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2Fcqcl2A%2FbtsIx3Odyd4%2FAAAAAAAAAAAAAAAAAAAAAM6uqSXDAB_27_wRBrif1XCOE8inEd6VhAQH1G0m0bO9%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3Dv7jkWNVWClAXnOPNdr39%252FJwquck%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="974" height="658" data-origin-width="974" data-origin-height="658" data-phocus-index="1"></span></figure>
+<p></p>
+<p data-ke-size="size18">이렇게 함으로써 video editing taks 뿐만 아니라 zero shot text-imate-to video generation에도 superior performance를 보였음을 위 그림을 통해 볼 수 있다.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style5">
+<h3 style="color: #000000; text-align: start;" data-ke-size="size23" id="Related%20Works-1"><a href="#Related%20Works-1">Related Works</a></h3>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style5">
+<h3 data-ke-size="size23" id="Preliminaries%20%3A%20Video%20Diffusion%20Model-1"><a href="#Preliminaries%20%3A%20Video%20Diffusion%20Model-1">Preliminaries : Video Diffusion Model</a></h3>
+<h4 data-ke-size="size20"><u>Overall Architecture</u></h4>
+<p data-ke-size="size18">Modern T2V디퓨전 모델은 보통 pretrained된 T2I(text to image)에 몇가지 adaptation 1) <b>additional temporal layer</b>(2d 컨볼루션 레이어를 3d 형태로 확장하거나, temporal self attention layer를 추가하는 방식으로), 2) <b>낮은 해상도에서 먼저 학습시키고, 업샘플링 해서 video 생성</b> 하는 방식, 혹은 control signal 를 추가하는 등의 방식이 있었음.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">Inference 단계에서는 가우시안 노이즈가 주어지면, trained 된 denoising Unet 이 T step의 denoising 단계를 거쳐 output 을 생성.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">이 denoising UNet의 각 block 에는 4가지 모듈이 있는데, <u>convolutional module</u>(feature 추출), <u>spatial self-attention module</u>(프레임 내의 dependency), <u>spatial cross-attention module</u>(text 조건에서 텍스트 지시가 각 프레임에 어떻게 적용될지),<u> temporal self-attention module</u>(frame 간 dependency)이 있음</p>
+<h4 data-ke-size="size20"><u>Attention Mechanism</u></h4>
+<p data-ke-size="size18">각 모듈은 입력에서 쿼리, 키, 벨류를 생성함. 예를 들면 SA-S 모듈은 입력 frame에서 쿼리, key, value를 생성하고 frame 내의 dependency 학습하는 것.</p>
+<p data-ke-size="size18">그리고 생성된 쿼리, key, value는 다음과 같은 식으로 연산이 되어짐.</p>
+<p class="equation" style="text-align: center;" data-ke-size="size18">attn(Q, K, V) = softmax(<sup>QK<sup>T</sup></sup>/<sub>√d</sub>)V</p>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style5">
+<h3 data-ke-size="size23" id="UniEdit-1"><a href="#UniEdit-1">UniEdit</a></h3>
+<p data-ke-size="size16"><b>모델 구조를 보자~</b></p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1002" data-origin-height="564" style="margin-left: 50%; transform: translateX(-50%); width: 1002px; max-width: 1002px;"><span data-url="https://blog.kakaocdn.net/dna/mGF11/btsIyFZ223w/AAAAAAAAAAAAAAAAAAAAABAaZYz57TrdoVimISEcEPKbjC8JmVH_4Cewg8jIOYSC/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=B5QKVujrZ%2FezBVZqeCzy2kF6zhQ%3D" data-phocus="https://blog.kakaocdn.net/dna/mGF11/btsIyFZ223w/AAAAAAAAAAAAAAAAAAAAABAaZYz57TrdoVimISEcEPKbjC8JmVH_4Cewg8jIOYSC/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=B5QKVujrZ%2FezBVZqeCzy2kF6zhQ%3D"><img src="https://blog.kakaocdn.net/dna/mGF11/btsIyFZ223w/AAAAAAAAAAAAAAAAAAAAABAaZYz57TrdoVimISEcEPKbjC8JmVH_4Cewg8jIOYSC/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=B5QKVujrZ%2FezBVZqeCzy2kF6zhQ%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FmGF11%2FbtsIyFZ223w%2FAAAAAAAAAAAAAAAAAAAAABAaZYz57TrdoVimISEcEPKbjC8JmVH_4Cewg8jIOYSC%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DB5QKVujrZ%252FezBVZqeCzy2kF6zhQ%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1002" height="564" data-origin-width="1002" data-origin-height="564" data-phocus-index="2"></span></figure>
+<p></p>
+<h4 data-ke-size="size20"><u>Method</u></h4>
+<p data-ke-size="size18">Inverstion-then-generation 파이프라인을 기반으로 함. DDIM inversion 을 통해 Source Video를 Latent Vector Zt로 변환. 이 Zt가 초기 노이즈로 사용되며, pretrained 된 Unet 모델에 들어가서&nbsp; 디노이징 됨.</p>
+<p data-ke-size="size18">이 과정에서 text prompt Pt를 condition으로 원하는 video edit을 가능하게 함.</p>
+<p data-ke-size="size18">Motion Editing 을 위해 논문에서 auxiliary reconstruction branch, auxiliary motion-reference branch, 두가지를 제안함. Background Inconsistency 를 해결하기 위해 mask-guided coordination scheme이 소개되며, text-image-to-video generation에도 확장이 가능함을 보일 예정.</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="892" data-origin-height="862" style="margin-left: 50%; transform: translateX(-50%); width: 892px; max-width: 892px;"><span data-url="https://blog.kakaocdn.net/dna/bKLVH1/btsIx5rWskt/AAAAAAAAAAAAAAAAAAAAAHrXxE5n1Mu2hFPX246i5TVJNVfH6Wo9Y2Up6Gn_xWh1/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=IZlyiMXKrzH8gQgDTbptGVf%2Fng0%3D" data-phocus="https://blog.kakaocdn.net/dna/bKLVH1/btsIx5rWskt/AAAAAAAAAAAAAAAAAAAAAHrXxE5n1Mu2hFPX246i5TVJNVfH6Wo9Y2Up6Gn_xWh1/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=IZlyiMXKrzH8gQgDTbptGVf%2Fng0%3D"><img src="https://blog.kakaocdn.net/dna/bKLVH1/btsIx5rWskt/AAAAAAAAAAAAAAAAAAAAAHrXxE5n1Mu2hFPX246i5TVJNVfH6Wo9Y2Up6Gn_xWh1/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=IZlyiMXKrzH8gQgDTbptGVf%2Fng0%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FbKLVH1%2FbtsIx5rWskt%2FAAAAAAAAAAAAAAAAAAAAAHrXxE5n1Mu2hFPX246i5TVJNVfH6Wo9Y2Up6Gn_xWh1%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DIZlyiMXKrzH8gQgDTbptGVf%252Fng0%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="892" height="862" data-origin-width="892" data-origin-height="862" data-phocus-index="3"></span></figure>
+<p></p>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style2">
+<h4 data-ke-size="size20"><u> Tuning-Free Video Motion Editing</u></h4>
+<p data-ke-size="size18"><b><i><u>SA-S Module, for content preservation\</u></i></b></p>
+<p data-ke-size="size18"><b>source video의 background 나 texture 를 살리기 위해 auxiliary reconstruction branch 를 제안</b>함. 이 reconstruction path는 똑같은 Zt에서 시작하며, 똑같이 denoising path 를 거친다. 위 그림에서는 초록색 부분을 보면 됨. 이떄, source prompt(비디오를 설명하는 prompt)를 컨디션으로 주면서, 원본 이미지를 복원하기 위한 denoising을 한다.&nbsp;</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1060" data-origin-height="206" style="margin-left: 50%; transform: translateX(-50%); width: 1060px; max-width: 1060px;"><span data-url="https://blog.kakaocdn.net/dna/zaUJy/btsIzseGIyp/AAAAAAAAAAAAAAAAAAAAADQq6kCmSRkqHJmwmdW_o5WK-IMCmM2ajz3ib2-HyO2-/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=8%2FrpvyxX4Bl%2F%2FI7kzSnt9LTL3Uo%3D" data-phocus="https://blog.kakaocdn.net/dna/zaUJy/btsIzseGIyp/AAAAAAAAAAAAAAAAAAAAADQq6kCmSRkqHJmwmdW_o5WK-IMCmM2ajz3ib2-HyO2-/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=8%2FrpvyxX4Bl%2F%2FI7kzSnt9LTL3Uo%3D" data-alt="이부분"><img src="https://blog.kakaocdn.net/dna/zaUJy/btsIzseGIyp/AAAAAAAAAAAAAAAAAAAAADQq6kCmSRkqHJmwmdW_o5WK-IMCmM2ajz3ib2-HyO2-/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=8%2FrpvyxX4Bl%2F%2FI7kzSnt9LTL3Uo%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FzaUJy%2FbtsIzseGIyp%2FAAAAAAAAAAAAAAAAAAAAADQq6kCmSRkqHJmwmdW_o5WK-IMCmM2ajz3ib2-HyO2-%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3D8%252FrpvyxX4Bl%252F%252FI7kzSnt9LTL3Uo%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1060" height="206" data-origin-width="1060" data-origin-height="206" data-phocus-index="4"></span><figcaption>이부분</figcaption>
+</figure>
+<p></p>
+<p data-ke-size="size18">이떄 denoising 을 하면서 나온 attention feature는 source video의 feature 를 포함함이 앞선 연구에서 증명되었기에, 이때 denoising 을 하면서 나온 attention feauture를 main editing path의 spatial self attention layer에 넣어주는 방식으로, 원본 feature를 복원함.</p>
+<p data-ke-size="size18">다음과 같은 식으로, 여기서 t0이랑 l0은 하이퍼파라미터인데, 내가 설정한 특정 기준만큼 원본 feature 를 더 잘 복원시킬 수 있도록 <b>main path의 attention에 있는 V를, source image prompt 를 주어서 복원하는 과정의 attention의 V로 교체</b>하는 방식.</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="824" data-origin-height="122" style="margin-left: 50%; transform: translateX(-50%); width: 824px; max-width: 824px;"><span data-url="https://blog.kakaocdn.net/dna/bCZQAt/btsIzoi2DB5/AAAAAAAAAAAAAAAAAAAAAIxZWDfO7G82LpAuT6TE4OkDv_mEVexGhNu0SoH3bG98/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=hPBBaQ0eEFbe7o0TJJB8nmQi81I%3D" data-phocus="https://blog.kakaocdn.net/dna/bCZQAt/btsIzoi2DB5/AAAAAAAAAAAAAAAAAAAAAIxZWDfO7G82LpAuT6TE4OkDv_mEVexGhNu0SoH3bG98/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=hPBBaQ0eEFbe7o0TJJB8nmQi81I%3D"><img src="https://blog.kakaocdn.net/dna/bCZQAt/btsIzoi2DB5/AAAAAAAAAAAAAAAAAAAAAIxZWDfO7G82LpAuT6TE4OkDv_mEVexGhNu0SoH3bG98/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=hPBBaQ0eEFbe7o0TJJB8nmQi81I%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FbCZQAt%2FbtsIzoi2DB5%2FAAAAAAAAAAAAAAAAAAAAAIxZWDfO7G82LpAuT6TE4OkDv_mEVexGhNu0SoH3bG98%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DhPBBaQ0eEFbe7o0TJJB8nmQi81I%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="824" height="122" data-origin-width="824" data-origin-height="122" data-phocus-index="5"></span></figure>
+<p></p>
+<p data-ke-size="size18"><b><u><i>SA-T Modules, for motion injection</i></u></b></p>
+<p data-ke-size="size18">단순히 t0이나 l0값, 즉 하이퍼파라미터를 잘 조정하면서, text prompt 컨디션을 더 많이 주는 등의 방식으로 출력 비디오가 text prompt 를 따르도록 할 수는 있음. 그렇지만 이렇게 하면, 텍스트 프롬프트를 제대로 영상이 따르지 않아 t0이랑 l0을 무작정 증가시켜버리면, 원본 비디오의 structure 이나 일관성 문제가 생겨버림.</p>
+<p data-ke-size="size18"><b>우리의 목표는 원하는 motion edit 을 하면서도, source content를 잘 보존하는 것.</b></p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1096" data-origin-height="236" style="margin-left: 50%; transform: translateX(-50%); width: 1096px; max-width: 1096px;"><span data-url="https://blog.kakaocdn.net/dna/cvKeFf/btsIx7b0xEj/AAAAAAAAAAAAAAAAAAAAAFaVOnzvaXadhkY9m09hgE7LYfdLnCDS1jbX3MaZnRR7/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=w5jqXksGZSyVlRlILFbrjGC%2Bv3E%3D" data-phocus="https://blog.kakaocdn.net/dna/cvKeFf/btsIx7b0xEj/AAAAAAAAAAAAAAAAAAAAAFaVOnzvaXadhkY9m09hgE7LYfdLnCDS1jbX3MaZnRR7/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=w5jqXksGZSyVlRlILFbrjGC%2Bv3E%3D" data-alt="For motion injection"><img src="https://blog.kakaocdn.net/dna/cvKeFf/btsIx7b0xEj/AAAAAAAAAAAAAAAAAAAAAFaVOnzvaXadhkY9m09hgE7LYfdLnCDS1jbX3MaZnRR7/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=w5jqXksGZSyVlRlILFbrjGC%2Bv3E%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FcvKeFf%2FbtsIx7b0xEj%2FAAAAAAAAAAAAAAAAAAAAAFaVOnzvaXadhkY9m09hgE7LYfdLnCDS1jbX3MaZnRR7%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3Dw5jqXksGZSyVlRlILFbrjGC%252Bv3E%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1096" height="236" data-origin-width="1096" data-origin-height="236" data-phocus-index="6"></span><figcaption>For motion injection</figcaption>
+</figure>
+<p></p>
+<p data-ke-size="size18">아까 reconstruction branch는 source 비디오를 설명하는 prompt를 컨디션으로 denoising 을 했다면, Motion reference branch는 내가 바꾸고 싶은 모션에 대한 설명, 즉<b> target prompt 를&nbsp; 컨디셔닝 하면서 denoising</b> 을 하는것.</p>
+<p data-ke-size="size18">그럼 여기서 나온 motion을 main editing path로 넣어주기 위해서 사용된 insight는</p>
+<p data-ke-size="size18"><b>temporal layer은 frame 간의 dependency를 모델링한다</b>! 이다.</p>
+<p data-ke-size="size18">이 insight를 설명해주는 그림인데, 여기서 세번쨰 줄 temporal attention이랑 네번째 줄 opticlal flow 시각화한걸 보자. temporal attention이랑 optical flow 가 거의 비슷하게 겹치는걸 볼 수 있고, 이걸 통해서 temporal attention이 frame 간 dependency를 encoding 하는것을&nbsp; 확인해볼 수 있음.&nbsp; 너구리 귀엽당</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1064" data-origin-height="880" style="margin-left: 50%; transform: translateX(-50%); width: 1064px; max-width: 1064px;"><span data-url="https://blog.kakaocdn.net/dna/sAznL/btsIydbKIcX/AAAAAAAAAAAAAAAAAAAAAFrMHiWtOXg_Xb2limh8nwY6lV6jt71ksXLJks6t1HVM/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=kg2JwbdxzV6N2fJKy%2FJLRUPt8K8%3D" data-phocus="https://blog.kakaocdn.net/dna/sAznL/btsIydbKIcX/AAAAAAAAAAAAAAAAAAAAAFrMHiWtOXg_Xb2limh8nwY6lV6jt71ksXLJks6t1HVM/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=kg2JwbdxzV6N2fJKy%2FJLRUPt8K8%3D"><img src="https://blog.kakaocdn.net/dna/sAznL/btsIydbKIcX/AAAAAAAAAAAAAAAAAAAAAFrMHiWtOXg_Xb2limh8nwY6lV6jt71ksXLJks6t1HVM/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=kg2JwbdxzV6N2fJKy%2FJLRUPt8K8%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FsAznL%2FbtsIydbKIcX%2FAAAAAAAAAAAAAAAAAAAAAFrMHiWtOXg_Xb2limh8nwY6lV6jt71ksXLJks6t1HVM%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3Dkg2JwbdxzV6N2fJKy%252FJLRUPt8K8%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1064" height="880" data-origin-width="1064" data-origin-height="880" data-phocus-index="7"></span></figure>
+<p></p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">그래서, 이런 insight 를 기반으로 main editing path의 temporal self-attention layer에 motion inject 를 할 방법을 제안함.</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="994" data-origin-height="212" style="margin-left: 50%; transform: translateX(-50%); width: 994px; max-width: 994px;"><span data-url="https://blog.kakaocdn.net/dna/ZvFb4/btsIyAYORSU/AAAAAAAAAAAAAAAAAAAAABjXPeDw0kyEeEipDYi_LgeqOt_RTY9uH2uzsqM37pWo/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=iwBynW0UdmxAnNuxYdBDI3vUaVg%3D" data-phocus="https://blog.kakaocdn.net/dna/ZvFb4/btsIyAYORSU/AAAAAAAAAAAAAAAAAAAAABjXPeDw0kyEeEipDYi_LgeqOt_RTY9uH2uzsqM37pWo/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=iwBynW0UdmxAnNuxYdBDI3vUaVg%3D"><img src="https://blog.kakaocdn.net/dna/ZvFb4/btsIyAYORSU/AAAAAAAAAAAAAAAAAAAAABjXPeDw0kyEeEipDYi_LgeqOt_RTY9uH2uzsqM37pWo/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=iwBynW0UdmxAnNuxYdBDI3vUaVg%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FZvFb4%2FbtsIyAYORSU%2FAAAAAAAAAAAAAAAAAAAAABjXPeDw0kyEeEipDYi_LgeqOt_RTY9uH2uzsqM37pWo%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DiwBynW0UdmxAnNuxYdBDI3vUaVg%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="994" height="212" data-origin-width="994" data-origin-height="212" data-phocus-index="8"></span></figure>
+<p></p>
+<p data-ke-size="size18">여기서 Qm, Km이 각각 motion reference branch 의 쿼리랑 키로, main editing 의 attention map의 쿼리랑 키를 motion reference branch 의 쿼리와 키로 바꾸는 방식.</p>
+<p data-ke-size="size18">이 모션을 source video 랑 잘 fuse 하기 위해 spatial structure control도 제안되었음. Spatial structure control 에 대해서는 밑에서 알아보자</p>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style2">
+<h4 data-ke-size="size20"><u>Tuning-Free Video Appearance Editing</u></h4>
+<p data-ke-size="size18">Appearance editing 은 motion editing 과는 달리 <b>Frame 간의 종속성을 필요로 하지 않기에,</b> 비슷한 파이프라인을 쓰지만<b> motion-reference branch 랑 motion injection mechanism 은 없앴음</b>. 또한, source video의 structural consistency를 유지하는 것이 주요 challenge 였기에, 이걸 해결하기 위해 <b>main editing path와 reconstruction branch 사이에&nbsp; spatial structure control 를 도입함.</b></p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">그럼 spatial structure control이란?</p>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style2">
+<h4 data-ke-size="size20"><u>Spatial structure Control on SA-S Modules</u></h4>
+<p data-ke-size="size18">이전의 연구들에서는 보통 appearance editing 을 위해 additional network 를 사용했음. 그치만 이 network의 성능에 따라서 performance의 결과가 너무 차이가 나는게 문제. 그래서 여기서 제안하는 건,&nbsp; <b>reconstruction branch에서 원본 비디오의 layout infromation를 뽑아내자</b>! 이다.</p>
+<p data-ke-size="size18">아까 위에 너구리사진에서 Spatial Query (2번쨰)보면, spatial attention은 영상의 structure를 encoding함을 알 수 있는데, 따라서 main path의 Spatial Attention module의 쿼리와 키를&nbsp; reconstruction branch 의 쿼리와 키로, 다음과 같이 대체 하는 방식.</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="978" data-origin-height="138" style="margin-left: 50%; transform: translateX(-50%); width: 978px; max-width: 978px;"><span data-url="https://blog.kakaocdn.net/dna/cvbiIo/btsIyyNKCTN/AAAAAAAAAAAAAAAAAAAAALGjrqEX1gGxG-kYKvW63yNe6SSK0zaVRSO-KrFdOfPT/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=otBNV%2BFlfIucIEtWQCb5y1poTBM%3D" data-phocus="https://blog.kakaocdn.net/dna/cvbiIo/btsIyyNKCTN/AAAAAAAAAAAAAAAAAAAAALGjrqEX1gGxG-kYKvW63yNe6SSK0zaVRSO-KrFdOfPT/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=otBNV%2BFlfIucIEtWQCb5y1poTBM%3D"><img src="https://blog.kakaocdn.net/dna/cvbiIo/btsIyyNKCTN/AAAAAAAAAAAAAAAAAAAAALGjrqEX1gGxG-kYKvW63yNe6SSK0zaVRSO-KrFdOfPT/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=otBNV%2BFlfIucIEtWQCb5y1poTBM%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FcvbiIo%2FbtsIyyNKCTN%2FAAAAAAAAAAAAAAAAAAAAALGjrqEX1gGxG-kYKvW63yNe6SSK0zaVRSO-KrFdOfPT%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DotBNV%252BFlfIucIEtWQCb5y1poTBM%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="978" height="138" data-origin-width="978" data-origin-height="138" data-phocus-index="9"></span></figure>
+<p></p>
+<p data-ke-size="size18">여기서 t2랑 l2는 editing 정도를 조절하기 위한 hyperparm.</p>
+<p data-ke-size="size18">여기까지 읽다가 드는 의문점이, <b>왜 어떤거는 Value를 교체하고 어떤건 Q, K를 교체하지?</b></p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">아까 content preservation에서는, value를 교체했고, Spatial structure control이나 motion injection하는거에서는 Q,랑 K를 교체했는데</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">Q, K, V의&nbsp; 의미를 생각해보자면</p>
+<p data-ke-size="size18">우선 Q(쿼리)는 주어진 입력 데이터에서 관심이 있는 특정 정보를 나태내고,</p>
+<p data-ke-size="size18">K(key)는 입력 데이터의 모든 위치에 대한 정보를 나타내어 쿼리와의 유사성을 계산하는데 사용되며</p>
+<p data-ke-size="size18">Value 는 실제로 반환될 정보!로</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18"><b>content preservation에서는 source video의 texture 와 스타일을 유지하면서 비디오를 편집하는게 목적이니까,</b> Value를 교체하면 source video의 중요한 정보와 특징이 그대로 유지된다. 이때, 쿼리랑 키는 데이터의 structural 특징을 반영하니까, 쿼리랑 키를 그대로 두고, 원본비디오의 value를 넣어주면, 원본 비디오의 스타일과 texture를 보존할 수 있음</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18"><b>Spatial Structure Control에서는 목적이 비디오의 각 frame의 구성을 일관성있게 유지하면서 text prompt 에 따라 필요한 texture 랑 스타일을 생성하는것.</b></p>
+<p data-ke-size="size18">여기서 쿼리와 키를 replace 시켜주면서, 쿼리와 키가 데이터의 structural 특징을 반영하니까, 이를 replace 하는 방식으로 일관성 있는 새로운 스타일 반영이 가능해지는것.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">즉 정리하자면</p>
+<p data-ke-size="size18">Content Preservation</p>
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li><b>Query, Key</b>: 원본 데이터의 구조적 정보를 유지.</li>
+<li><b>Value</b>: 원본 비디오의 텍스처와 스타일을 유지하기 위해 교체.</li>
+<li><b>즉, </b>Value를 교체함으로써 원본 비디오의 중요한 정보와 특징을 그대로 유지할 수 있음.</li>
+</ul>
+<p data-ke-size="size18">Spatial Structure Control</p>
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li><b> <b>Query, Key</b><span style="color: #333333; text-align: left;">:<span> </span></span></b>&nbsp;새로운 텍스처와 스타일을 반영하기 위해 교체.</li>
+<li><b>Value</b>: 기존의 구조적 정보를 유지하기 위해 그대로 유지.</li>
+<li><b>즉</b> 쿼리와 키를 교체함으로써 프레임 간 구성 일관성을 유지하면서, 텍스트 프롬프트에 따라 새로운 텍스처와 스타일을 생성할 수 있음</li>
+</ul>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style2">
+<h4 data-ke-size="size20"><u>Mask-Guided Coordination</u></h4>
+<p data-ke-size="size18">Background Consistency를 더 향상시키기 위해, 논문에서는&nbsp; foreground/background에 segmentation mask M를 활용하는 방법을 제안함. foreground와 배경을 구분해서, 편집할떄 consistency 향상에 도움을 주는 친구이다</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">Maskattention을 다음과 같이 정의할 수 있음</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1194" data-origin-height="162" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/RLkrD/btsIzb5DqOp/AAAAAAAAAAAAAAAAAAAAAJ7H71nWE8mxzsnFp12BcWL-vJIFme6vuk6vlmmSRjo1/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=hkeYUqn0HyxR6rwhF8s%2BsZsGm4Y%3D" data-phocus="https://blog.kakaocdn.net/dna/RLkrD/btsIzb5DqOp/AAAAAAAAAAAAAAAAAAAAAJ7H71nWE8mxzsnFp12BcWL-vJIFme6vuk6vlmmSRjo1/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=hkeYUqn0HyxR6rwhF8s%2BsZsGm4Y%3D"><img src="https://blog.kakaocdn.net/dna/RLkrD/btsIzb5DqOp/AAAAAAAAAAAAAAAAAAAAAJ7H71nWE8mxzsnFp12BcWL-vJIFme6vuk6vlmmSRjo1/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=hkeYUqn0HyxR6rwhF8s%2BsZsGm4Y%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FRLkrD%2FbtsIzb5DqOp%2FAAAAAAAAAAAAAAAAAAAAAJ7H71nWE8mxzsnFp12BcWL-vJIFme6vuk6vlmmSRjo1%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DhkeYUqn0HyxR6rwhF8s%252BsZsGm4Y%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1194" height="162" data-origin-width="1194" data-origin-height="162" data-phocus-index="10"></span></figure>
+<p></p>
+<p data-ke-size="size18">Mask-guided self-attention은 다음과 같음, Mf는 foreground 마스크. Mb는 background 마스크.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1000" data-origin-height="172" style="margin-left: 50%; transform: translateX(-50%); width: 1000px; max-width: 1000px;"><span data-url="https://blog.kakaocdn.net/dna/cVo4cT/btsIyYrUlhz/AAAAAAAAAAAAAAAAAAAAANKwguANqMsH7TQ-z4jKEkjAGzMAbFzlDgTRZhXthZCY/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=%2FCUwCFniBIC2Mz2HoRx4Gsxqvw0%3D" data-phocus="https://blog.kakaocdn.net/dna/cVo4cT/btsIyYrUlhz/AAAAAAAAAAAAAAAAAAAAANKwguANqMsH7TQ-z4jKEkjAGzMAbFzlDgTRZhXthZCY/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=%2FCUwCFniBIC2Mz2HoRx4Gsxqvw0%3D"><img src="https://blog.kakaocdn.net/dna/cVo4cT/btsIyYrUlhz/AAAAAAAAAAAAAAAAAAAAANKwguANqMsH7TQ-z4jKEkjAGzMAbFzlDgTRZhXthZCY/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=%2FCUwCFniBIC2Mz2HoRx4Gsxqvw0%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FcVo4cT%2FbtsIyYrUlhz%2FAAAAAAAAAAAAAAAAAAAAANKwguANqMsH7TQ-z4jKEkjAGzMAbFzlDgTRZhXthZCY%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3D%252FCUwCFniBIC2Mz2HoRx4Gsxqvw0%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1000" height="172" data-origin-width="1000" data-origin-height="172" data-phocus-index="11"></span></figure>
+<p></p>
+<p data-ke-size="size18">단순 self attention 뿐만 아니라 content preservatin이나 motion injection에도 중요한 역할을 함.</p>
+<p data-ke-size="size18">쿼리를&nbsp;</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="640" data-origin-height="86" style="margin-left: 50%; transform: translateX(-50%); width: 640px; max-width: 640px;"><span data-url="https://blog.kakaocdn.net/dna/cIcQ4B/btsIAcv1pmr/AAAAAAAAAAAAAAAAAAAAAOwzdorrkmgqUECSB_aBxOMBric-0s488KMb905A_VdC/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=Vi7vv2O68NXP9GSnhyErCHcpnPc%3D" data-phocus="https://blog.kakaocdn.net/dna/cIcQ4B/btsIAcv1pmr/AAAAAAAAAAAAAAAAAAAAAOwzdorrkmgqUECSB_aBxOMBric-0s488KMb905A_VdC/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=Vi7vv2O68NXP9GSnhyErCHcpnPc%3D"><img src="https://blog.kakaocdn.net/dna/cIcQ4B/btsIAcv1pmr/AAAAAAAAAAAAAAAAAAAAAOwzdorrkmgqUECSB_aBxOMBric-0s488KMb905A_VdC/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=Vi7vv2O68NXP9GSnhyErCHcpnPc%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FcIcQ4B%2FbtsIAcv1pmr%2FAAAAAAAAAAAAAAAAAAAAAOwzdorrkmgqUECSB_aBxOMBric-0s488KMb905A_VdC%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DVi7vv2O68NXP9GSnhyErCHcpnPc%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="640" height="86" data-origin-width="640" data-origin-height="86" data-phocus-index="12"></span></figure>
+<p></p>
+<p data-ke-size="size18">다음과 같이 조정하며, foreground mask를 활용해 foreground information을 강조하고, 배경 정보는 원래 쿼리 Q를 유지해서 foreground 랑 background의 일관성을 유지하는 방식.</p>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style2">
+<h4 data-ke-size="size20"><u>Zero-Shot?</u></h4>
+<p data-ke-size="size18">텍스트 prompt 와 이미지를 입력으로 사용해 video generation하는 방법. 두가지 접근 방식이 사용됨</p>
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li>1) Simulated Camera Movement
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li>입력 이미지를 simulated camera movement로 변환해서 psudo video clip을 생성 -&gt; video sequence 형성</li>
+</ul>
+</li>
+<li>2) Existing Image Animation Approach
+<ul style="list-style-type: disc;" data-ke-list-type="disc">
+<li>기존의 이미지 animation 기법을 활용해서 무작위 motion이 포함된 video생성&nbsp;</li>
+</ul>
+</li>
+</ul>
+<p data-ke-size="size18">이렇게 두가지 방법을 통해 생성된 video를 vanilla video라고 하는ㅇ데, 이 vanilla video 에 대해 UniEdit을 사용해 text prompt 기반 edit을 해서 video를 얻음</p>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style5">
+<h3 data-ke-size="size23" id="Experiments-1"><a href="#Experiments-1">Experiments</a></h3>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="1262" data-origin-height="924" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/sGfIv/btsIyg7HuA5/AAAAAAAAAAAAAAAAAAAAAA-8so61OrBrshExe3ZOfajLtJ0jmowiqQG2X2nRW-dI/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=RuLQAJxD9mWCY6FKz%2FFrpb1vqcM%3D" data-phocus="https://blog.kakaocdn.net/dna/sGfIv/btsIyg7HuA5/AAAAAAAAAAAAAAAAAAAAAA-8so61OrBrshExe3ZOfajLtJ0jmowiqQG2X2nRW-dI/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=RuLQAJxD9mWCY6FKz%2FFrpb1vqcM%3D"><img src="https://blog.kakaocdn.net/dna/sGfIv/btsIyg7HuA5/AAAAAAAAAAAAAAAAAAAAAA-8so61OrBrshExe3ZOfajLtJ0jmowiqQG2X2nRW-dI/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=RuLQAJxD9mWCY6FKz%2FFrpb1vqcM%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FsGfIv%2FbtsIyg7HuA5%2FAAAAAAAAAAAAAAAAAAAAAA-8so61OrBrshExe3ZOfajLtJ0jmowiqQG2X2nRW-dI%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DRuLQAJxD9mWCY6FKz%252FFrpb1vqcM%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="1262" height="924" data-origin-width="1262" data-origin-height="924" data-phocus-index="13"></span></figure>
+<p></p>
+<p data-ke-size="size18">결과를 보면 edited video가 target promp와 일치허고, 시간적 일관성이 유지됨.</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="558" data-origin-height="290" style="margin-left: 50%; transform: translateX(-50%); width: 558px; max-width: 558px;"><span data-url="https://blog.kakaocdn.net/dna/c33gLx/btsIzVac7oI/AAAAAAAAAAAAAAAAAAAAAOOSNsn27vEO-W5fAAX7oIdFDsMrcWVezcYOWuMk4kgk/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=Cv8jR2X7uZSL%2BG%2FrDHGExfSpPNs%3D" data-phocus="https://blog.kakaocdn.net/dna/c33gLx/btsIzVac7oI/AAAAAAAAAAAAAAAAAAAAAOOSNsn27vEO-W5fAAX7oIdFDsMrcWVezcYOWuMk4kgk/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=Cv8jR2X7uZSL%2BG%2FrDHGExfSpPNs%3D"><img src="https://blog.kakaocdn.net/dna/c33gLx/btsIzVac7oI/AAAAAAAAAAAAAAAAAAAAAOOSNsn27vEO-W5fAAX7oIdFDsMrcWVezcYOWuMk4kgk/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=Cv8jR2X7uZSL%2BG%2FrDHGExfSpPNs%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2Fc33gLx%2FbtsIzVac7oI%2FAAAAAAAAAAAAAAAAAAAAAOOSNsn27vEO-W5fAAX7oIdFDsMrcWVezcYOWuMk4kgk%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DCv8jR2X7uZSL%252BG%252FrDHGExfSpPNs%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="558" height="290" data-origin-width="558" data-origin-height="290" data-phocus-index="14"></span></figure>
+<p></p>
+<p data-ke-size="size18">Quantitative Result를 봐도, UniEdit이 가장 높은 frame consistency 와 textual alignment 점수를 얻었음.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="950" data-origin-height="998" style="margin-left: 50%; transform: translateX(-50%); width: 950px; max-width: 950px;"><span data-url="https://blog.kakaocdn.net/dna/4fj9e/btsIzo4KDVU/AAAAAAAAAAAAAAAAAAAAAD9KJPPWVG2aBEXbSn_PNYXvtW0MkBXPlRrxwm7nTcVY/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=%2FJj5wRCrd0dHh9KYa65h04PDN0Y%3D" data-phocus="https://blog.kakaocdn.net/dna/4fj9e/btsIzo4KDVU/AAAAAAAAAAAAAAAAAAAAAD9KJPPWVG2aBEXbSn_PNYXvtW0MkBXPlRrxwm7nTcVY/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=%2FJj5wRCrd0dHh9KYa65h04PDN0Y%3D" data-alt="ni"><img src="https://blog.kakaocdn.net/dna/4fj9e/btsIzo4KDVU/AAAAAAAAAAAAAAAAAAAAAD9KJPPWVG2aBEXbSn_PNYXvtW0MkBXPlRrxwm7nTcVY/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=%2FJj5wRCrd0dHh9KYa65h04PDN0Y%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2F4fj9e%2FbtsIzo4KDVU%2FAAAAAAAAAAAAAAAAAAAAAD9KJPPWVG2aBEXbSn_PNYXvtW0MkBXPlRrxwm7nTcVY%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3D%252FJj5wRCrd0dHh9KYa65h04PDN0Y%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="950" height="998" data-origin-width="950" data-origin-height="998" data-phocus-index="15"></span><figcaption>ni</figcaption>
+</figure>
+<p></p>
+<p data-ke-size="size18">이건 Ablation study. Spatial structure control 의 양을 조절해가면서 ablation study를 하는데, structural control이 없으면 그냥 target prompt만 따라가고, 이 양이 많아질 수록 이미지의 특성을 잘 반영하는걸 볼 수있음.</p>
+<p data-ke-size="size18">&nbsp;</p>
+<p data-ke-size="size18">Limatation으로는 , 지금은 motion이랑 appearance 편집을 위해 uniedit을 두번 사용하는 방식으로 각각 editing 이 수행되는데 이걸 합칠 방법? 이나 하이퍼파라미터를 자동으로 결정하게 하는 방법에 대한 연구가 필요함.</p>
+<h4 data-ke-size="size20">&nbsp;</h4>
+<hr contenteditable="false" data-ke-type="horizontalRule" data-ke-style="style2">
+<h4 data-ke-size="size20"><b>개인적으로 좀 궁금한거?</b></h4>
+<p data-ke-size="size18">마스크해서 foreground / background 구분한다고 하는데, attention map에서 CA-S모듈 threshold나 segmentation모델을 통해 mask를 한다고 하는데, 이거 정확성이 보장이 되는지?&nbsp; 마스크의 신뢰도 평가하는 부분 있는지? 잘 설명이 안되어있는거 같음.</p>
+<p data-ke-size="size18">&nbsp;</p>
+    </div>
+    
+    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+        <a href="../../blog.html" class="back-link">← Back to Blog</a>
+    </div>
+</body>
+</html>
