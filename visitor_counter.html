@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visitor Counter - Seohyun Lee Blog</title>
+    <style>
+        body {
+            background: #0d0f17;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .counter-container {
+            text-align: center;
+            padding: 2rem;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            background: rgba(255,255,255,0.05);
+        }
+        .counter-number {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #667eea;
+            margin: 1rem 0;
+        }
+        .counter-label {
+            font-size: 1.2rem;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="counter-container">
+        <h1>🌐 Website Visitor Counter</h1>
+        <div class="counter-number" id="visitorCount">Loading...</div>
+        <div class="counter-label">Total Visitors</div>
+        <p style="margin-top: 2rem; color: #666; font-size: 0.9rem;">
+            This counter updates in real-time using localStorage
+        </p>
+    </div>
+
+    <script>
+        // 방문자 카운터 기능
+        function updateVisitorCount() {
+            let count = localStorage.getItem('visitorCount');
+            
+            if (count === null) {
+                // 첫 방문자
+                count = 1;
+                localStorage.setItem('visitorCount', count);
+                localStorage.setItem('firstVisit', new Date().toISOString());
+            } else {
+                // 기존 방문자
+                count = parseInt(count) + 1;
+                localStorage.setItem('visitorCount', count);
+                localStorage.setItem('lastVisit', new Date().toISOString());
+            }
+            
+            // 카운터 표시
+            document.getElementById('visitorCount').textContent = count.toLocaleString();
+            
+            // 방문 정보 로그
+            console.log(`Visit #${count}`);
+            console.log(`First visit: ${localStorage.getItem('firstVisit')}`);
+            console.log(`Last visit: ${localStorage.getItem('lastVisit')}`);
+        }
+        
+        // 페이지 로드 시 카운터 업데이트
+        updateVisitorCount();
+        
+        // 페이지 표시 이벤트 (새 탭/창에서 열 때)
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                updateVisitorCount();
+            }
+        });
+    </script>
+</body>
+</html>
