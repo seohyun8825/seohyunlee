@@ -79,7 +79,7 @@ def delete_post():
         return
     
     print(f"\n🎉 포스트가 성공적으로 삭제되었습니다!")
-    print(f"🚀 'npm run publish'로 변경사항을 배포하세요.")
+    print(f"🚀 'npm run deploy-simple'로 변경사항을 배포하세요.")
 
 if __name__ == "__main__":
     delete_post()
