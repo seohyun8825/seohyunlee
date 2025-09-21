@@ -46,7 +46,7 @@ python add_new_post.py
 
 4. **Deploy the changes:**
 ```bash
-npm run publish
+npm run deploy-simple
 ```
 
 ### Deleting Posts
@@ -69,12 +69,12 @@ python delete_post.py
 
 4. **Deploy the changes:**
 ```bash
-npm run publish
+npm run deploy-simple
 ```
 
 ## 🚀 Deployment
 
 ### Deploy to seohyunleee.com
 ```bash
-npm run publish
+npm run deploy-simple
 ```
