@@ -1,6 +1,6 @@
 🌐 **Website**: [seohyunleee.com](https://seohyunleee.com)
 
-This is a personal blog website built with HTML, CSS, and JavaScript, featuring 101+ blog posts migrated from Tistory.
+This is a personal blog website built with HTML, CSS, and JavaScript
 
 ## 🚀 Quick Start
 
