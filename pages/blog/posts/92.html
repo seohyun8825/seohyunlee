@@ -1,18 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Normalizing Flows — happy8825 - Seohyun Lee Blog</title>
-    <meta name="description" content="
-
-Normalizing Flow란?
-가우시안과 같은 쉬운 분포 z에 invertible한 함수 f를 씌워주는 방식으로, 복잡한 확률분포 p(x)를 모델링 할 수 있게 하는것.
-&nbsp;
-
-
-그니까 우리 목적은
-p0(z0)에서 단계별로 쭉~ 함수를 씌워서 복잡한 pk(zk)를 알아내는">
+    <title>test auto - Seohyun Lee Blog</title>
+    <meta name="description" content="test auto">
     <link rel="stylesheet" href="../../styles.css">
     <style>
         body { 
@@ -22,7 +14,7 @@ p0(z0)에서 단계별로 쭉~ 함수를 씌워서 복잡한 pk(zk)를 알아내
             line-height: 1.6; 
             margin: 0; 
             padding: 2rem;
-            max-width: 900px;
+            max-width: 800px;
             margin: 0 auto;
         }
         .post-header {
@@ -45,41 +37,7 @@ p0(z0)에서 단계별로 쭉~ 함수를 씌워서 복잡한 pk(zk)를 알아내
         .post-content {
             font-size: 1.1rem;
             line-height: 1.8;
-        }
-        .post-content img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 8px;
-            margin: 1rem 0;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        }
-        .post-content p {
-            margin-bottom: 1rem;
-        }
-        .post-content h1, .post-content h2, .post-content h3 {
-            color: #667eea;
-            margin-top: 2rem;
-            margin-bottom: 1rem;
-        }
-        .post-content blockquote {
-            border-left: 4px solid #667eea;
-            padding-left: 1rem;
-            margin: 1.5rem 0;
-            color: #ccc;
-            font-style: italic;
-        }
-        .post-content code {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 0.2rem 0.4rem;
-            border-radius: 4px;
-            font-family: 'Courier New', monospace;
-        }
-        .post-content pre {
-            background: rgba(0, 0, 0, 0.3);
-            padding: 1rem;
-            border-radius: 8px;
-            overflow-x: auto;
-            margin: 1rem 0;
+            white-space: pre-wrap;
         }
         .back-link {
             display: inline-block;
@@ -101,35 +59,30 @@ p0(z0)에서 단계별로 쭉~ 함수를 씌워서 복잡한 pk(zk)를 알아내
     
     <div class="post-header">
         <div class="post-meta">
-            <span>📅 2024-06-29</span>
-            <span> | 🏷️ Computer Vision Paper Review</span>
-            <span> | 🔗 <a href="https://happy8825.tistory.com/6" target="_blank">Original Post</a></span>
-            <span> | 📊 5 images</span>
+            <span>📅 2025-09-22</span>
+            <span> | 🏷️ test</span>
         </div>
-        <h1 class="post-title">Normalizing Flows — happy8825</h1>
-        
+        <h1 class="post-title">test auto</h1>
+        <div class='tags'>
+            <span style="background: rgba(255,255,255,0.1); padding: 0.25rem 0.5rem; border-radius: 12px; margin-right: 0.5rem; font-size: 0.9rem;">#test</span>
+        </div>
     </div>
     
     <div class="post-content">
-        <p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="2000" data-origin-height="1012" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/csQAkS/btsIgLfT0Su/AAAAAAAAAAAAAAAAAAAAANKI5pe1rDuxsoXA1W5EJ4_hNTrfwhb7Xt32INfQzi9a/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=wT0UpWzwVl%2Bb2bZ0QgYDbyIPNYI%3D" data-phocus="https://blog.kakaocdn.net/dna/csQAkS/btsIgLfT0Su/AAAAAAAAAAAAAAAAAAAAANKI5pe1rDuxsoXA1W5EJ4_hNTrfwhb7Xt32INfQzi9a/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=wT0UpWzwVl%2Bb2bZ0QgYDbyIPNYI%3D"><img src="https://blog.kakaocdn.net/dna/csQAkS/btsIgLfT0Su/AAAAAAAAAAAAAAAAAAAAANKI5pe1rDuxsoXA1W5EJ4_hNTrfwhb7Xt32INfQzi9a/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=wT0UpWzwVl%2Bb2bZ0QgYDbyIPNYI%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FcsQAkS%2FbtsIgLfT0Su%2FAAAAAAAAAAAAAAAAAAAAANKI5pe1rDuxsoXA1W5EJ4_hNTrfwhb7Xt32INfQzi9a%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DwT0UpWzwVl%252Bb2bZ0QgYDbyIPNYI%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="2000" height="1012" data-origin-width="2000" data-origin-height="1012" data-phocus-index="0"></span></figure>
-<p></p>
-<p data-ke-size="size16"><b>Normalizing Flow란?</b></p>
-<p data-ke-size="size16"><b>가우시안과 같은 쉬운 분포 z에 invertible한 함수 f를 씌워주는 방식으로, 복잡한 확률분포 p(x)를 모델링 할 수 있게 하는것.</b></p>
-<p data-ke-size="size16">&nbsp;</p>
-<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="2000" data-origin-height="524" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/Nh2y3/btsIhRe74eZ/AAAAAAAAAAAAAAAAAAAAAFVaStnNxFC2AYXoBYpExgKQEV5YR_tm7UMtrYjW_9co/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=HRWsvT7LNFWi71gvZZA1N3K0Icg%3D" data-phocus="https://blog.kakaocdn.net/dna/Nh2y3/btsIhRe74eZ/AAAAAAAAAAAAAAAAAAAAAFVaStnNxFC2AYXoBYpExgKQEV5YR_tm7UMtrYjW_9co/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=HRWsvT7LNFWi71gvZZA1N3K0Icg%3D"><img src="https://blog.kakaocdn.net/dna/Nh2y3/btsIhRe74eZ/AAAAAAAAAAAAAAAAAAAAAFVaStnNxFC2AYXoBYpExgKQEV5YR_tm7UMtrYjW_9co/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=HRWsvT7LNFWi71gvZZA1N3K0Icg%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FNh2y3%2FbtsIhRe74eZ%2FAAAAAAAAAAAAAAAAAAAAAFVaStnNxFC2AYXoBYpExgKQEV5YR_tm7UMtrYjW_9co%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DHRWsvT7LNFWi71gvZZA1N3K0Icg%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="2000" height="524" data-origin-width="2000" data-origin-height="524" data-phocus-index="1"></span></figure>
-<p></p>
-<p data-ke-size="size16"><b>그니까 우리 목적은</b></p>
-<p data-ke-size="size16"><b>p0(z0)에서 단계별로 쭉~ 함수를 씌워서 복잡한 pk(zk)를 알아내는게 목표.</b></p>
-<p data-ke-size="size16"><b>Change of variables theorem</b></p>
-<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="2000" data-origin-height="728" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/Vjuhh/btsIifmrPh3/AAAAAAAAAAAAAAAAAAAAAIHdE1Bm1xJej5n4c8L9InxBwurpZz-kr91egNVl_5GJ/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=W%2BLaSpIdOFlkx4Rmyi1T2vqh7JM%3D" data-phocus="https://blog.kakaocdn.net/dna/Vjuhh/btsIifmrPh3/AAAAAAAAAAAAAAAAAAAAAIHdE1Bm1xJej5n4c8L9InxBwurpZz-kr91egNVl_5GJ/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=W%2BLaSpIdOFlkx4Rmyi1T2vqh7JM%3D"><img src="https://blog.kakaocdn.net/dna/Vjuhh/btsIifmrPh3/AAAAAAAAAAAAAAAAAAAAAIHdE1Bm1xJej5n4c8L9InxBwurpZz-kr91egNVl_5GJ/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=W%2BLaSpIdOFlkx4Rmyi1T2vqh7JM%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FVjuhh%2FbtsIifmrPh3%2FAAAAAAAAAAAAAAAAAAAAAIHdE1Bm1xJej5n4c8L9InxBwurpZz-kr91egNVl_5GJ%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DW%252BLaSpIdOFlkx4Rmyi1T2vqh7JM%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="2000" height="728" data-origin-width="2000" data-origin-height="728" data-phocus-index="2"></span></figure>
-<p></p>
-<p data-ke-size="size16"><b> 이걸 사용해서 Normalizing flow를 만들 수 있는데 </b></p>
-<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="2000" data-origin-height="889" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/cLihDB/btsIg6jPP4H/AAAAAAAAAAAAAAAAAAAAAJJ7vUlLaEJ-Q4aq4UD2BFhkg3-hFP_pMcAR0CY3G-Rf/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=69pTf6DUeGs758SG0hIBE9Cehj8%3D" data-phocus="https://blog.kakaocdn.net/dna/cLihDB/btsIg6jPP4H/AAAAAAAAAAAAAAAAAAAAAJJ7vUlLaEJ-Q4aq4UD2BFhkg3-hFP_pMcAR0CY3G-Rf/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=69pTf6DUeGs758SG0hIBE9Cehj8%3D"><img src="https://blog.kakaocdn.net/dna/cLihDB/btsIg6jPP4H/AAAAAAAAAAAAAAAAAAAAAJJ7vUlLaEJ-Q4aq4UD2BFhkg3-hFP_pMcAR0CY3G-Rf/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=69pTf6DUeGs758SG0hIBE9Cehj8%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FcLihDB%2FbtsIg6jPP4H%2FAAAAAAAAAAAAAAAAAAAAAJJ7vUlLaEJ-Q4aq4UD2BFhkg3-hFP_pMcAR0CY3G-Rf%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3D69pTf6DUeGs758SG0hIBE9Cehj8%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="2000" height="889" data-origin-width="2000" data-origin-height="889" data-phocus-index="3"></span></figure>
-<p></p>
-<p data-ke-size="size16"><b>K번 역변환 해준다고 하면</b></p>
-<p></p><figure class="imageblock alignCenter" data-ke-mobilestyle="widthOrigin" data-origin-width="2000" data-origin-height="621" style="margin-left: 50%; transform: translateX(-50%); width: 1100px; max-width: 1100px;"><span data-url="https://blog.kakaocdn.net/dna/DTVAJ/btsIifUgrYH/AAAAAAAAAAAAAAAAAAAAALtP3KSnQEUA9cUqmBE-otOKBdSXK1Gr8g_ErI4w_wwK/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=ThKEUiHUFhYJiiRQSUbyANDW4pQ%3D" data-phocus="https://blog.kakaocdn.net/dna/DTVAJ/btsIifUgrYH/AAAAAAAAAAAAAAAAAAAAALtP3KSnQEUA9cUqmBE-otOKBdSXK1Gr8g_ErI4w_wwK/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=ThKEUiHUFhYJiiRQSUbyANDW4pQ%3D"><img src="https://blog.kakaocdn.net/dna/DTVAJ/btsIifUgrYH/AAAAAAAAAAAAAAAAAAAAALtP3KSnQEUA9cUqmBE-otOKBdSXK1Gr8g_ErI4w_wwK/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&amp;expires=1759244399&amp;allow_ip=&amp;allow_referer=&amp;signature=ThKEUiHUFhYJiiRQSUbyANDW4pQ%3D" srcset="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&amp;fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FDTVAJ%2FbtsIifUgrYH%2FAAAAAAAAAAAAAAAAAAAAALtP3KSnQEUA9cUqmBE-otOKBdSXK1Gr8g_ErI4w_wwK%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1759244399%26allow_ip%3D%26allow_referer%3D%26signature%3DThKEUiHUFhYJiiRQSUbyANDW4pQ%253D" onerror="this.onerror=null; this.src='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png'; this.srcset='//t1.daumcdn.net/tistory_admin/static/images/no-image-v1.png';" loading="lazy" width="2000" height="621" data-origin-width="2000" data-origin-height="621" data-phocus-index="4"></span></figure>
-<p></p>
-<p data-ke-size="size16"><b> 즉 여기에 negative log likelyhood를 씌운게 loss function이 되는것.</b></p>
+여기에 포스트 내용을 작성하세요.
+
+마크다운 형식으로 작성하거나 HTML 태그를 사용할 수 있습니다.
+
+예시:
+- **굵은 글씨**
+- *기울임*
+- [링크](URL)
+
+코드 블록:
+```python
+def hello():
+    print("Hello, World!")
+```
     </div>
     
     <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">

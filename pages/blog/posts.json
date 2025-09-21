@@ -2,6 +2,20 @@
   "posts": [
     {
       "id": "post-92",
+      "title": "test auto",
+      "date": "2025-09-22",
+      "category": "test",
+      "tags": [
+        "test"
+      ],
+      "excerpt": "test auto",
+      "content": "<p>여기에 포스트 내용을 작성하세요.</p>",
+      "images": [],
+      "original_url": "",
+      "filename": "92.html"
+    },
+    {
+      "id": "post-92",
       "title": "Learning Fine-Grained Bimanual Manipulation with Low-Cost Hardware — happy8825",
       "date": "2025-09-15",
       "category": "robot",

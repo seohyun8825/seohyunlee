@@ -6,6 +6,7 @@
   "scripts": {
     "deploy": "gh-pages -d .",
     "publish": "git add . && git commit -m \"Auto update\" && git push origin main && npm run deploy",
+    "deploy-simple": "git add . && git commit -m \"Auto update\" && git push origin main && git checkout gh-pages && git merge main && git push origin gh-pages && git checkout main",
     "crawl-blog": "python crawl_tistory.py",
     "update-blog": "python crawl_tistory.py && npm run publish",
     "dev": "python -m http.server 8000"
