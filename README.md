@@ -71,10 +71,3 @@ python delete_post.py
 ```bash
 npm run deploy-simple
 ```
-
-## 🚀 Deployment
-
-### Deploy to seohyunleee.com
-```bash
-npm run deploy-simple
-```
