@@ -355,6 +355,31 @@ main { position: relative; z-index: 1; min-height: 100vh; }
   color: #b8c3cf;
   max-width: none;
 }
+.experience-list {
+  margin: 12px 0 0;
+  padding-left: 18px;
+  color: #b8c3cf;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.experience-list li {
+  margin: 4px 0;
+}
+.experience-list strong {
+  color: #eef5fb;
+}
+.meta-list {
+  margin: 8px 0 0;
+  padding-left: 20px;
+  color: var(--muted);
+  line-height: 1.65;
+}
+.meta-list li {
+  margin: 4px 0;
+}
+.meta-list strong {
+  color: var(--text);
+}
 .cta-row { 
   margin-top: 28px; 
   display: flex; 
