@@ -525,6 +525,18 @@ main { position: relative; z-index: 1; min-height: 100vh; }
 }
 .pub-content h3 { margin: 0 0 8px; font-size: 1.1rem; font-weight: 600; line-height: 1.4; color: var(--text); }
 .pub-content .meta { color: var(--muted); margin-bottom: 8px; font-size: 0.95rem; }
+.pub-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 12px;
+  color: #f7fbff;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+.pub-badges strong {
+  font-weight: 800;
+}
 .author-self {
   color: #f7fbff;
   font-weight: 800;
