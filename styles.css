@@ -128,7 +128,7 @@ main { position: relative; z-index: 1; min-height: 100vh; }
   padding: 36px 20px 28px;
 }
 .hero-content {
-  max-width: 880px;
+  max-width: 1040px;
   width: 100%;
   margin: 0 auto;
   padding: 0 42px;
@@ -181,12 +181,6 @@ main { position: relative; z-index: 1; min-height: 100vh; }
   gap: 9px;
   margin: 0 0 28px;
 }
-.scholar-inline-icon {
-  width: 20px;
-  height: 20px;
-  display: block;
-  flex: 0 0 auto;
-}
 .hero-text p {
   font-size: 15px;
   line-height: 1.6;
@@ -195,7 +189,7 @@ main { position: relative; z-index: 1; min-height: 100vh; }
   max-width: 520px;
 }
 .research-interest {
-  max-width: 650px;
+  max-width: 920px;
   margin: 0;
   text-align: left;
 }
@@ -229,6 +223,7 @@ main { position: relative; z-index: 1; min-height: 100vh; }
 }
 .research-list {
   display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 9px;
   margin: 0;
   padding: 0;
@@ -254,7 +249,7 @@ main { position: relative; z-index: 1; min-height: 100vh; }
   box-shadow: 0 0 16px rgba(21,227,184,0.28);
 }
 .selected-experience {
-  max-width: 650px;
+  max-width: 920px;
   margin-top: 28px;
   text-align: left;
 }
@@ -638,6 +633,9 @@ main { position: relative; z-index: 1; min-height: 100vh; }
   }
   .research-heading::after {
     min-width: 60px;
+  }
+  .research-list {
+    grid-template-columns: 1fr;
   }
   
   .title-avatar { width: 62px; height: 62px; }
