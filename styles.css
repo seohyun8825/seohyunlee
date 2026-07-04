@@ -769,3 +769,10 @@ html { scroll-behavior: smooth; }
   .audio-controls { gap: 8px; padding: 6px 10px; }
   .audio-volume { width: 90px; }
 }
+
+/* About bio (academic intro) */
+.about-bio { margin: 18px 0 12px; max-width: 730px; }
+.about-bio p { color: var(--text); opacity: 0.9; font-size: 1.02rem; line-height: 1.8; margin: 0 0 14px; }
+.about-bio p:last-child { margin-bottom: 0; }
+.about-bio a { color: var(--accent-2); text-decoration: none; border-bottom: 1px solid rgba(21,227,184,0.35); transition: border-color .15s ease, color .15s ease; }
+.about-bio a:hover { border-bottom-color: var(--accent-2); }
